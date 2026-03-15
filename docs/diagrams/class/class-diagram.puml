@@ -1,0 +1,171 @@
+/* This is a PlantUML class diagram for the Bus Tracking system project.
+Which includes the main actors: Admin, Staff, Driver, Student, Parent. */
+@startuml
+skinparam classAttributeIconSize 0
+
+abstract class User {
+    - id: uuid
+    - name: string
+    - email: string
+    - password: string
+    - role: string
+    - phoneNumber: string
+    - address: string
+    - createdAt: datetime
+    - updatedAt: datetime
+    - deletedAt: datetime
+
+    + login(): boolean
+    + logout(): void
+    + updateProfile(): void
+    + changePassword(): void
+    + getRole(): string
+}
+
+class Admin extends User {
+    + manageUsers(): void
+    + viewReports(): void
+    + configureSystem(): void
+}
+
+class Staff extends User {
+    + manageBusRoutes(): void
+    + assignDrivers(): void
+    + monitorBusLocations(): void
+}
+
+class Driver extends User {
+    - licenseNumber: string
+
+    + viewAssignedRoutes(): void
+    + viewAssignedShifts(): void
+    + reportIssues(): void
+}
+
+class Student extends User {
+    - studentId: string
+    - studentClass: string
+
+    + viewBusSchedule(): void
+    + checkIn(): void
+    + viewBusLocation(): void
+}
+
+class Parent extends User {
+    + viewChildBusSchedule(): void
+    + viewChildBusLocation(): void
+    + receiveNotifications(): void
+}
+
+class Bus {
+    - id: uuid
+    - licensePlate: string
+    - model: string
+    - capacity: int
+    - status: BusStatus
+    - createdAt: datetime
+    - updatedAt: datetime
+    - deletedAt: datetime
+}
+
+enum BusStatus {
+    ACTIVE
+    MAINTENANCE
+    RETIRED
+}
+
+class BusStop {
+    - id: uuid
+    - name: string
+    - address: string
+    - latitude: double
+    - longitude: double
+    - createdAt: datetime
+    - updatedAt: datetime
+    - deletedAt: datetime
+}
+
+class BusRoute {
+    - id: uuid
+    - name: string
+    - description: string
+    - totalDistance: double
+    - createdAt: datetime
+    - updatedAt: datetime
+    - deletedAt: datetime
+}
+
+class RouteStop {
+    - id: uuid
+    - stopOrder: int
+}
+
+class BusTrip {
+    - id: uuid
+    - date: date
+    - startTime: time
+    - endTime: time
+    - status: BusTripStatus
+    - createdAt: datetime
+    - updatedAt: datetime
+    - deletedAt: datetime
+}
+
+enum BusTripStatus {
+    SCHEDULED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+class BoardingRecord {
+    - id: uuid
+    - actionType: BoardingRecordActionType
+    - timestamp: datetime
+    - note: string
+}
+
+enum BoardingRecordActionType {
+    BOARDING
+    ALIGHTING
+    ABSENT
+}
+
+class TrackingLog {
+    - id: uuid
+    - latitude: double
+    - longitude: double
+    - speed: double
+    - timestamp: datetime
+}
+
+class Notification {
+    - id: uuid
+    - title: string
+    - message: string
+    - type: string
+    - isRead: boolean
+    - createdAt: datetime
+}
+
+Parent "1" -- "1..*" Student : manages >
+BusTrip "*" -- "1" BusRoute : follows >
+BusTrip "*" -- "1" Bus : uses >
+BusTrip "*" -- "1" Driver : driven by >
+BusTrip "*" -- "0..1" Conductor : assisted by >
+
+BusRoute "1" *-- "*" RouteStop : contains >
+BusStop "1" *-- "*" RouteStop : mapped to >
+
+BusTrip "1" *-- "*" TrackingLog : logs GPS >
+BusTrip "1" *-- "*" BoardingRecord : has >
+Student "1" *-- "*" BoardingRecord : performs >
+BoardingRecord "*" -- "1" BusStop : at >
+
+User "1" *-- "*" Notification : receives >
+
+Bus --> BusStatus
+BusTrip --> BusTripStatus
+BoardingRecord --> BoardingRecordActionType
+
+@enduml
