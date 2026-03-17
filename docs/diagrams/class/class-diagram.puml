@@ -1,5 +1,3 @@
-/* This is a PlantUML class diagram for the Bus Tracking system project.
-Which includes the main actors: Admin, Staff, Driver, Student, Parent. */
 @startuml
 skinparam classAttributeIconSize 0
 
@@ -96,12 +94,19 @@ class BusRoute {
 }
 
 class RouteStop {
-    - id: uuid
+    - routeId: uuid
+    - stopId: uuid
     - stopOrder: int
+    - scheduledTime: datetime
+    - isFinalStop: boolean
+
 }
 
 class BusTrip {
     - id: uuid
+    - routeId: uuid
+    - busId: uuid
+    - driverId: uuid
     - date: date
     - startTime: time
     - endTime: time
@@ -121,18 +126,19 @@ enum BusTripStatus {
 class BoardingRecord {
     - id: uuid
     - actionType: BoardingRecordActionType
+    - studentId: uuid
     - timestamp: datetime
-    - note: string
+    - note?: string
 }
 
 enum BoardingRecordActionType {
     BOARDING
-    ALIGHTING
     ABSENT
 }
 
 class TrackingLog {
     - id: uuid
+    - busTripId: uuid
     - latitude: double
     - longitude: double
     - speed: double
@@ -141,6 +147,7 @@ class TrackingLog {
 
 class Notification {
     - id: uuid
+    - recipientId: uuid
     - title: string
     - message: string
     - type: string
@@ -152,7 +159,6 @@ Parent "1" -- "1..*" Student : manages >
 BusTrip "*" -- "1" BusRoute : follows >
 BusTrip "*" -- "1" Bus : uses >
 BusTrip "*" -- "1" Driver : driven by >
-BusTrip "*" -- "0..1" Conductor : assisted by >
 
 BusRoute "1" *-- "*" RouteStop : contains >
 BusStop "1" *-- "*" RouteStop : mapped to >
