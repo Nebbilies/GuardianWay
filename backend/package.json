@@ -12,7 +12,10 @@
   "type": "commonjs",
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.5.0"
+    "@prisma/client": "^7.5.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "redis": "^5.11.0"
   },
   "devDependencies": {
     "prisma": "^7.5.0"
