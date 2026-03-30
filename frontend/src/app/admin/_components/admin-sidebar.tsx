@@ -60,7 +60,7 @@ export default function AdminSidebar() {
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuButton>
-                        <LogOut className={'w-8 h-8'}/>
+                        <LogOut className={'w-8 h-8 text-destructive'}/>
                         <span className={'text-destructive'}>
                             Đăng xuất
                         </span>

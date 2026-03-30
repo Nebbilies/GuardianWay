@@ -44,3 +44,5 @@ export default function MapComponent({ latLng, setLatLng }: MapComponentProps) {
             </MapContainer>
     )
 }
+
+

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import {Toaster} from "@/components/ui/sonner";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
+        <Toaster position={'bottom-right'} />
         {children}
       </body>
     </html>
