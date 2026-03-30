@@ -1,0 +1,8 @@
+{
+  "name": "guardian-way-workspace",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
