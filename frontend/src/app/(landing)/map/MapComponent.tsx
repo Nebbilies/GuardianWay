@@ -20,15 +20,16 @@ function MapDescendant({ onMapClick }: MapDescendantProps) {
 }
 
 interface MapComponentProps {
+    mapHeight: number;
     latLng: { lat: number, lng: number } | null;
     setLatLng: (position: { lat: number, lng: number }) => void;
 }
 
-export default function MapComponent({ latLng, setLatLng }: MapComponentProps) {
+export default function MapComponent({ mapHeight, latLng, setLatLng }: MapComponentProps) {
     const mapRef: RefObject<L.Map | null> = useRef<L.Map | null>(null);
     return (
-            <MapContainer center={[10.832, 106.6297]} zoom={13} scrollWheelZoom={true}
-                            style={{ height: "600px", width: "100%" }} ref={mapRef}>
+            <MapContainer center={[10.832, 106.6297]} zoom={10} scrollWheelZoom={true}
+                          style={{ height: `${mapHeight}px`, width: "100%" }} ref={mapRef}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

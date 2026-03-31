@@ -113,7 +113,7 @@ export default function BusStopsList({
                                 : '—'}
                         </td>
                         <td className="px-6 py-4 text-sm text-foreground">
-                            {new Date(busStop.createdAt).toLocaleDateString()}
+                            {new Date(busStop.createdAt).toLocaleString()}
                         </td>
                         <td className="px-6 py-4 text-sm text-right">
                             <div className="flex justify-end gap-2">

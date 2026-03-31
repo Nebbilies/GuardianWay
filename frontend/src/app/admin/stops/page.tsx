@@ -57,6 +57,11 @@ export default function StopsPage() {
         setIsDialogOpen(true);
     }
 
+    const handleEditBusStop = (busStop: BusStop) => {
+        setSelectedBusStop(busStop);
+        setIsDialogOpen(true);
+    }
+
     const { data: busStops = [], error, isLoading, mutate } = useSWR<BusStop[]>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops`, fetcher)
 
     if (error) {
@@ -84,7 +89,7 @@ export default function StopsPage() {
             ) : (
                         <BusStopsList
                             busStops={busStops}
-                            onEdit={(id) => console.log('Edit', id)}
+                            onEdit={handleEditBusStop}
                             onDelete={async (id) => console.log('Delete', id)}
                         />
                 )}

@@ -6,8 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Field, FieldLabel, FieldError } from '@/components/ui/field'
+import {Field, FieldLabel, FieldError, FieldDescription} from '@/components/ui/field'
 import {BusStop} from "@/types/types";
+import MapComponent from "@/app/(landing)/map/MapComponent";
 
 const busStopSchema = z.object({
     name: z.string().min(1, "Vui lòng nhập tên trạm dừng"),
@@ -96,11 +97,22 @@ export default function BusStopForm({
                 )}
             />
 
-            <div className="space-y-4">
+            <div className="space-y-2">
                 <label className="block text-sm font-medium text-foreground">
                     Vị trí trên bản đồ
                 </label>
-                <div className="grid grid-cols-2 gap-4">
+                <FieldDescription>
+                    Nhấp vào bản đồ để chọn vị trí của trạm dừng. Vĩ độ và kinh độ sẽ được tự động cập nhật.
+                </FieldDescription>
+                <MapComponent
+                    mapHeight={300}
+                    latLng={{ lat: form.watch('latitude') || 0, lng: form.watch('longitude') || 0 }}
+                    setLatLng={({lat, lng}) => {
+                        form.setValue('latitude', lat, { shouldDirty: true })
+                        form.setValue('longitude', lng, { shouldDirty: true })
+                    }}
+                />
+                <div className="grid grid-cols-2 gap-4 mt-4">
                     <Controller
                         name="latitude"
                         control={form.control}
@@ -117,7 +129,7 @@ export default function BusStopForm({
                                     placeholder="Lat"
                                     value={field.value === 0 ? '' : field.value}
                                     aria-invalid={fieldState.invalid}
-                                    disabled={isLoading}
+                                    disabled={true}
                                 />
                                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                             </Field>
@@ -140,7 +152,7 @@ export default function BusStopForm({
                                     placeholder="Long"
                                     value={field.value === 0 ? '' : field.value}
                                     aria-invalid={fieldState.invalid}
-                                    disabled={isLoading}
+                                    disabled={true}
                                 />
                                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                             </Field>
