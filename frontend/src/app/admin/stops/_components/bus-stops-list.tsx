@@ -4,13 +4,24 @@ import { useState } from 'react'
 import { Edit2, Trash2, ArrowUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { BusStop } from '@/types/types'
 
 interface BusStopsListProps {
     busStops: BusStop[]
     onEdit: (busStop: BusStop) => void
     onDelete: (id: string) => Promise<void>
-    isDeleting?: string | null
+    isDeleting: boolean;
 }
 
 type SortKey = 'name' | 'address' | 'createdAt'
@@ -20,10 +31,11 @@ export default function BusStopsList({
                                  busStops,
                                  onEdit,
                                  onDelete,
-                                 isDeleting = null,
+                                 isDeleting,
                              }: BusStopsListProps) {
     const [sortKey, setSortKey] = useState<SortKey>('createdAt')
     const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+    const [deletingStopId, setDeletingStopId] = useState<string | null>(null)
 
     const handleSort = (key: SortKey) => {
         if (sortKey === key) {
@@ -125,15 +137,46 @@ export default function BusStopsList({
                                 >
                                     <Edit2 className="w-4 h-4" />
                                 </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => onDelete(busStop.id)}
-                                    disabled={isDeleting === busStop.id}
-                                    className="text-destructive hover:text-destructive"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <AlertDialog open={deletingStopId === busStop.id} onOpenChange={(open) => !open && setDeletingStopId(null)}>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            disabled={isDeleting}
+                                            onClick={() => setDeletingStopId(busStop.id)}
+                                            className="text-destructive hover:text-destructive"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Trạm dừng <strong>{busStop.name}</strong> sẽ bị xóa khỏi hệ thống.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel disabled={isDeleting}>Hủy</AlertDialogCancel>
+                                            <Button
+                                                variant={'destructive'}
+                                                disabled={isDeleting}
+                                                onClick={async (e) => {
+                                                    e.preventDefault()
+                                                    try {
+                                                        await onDelete(busStop.id)
+                                                        setDeletingStopId(null)
+                                                    } catch (error) {
+                                                        // Handle error or let parent handle it
+                                                        console.error(error)
+                                                    }
+                                                }}
+                                            >
+                                                {isDeleting ? "Đang xóa..." : "Xóa"}
+                                            </Button>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </td>
                     </tr>

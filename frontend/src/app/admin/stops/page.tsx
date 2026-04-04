@@ -21,6 +21,7 @@ export default function StopsPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedBusStop, setSelectedBusStop] = useState<BusStop | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleCloseDialog = () => {
         setIsDialogOpen(false);
@@ -64,6 +65,26 @@ export default function StopsPage() {
         setIsDialogOpen(true);
     }
 
+    const handleDeleteBusStop = async (id: string)=> {
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!res.ok) {
+                throw new Error('Đã xảy ra lỗi: ' + res.statusText);
+            }
+
+            await mutate();
+            toast.success('Trạm dừng đã được xóa thành công!');
+        } catch (error) {
+            console.error('Có lỗi khi xóa điểm dừng:', error);
+        } finally {
+            setIsDeleting(false);
+        }
+    }
+
     const { data: busStops = [], error, isLoading, mutate } = useSWR<BusStop[]>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops`, fetcher)
 
     if (error) {
@@ -92,7 +113,8 @@ export default function StopsPage() {
                         <BusStopsList
                             busStops={busStops}
                             onEdit={handleEditBusStop}
-                            onDelete={async (id) => console.log('Delete', id)}
+                            onDelete={handleDeleteBusStop}
+                            isDeleting={isDeleting}
                         />
                 )}
             <FormDialog
