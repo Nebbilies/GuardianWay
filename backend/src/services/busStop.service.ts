@@ -49,6 +49,13 @@ class BusStopService {
       isSchoolStop: !!isSchoolStop,
     })
   }
+
+    async delete(id: string) {
+        if (!id) {
+            throw new Error("Thiếu thông tin của trạm dừng");
+        }
+        return busStopRepository.delete(id);
+    }
 }
 
 export const busStopService = new BusStopService();

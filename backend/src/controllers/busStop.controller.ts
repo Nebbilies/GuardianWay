@@ -40,6 +40,17 @@ class BusStopController {
             }
         }
     }
+
+    async delete(req: Request, res: Response) {
+        try {
+            const busStop = await busStopService.delete(String(req.params.id));
+            res.status(200).json(busStop);
+        } catch (e) {
+            console.error("Có lỗi xảy ra khi xóa trạm dừng:", e);
+            const errorMessage = e instanceof Error ? e.message : e;
+            return res.status(500).json({ message: "Internal server error" + errorMessage });
+        }
+    }
 }
 
 export const busStopController = new BusStopController();

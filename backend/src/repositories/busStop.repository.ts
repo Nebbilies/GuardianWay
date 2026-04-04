@@ -19,6 +19,12 @@ class BusStopRepository {
             data: updateData,
         })
     }
+
+    async delete(id: string): Promise<BusStop> {
+        return prisma.busStop.delete({
+            where: { id },
+        })
+    }
 }
 
 export const busStopRepository = new BusStopRepository();
