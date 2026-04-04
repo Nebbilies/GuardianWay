@@ -15,7 +15,7 @@ class BusStopService {
     const { name, address, latitude, longitude, isSchoolStop } = data;
 
     if (!name || !address || typeof latitude !== "number" || typeof longitude !== "number") {
-      throw new Error("Missing required bus stop fields");
+      throw new Error("Thiếu thông tin của trạm dừng");
     }
 
     return busStopRepository.create({
@@ -25,6 +25,29 @@ class BusStopService {
       longitude,
       isSchoolStop: !!isSchoolStop,
     });
+  }
+
+  async edit(id: string, data: {
+    name?: string;
+    address?: string;
+    latitude?: number;
+    longitude?: number;
+    isSchoolStop?: boolean;
+  }) {
+    const { name, address, latitude, longitude, isSchoolStop } = data;
+
+    if (!id || !name || !address || typeof latitude !== "number" || typeof longitude !== "number") {
+        throw new Error("Thiếu thông tin của trạm dừng");
+    }
+
+    return busStopRepository.edit({
+      id,
+      name,
+      address,
+      latitude,
+      longitude,
+      isSchoolStop: !!isSchoolStop,
+    })
   }
 }
 

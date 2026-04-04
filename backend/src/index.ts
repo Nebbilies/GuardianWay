@@ -11,7 +11,7 @@ app.use(express.json());
 app.use("/api/bus-stops", busStopRoutes);
 
 app.get("/", (req: Request, res: any) => {
-    res.send("Welcome to the Bus Stop Management API");
+    res.send("Hello, api is on!");
 })
 
 const PORT = process.env.PORT || 8000;

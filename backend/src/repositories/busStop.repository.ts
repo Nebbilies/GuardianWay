@@ -11,6 +11,14 @@ class BusStopRepository {
             data,
         });
     }
+
+    async edit(data: Pick<BusStop, "id" | "name" | "address" | "latitude" | "longitude" | "isSchoolStop">): Promise<BusStop> {
+        const { id, ... updateData } = data;
+        return prisma.busStop.update({
+            where: { id },
+            data: updateData,
+        })
+    }
 }
 
 export const busStopRepository = new BusStopRepository();

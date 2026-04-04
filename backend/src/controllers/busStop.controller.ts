@@ -16,13 +16,28 @@ class BusStopController {
         try {
             const busStop = await busStopService.create(req.body);
             res.status(201).json(busStop);
-        } catch (error) {
-            if (error instanceof Error && error.message === "Missing required bus stop fields") {
-                return res.status(400).json({ message: error.message });
+        } catch (e) {
+            if (e instanceof Error && e.message === "Thiếu thông tin của trạm dừng") {
+                return res.status(400).json({ message: e.message });
             }
+            console.error("Có lỗi xảy ra khi chỉnh sửa trạm dừng:", e);
+            const errorMessage = e instanceof Error ? e.message : e;
+            return res.status(500).json({ message: "Internal server error" + errorMessage });
+        }
+    }
 
-            console.error("Error creating bus stop:", error);
-            res.status(500).json({ message: "Internal server error" });
+    async edit(req: Request, res: Response) {
+        try {
+            const busStop = await busStopService.edit(String(req.params.id), req.body);
+            res.status(200).json(busStop);
+        } catch (e) {
+            if (e instanceof Error && e.message === "Thiếu thông tin của trạm dừng") {
+                return res.status(400).json({ message: e.message });
+            } else {
+                console.error("Có lỗi xảy ra khi chỉnh sửa trạm dừng:", e);
+                const errorMessage = e instanceof Error ? e.message : e;
+                return res.status(500).json({ message: "Internal server error" + errorMessage });
+            }
         }
     }
 }
