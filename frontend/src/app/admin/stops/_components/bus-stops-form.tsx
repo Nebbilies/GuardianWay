@@ -8,7 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {Field, FieldLabel, FieldError, FieldDescription} from '@/components/ui/field'
 import {BusStop} from "@/types/types";
-import MapComponent from "@/app/(landing)/map/MapComponent";
+import dynamic from 'next/dynamic';
+
+const MapComponent = dynamic(() => import('@/app/(landing)/map/MapComponent'), {
+    ssr: false
+});
 
 const busStopSchema = z.object({
     name: z.string().min(1, "Vui lòng nhập tên trạm dừng"),

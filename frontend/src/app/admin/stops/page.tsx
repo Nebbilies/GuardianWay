@@ -5,7 +5,8 @@ import useSWR from 'swr';
 import {Button} from "@/components/ui/button";
 import {BusStop} from "@/types/types";
 import BusStopsList from "@/app/admin/stops/_components/bus-stops-list";
-import {BusStopDialog} from "@/app/admin/stops/_components/bus-stops-dialog";
+import {FormDialog} from "@/components/custom/form-dialog";
+import BusStopForm from "@/app/admin/stops/_components/bus-stops-form";
 import {useState} from "react";
 
 const fetcher = (url: string) => fetch(url).then(res => {
@@ -93,13 +94,19 @@ export default function StopsPage() {
                             onDelete={async (id) => console.log('Delete', id)}
                         />
                 )}
-            <BusStopDialog
+            <FormDialog
                 isOpen={isDialogOpen}
                 onClose={handleCloseDialog}
-                initialData={selectedBusStop}
-                onSubmit={handleSubmit}
-                isLoading={isSubmitting}
-            />
+                title={selectedBusStop?.id ? 'Chỉnh sửa điểm dừng' : 'Tạo điểm dừng'}
+                description={selectedBusStop?.id ? 'Chỉnh sửa thông tin điểm dừng.' : 'Nhập thông tin để tạo điểm dừng mới.'}
+            >
+                <BusStopForm
+                    initialData={selectedBusStop}
+                    onSubmit={handleSubmit}
+                    onCancel={handleCloseDialog}
+                    isLoading={isSubmitting}
+                />
+            </FormDialog>
         </div>
     )
 }

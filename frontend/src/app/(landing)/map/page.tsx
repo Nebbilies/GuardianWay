@@ -13,7 +13,7 @@ export default function MapPage() {
         <main className="min-h-screen bg-background flex flex-col items-center justify-center w-full p-4">
             <div className="relative flex flex-col bg-card rounded-xl shadow-md border border-border overflow-hidden w-2/3 items-center">
                 <div className="h-full w-full z-0 flex items-center justify-center">
-                    <MapComponent latLng={latLng} setLatLng={setLatLng} />
+                    <MapComponent latLng={latLng} setLatLng={setLatLng} mapHeight="80vh" />
                 </div>
                 <div className="p-5 flex items-center justify-center bg-secondary/10 border-t border-border w-2/3">
                     {latLng ? (
