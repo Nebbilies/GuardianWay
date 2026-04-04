@@ -99,6 +99,9 @@ export default function BusStopsList({
                     <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
                         Location
                     </th>
+                    <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
+                        School Stop
+                    </th>
                     <th className="px-6 py-3 text-left text-sm">
                         <SortHeader label="Created" sortKeyValue="createdAt" />
                     </th>
@@ -123,6 +126,9 @@ export default function BusStopsList({
                             {busStop.latitude && busStop.longitude
                                 ? `${busStop.latitude.toFixed(4)}, ${busStop.longitude.toFixed(4)}`
                                 : '—'}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-foreground">
+                            {busStop.isSchoolStop ? 'Yes' : 'No'}
                         </td>
                         <td className="px-6 py-4 text-sm text-foreground">
                             {new Date(busStop.createdAt).toLocaleString()}
