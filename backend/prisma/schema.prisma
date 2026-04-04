@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,7 +6,144 @@ datasource db {
   provider = "postgresql"
 }
 
-// enums
+model User {
+  id             String           @id @default(dbgenerated("gen_random_uuid()"))
+  name           String
+  email          String           @unique
+  password       String
+  role           Role
+  phoneNumber    String?
+  address        String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+  driverProfile  DriverProfile?
+  notifications  Notification[]
+  children       StudentProfile[] @relation("ParentToStudent")
+  studentProfile StudentProfile?
+}
+
+model StudentProfile {
+  id              String           @id @default(dbgenerated("gen_random_uuid()"))
+  userId          String           @unique
+  studentId       String           @unique
+  studentClass    String
+  parentId        String?
+  boardingRecords BoardingRecord[]
+  parent          User?            @relation("ParentToStudent", fields: [parentId], references: [id])
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DriverProfile {
+  id            String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId        String    @unique
+  licenseNumber String
+  trips         BusTrip[]
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Bus {
+  id           String    @id @default(dbgenerated("gen_random_uuid()"))
+  licensePlate String    @unique
+  model        String
+  capacity     Int
+  status       BusStatus @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  trips        BusTrip[]
+}
+
+model BusStop {
+  id              String           @id @default(dbgenerated("gen_random_uuid()"))
+  name            String
+  address         String
+  latitude        Float
+  longitude       Float
+  isSchoolStop    Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  boardingRecords BoardingRecord[]
+  routeStops      RouteStop[]
+}
+
+model BusRoute {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  name          String
+  description   String?
+  totalDistance Float
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+  trips         BusTrip[]
+  routeStops    RouteStop[]
+}
+
+model RouteStop {
+  routeId       String
+  stopId        String
+  stopOrder     Int
+  scheduledTime DateTime? @db.Time(6)
+  isFinalStop   Boolean   @default(false)
+  route         BusRoute  @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stop          BusStop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  @@id([routeId, stopId])
+}
+
+model BusTrip {
+  id              String           @id @default(dbgenerated("gen_random_uuid()"))
+  routeId         String
+  busId           String
+  driverId        String
+  date            DateTime         @db.Date
+  startTime       DateTime         @db.Time(6)
+  endTime         DateTime?        @db.Time(6)
+  status          BusTripStatus    @default(SCHEDULED)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  boardingRecords BoardingRecord[]
+  bus             Bus              @relation(fields: [busId], references: [id])
+  driver          DriverProfile    @relation(fields: [driverId], references: [id])
+  route           BusRoute         @relation(fields: [routeId], references: [id])
+  trackingLogs    TrackingLog[]
+}
+
+model BoardingRecord {
+  id         String         @id @default(dbgenerated("gen_random_uuid()"))
+  actionType BoardingAction
+  studentId  String
+  tripId     String
+  stopId     String
+  timestamp  DateTime       @default(now())
+  note       String?
+  stop       BusStop        @relation(fields: [stopId], references: [id])
+  student    StudentProfile @relation(fields: [studentId], references: [id])
+  trip       BusTrip        @relation(fields: [tripId], references: [id])
+}
+
+model TrackingLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  busTripId String
+  latitude  Float
+  longitude Float
+  speed     Float
+  timestamp DateTime @default(now())
+  trip      BusTrip  @relation(fields: [busTripId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  recipientId String
+  title       String
+  message     String
+  type        String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+}
 
 enum Role {
   ADMIN
@@ -38,160 +169,4 @@ enum BusTripStatus {
 enum BoardingAction {
   BOARDING
   ABSENT
-}
-
-// data models
-
-model User {
-  id          String    @id @default(dbgenerated("gen_random_uuid()"))
-  name        String
-  email       String    @unique
-  password    String
-  role        Role
-  phoneNumber String?
-  address     String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  studentProfile StudentProfile?
-  driverProfile  DriverProfile?
-
-  // parent - student = 1 - n
-  children StudentProfile[] @relation("ParentToStudent")
-
-  notifications Notification[]
-}
-
-model StudentProfile {
-  id           String @id @default(dbgenerated("gen_random_uuid()"))
-  userId       String @unique
-  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  studentId    String @unique
-  studentClass String
-
-  parentId String?
-  parent   User?   @relation("ParentToStudent", fields: [parentId], references: [id])
-
-  boardingRecords BoardingRecord[]
-}
-
-model DriverProfile {
-  id            String @id @default(dbgenerated("gen_random_uuid()"))
-  userId        String @unique
-  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  licenseNumber String
-
-  trips BusTrip[]
-}
-
-model Bus {
-  id           String    @id @default(dbgenerated("gen_random_uuid()"))
-  licensePlate String    @unique
-  model        String
-  capacity     Int
-  status       BusStatus @default(ACTIVE)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
-
-  trips BusTrip[]
-}
-
-model BusStop {
-  id        String    @id @default(dbgenerated("gen_random_uuid()"))
-  name      String
-  address   String
-  latitude  Float
-  longitude Float
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  routeStops      RouteStop[]
-  boardingRecords BoardingRecord[]
-}
-
-model BusRoute {
-  id            String    @id @default(dbgenerated("gen_random_uuid()"))
-  name          String
-  description   String?
-  totalDistance Float
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-
-  routeStops RouteStop[]
-  trips      BusTrip[]
-}
-
-model RouteStop {
-  routeId       String
-  stopId        String
-  stopOrder     Int
-  scheduledTime DateTime? @db.Time
-  isFinalStop   Boolean   @default(false)
-
-  route BusRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
-  stop  BusStop  @relation(fields: [stopId], references: [id], onDelete: Cascade)
-
-  @@id([routeId, stopId])
-}
-
-model BusTrip {
-  id        String        @id @default(dbgenerated("gen_random_uuid()"))
-  routeId   String
-  busId     String
-  driverId  String
-  date      DateTime      @db.Date
-  startTime DateTime      @db.Time
-  endTime   DateTime?     @db.Time
-  status    BusTripStatus @default(SCHEDULED)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  deletedAt DateTime?
-
-  route  BusRoute      @relation(fields: [routeId], references: [id])
-  bus    Bus           @relation(fields: [busId], references: [id])
-  driver DriverProfile @relation(fields: [driverId], references: [id])
-
-  trackingLogs    TrackingLog[]
-  boardingRecords BoardingRecord[]
-}
-
-model BoardingRecord {
-  id         String         @id @default(dbgenerated("gen_random_uuid()"))
-  actionType BoardingAction
-  studentId  String
-  tripId     String
-  stopId     String
-  timestamp  DateTime       @default(now())
-  note       String?
-
-  student StudentProfile @relation(fields: [studentId], references: [id])
-  trip    BusTrip        @relation(fields: [tripId], references: [id])
-  stop    BusStop        @relation(fields: [stopId], references: [id])
-}
-
-model TrackingLog {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
-  busTripId String
-  latitude  Float
-  longitude Float
-  speed     Float
-  timestamp DateTime @default(now())
-
-  trip BusTrip @relation(fields: [busTripId], references: [id], onDelete: Cascade)
-}
-
-model Notification {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  recipientId String
-  title       String
-  message     String
-  type        String
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 }
