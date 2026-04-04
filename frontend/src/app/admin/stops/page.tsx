@@ -8,6 +8,7 @@ import BusStopsList from "@/app/admin/stops/_components/bus-stops-list";
 import {FormDialog} from "@/components/custom/form-dialog";
 import BusStopForm from "@/app/admin/stops/_components/bus-stops-form";
 import {useState} from "react";
+import {toast} from "sonner";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     if (!res.ok) {
@@ -31,7 +32,6 @@ export default function StopsPage() {
         try {
             const url = data.id ? `${process.env.NEXT_PUBLIC_API_URL}/bus-stops/${data.id}` : `${process.env.NEXT_PUBLIC_API_URL}/bus-stops`;
             const method = data.id ? 'PUT' : 'POST';
-
             const res = await fetch(url, {
                 method,
                 headers: {
@@ -41,10 +41,11 @@ export default function StopsPage() {
             });
 
             if (!res.ok) {
-                throw new Error('Failed to save bus stop: ' + res.statusText);
+                throw new Error('Đã xảy ra lỗi: ' + res.statusText);
             }
 
             await mutate();
+            toast.success(`Trạm dừng đã được ${data.id ? 'cập nhật' : 'tạo'} thành công!`);
             handleCloseDialog();
         } catch (error) {
             console.error('Có lỗi khi lưu điểm dừng:', error);

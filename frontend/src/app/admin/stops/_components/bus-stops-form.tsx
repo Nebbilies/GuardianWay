@@ -31,7 +31,7 @@ export type BusStopFormValues = z.infer<typeof busStopSchema>
 
 interface BusStopFormProps {
     initialData?: Partial<BusStop>
-    onSubmit: (data: BusStopFormValues) => Promise<void>
+    onSubmit: (data: BusStopFormValues & { id?: string }) => Promise<void>
     onCancel: () => void
     isLoading?: boolean
 }
@@ -62,12 +62,17 @@ export default function BusStopForm({
                 address: initialData.address,
                 latitude: initialData.latitude,
                 longitude: initialData.longitude,
+                isSchoolStop: initialData.isSchoolStop,
             })
         }
     }, [initialData, form])
 
     const handleSubmit = async (data: BusStopFormValues) => {
-        await onSubmit(data)
+        if (initialData?.id) {
+            await onSubmit({ ...data, id: initialData.id as string })
+        } else {
+            await onSubmit(data)
+        }
     }
 
     return (
