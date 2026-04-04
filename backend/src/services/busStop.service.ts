@@ -10,8 +10,9 @@ class BusStopService {
     address?: string;
     latitude?: number;
     longitude?: number;
+    isSchoolStop?: boolean;
   }) {
-    const { name, address, latitude, longitude } = data;
+    const { name, address, latitude, longitude, isSchoolStop } = data;
 
     if (!name || !address || typeof latitude !== "number" || typeof longitude !== "number") {
       throw new Error("Missing required bus stop fields");
@@ -22,6 +23,7 @@ class BusStopService {
       address,
       latitude,
       longitude,
+      isSchoolStop: !!isSchoolStop,
     });
   }
 }

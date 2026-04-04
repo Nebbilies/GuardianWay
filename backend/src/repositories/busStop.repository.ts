@@ -6,7 +6,7 @@ class BusStopRepository {
         return prisma.busStop.findMany();
     }
 
-    async create(data: Pick<BusStop, "name" | "address" | "latitude" | "longitude">): Promise<BusStop> {
+    async create(data: Pick<BusStop, "name" | "address" | "latitude" | "longitude" | "isSchoolStop">): Promise<BusStop> {
         return prisma.busStop.create({
             data,
         });
