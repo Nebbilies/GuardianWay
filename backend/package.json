@@ -16,10 +16,12 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@gw/shared": "^1.0.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "prisma-extension-pagination": "^0.7.6",
     "redis": "^5.11.0"
   },
   "devDependencies": {
