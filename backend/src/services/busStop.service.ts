@@ -1,8 +1,8 @@
-import { busStopRepository } from "../repositories/busStop.repository";
+import { busStopRepository, GetAllBusStopsParams } from "../repositories/busStop.repository";
 
 class BusStopService {
-  async getAll() {
-    return busStopRepository.getAll();
+  async getAll(params: GetAllBusStopsParams = {}) {
+    return busStopRepository.getAll(params);
   }
 
   async create(data: {

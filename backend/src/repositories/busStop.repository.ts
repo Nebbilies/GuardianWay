@@ -2,7 +2,7 @@ import prisma from "../config/prisma";
 import {BusStop} from "@prisma/client";
 import {PaginatedResult} from "@gw/shared"
 
-interface GetAllBusStopsParams {
+export interface GetAllBusStopsParams {
     search?: string;
     isSchoolStop?: boolean;
     page?: number;
@@ -21,6 +21,7 @@ class BusStopRepository {
             where: {
                 name: params.search ? { contains: params.search, mode: 'insensitive' } : undefined,
                 isSchoolStop: params.isSchoolStop,
+                deletedAt: null,
             },
             orderBy: { [sortBy]: sortOrder },
         }).withPages({
