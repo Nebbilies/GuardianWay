@@ -73,7 +73,7 @@ model BusRoute {
   id            String      @id @default(dbgenerated("gen_random_uuid()"))
   name          String
   description   String?
-  totalDistance Float?
+  totalDistance Float       @default(0)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   deletedAt     DateTime?
