@@ -1,6 +1,6 @@
 import prisma from "../config/prisma";
 import {BusStop} from "@prisma/client";
-import {PaginatedResult} from "@gw/shared"
+import {PaginatedResponse} from "@gw/shared"
 
 export interface GetAllBusStopsParams {
     search?: string;
@@ -11,7 +11,7 @@ export interface GetAllBusStopsParams {
 }
 
 class BusStopRepository {
-    async getAll(params: GetAllBusStopsParams = {}): Promise<PaginatedResult<BusStop>> {
+    async getAll(params: GetAllBusStopsParams = {}): Promise<PaginatedResponse<BusStop>> {
         const sortParam = params?.sort || 'name';
         const isDesc = sortParam.startsWith('-');
         const sortBy = isDesc ? sortParam.substring(1) : sortParam;
