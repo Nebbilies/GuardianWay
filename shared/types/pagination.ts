@@ -8,7 +8,7 @@ export interface PaginationMetadata {
   totalCount: number;
 }
 
-export interface PaginatedResult<T> {
+export interface PaginatedResponse<T> {
   data: T[];
   metadata: PaginationMetadata;
 }
