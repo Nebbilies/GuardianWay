@@ -7,8 +7,10 @@ import {BusStop, PaginatedResponse} from "@/types/types";
 import BusStopsList from "@/app/admin/stops/_components/bus-stops-list";
 import {FormDialog} from "@/components/custom/form-dialog";
 import BusStopForm from "@/app/admin/stops/_components/bus-stops-form";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {toast} from "sonner";
+import {Input} from "@/components/ui/input";
+import * as sea from "node:sea";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     if (!res.ok) {
@@ -22,14 +24,31 @@ export default function StopsPage() {
     const [selectedBusStop, setSelectedBusStop] = useState<BusStop | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+    // Debounce search term
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
+
+        return () => clearTimeout(delayDebounce);
+    }, [searchTerm]);
+
+    // Build URL params
+    const params = new URLSearchParams();
+    if (debouncedSearchTerm) {
+        params.set('search', debouncedSearchTerm);
+    }
 
     // fetch bus stops
     const {
         data: busStops,
         error,
         isLoading,
-        mutate
-    } = useSWR<PaginatedResponse<BusStop>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops`, fetcher)
+        mutate,
+    } = useSWR<PaginatedResponse<BusStop>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops?${params.toString()}`, fetcher);
 
     if (error) {
         return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
@@ -106,10 +125,18 @@ export default function StopsPage() {
                         Quản lý tất cả các điểm dừng trong hệ thống
                     </p>
                 </div>
-                <Button className={'gap-2'} onClick={handleAddBusStop}>
-                    <Plus className={'w-4 h-4'}/>
-                    Thêm điểm dừng
-                </Button>
+                <div className={'flex'}>
+                    <Input
+                        placeholder={'Tìm kiếm...'}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className={'mr-4'}
+                    />
+                    <Button className={'gap-2'} onClick={handleAddBusStop}>
+                        <Plus className={'w-4 h-4'}/>
+                        Thêm điểm dừng
+                    </Button>
+                </div>
             </div>
             {isLoading || !busStops ? (
                 <div className="bg-card border border-border rounded-lg p-8 text-center">
