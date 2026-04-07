@@ -24,7 +24,7 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
-        <Toaster position={'bottom-right'} />
+        <Toaster position={'bottom-right'} richColors theme={"light"}/>
         {children}
       </body>
     </html>
