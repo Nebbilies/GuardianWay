@@ -31,7 +31,7 @@ export default function StopsPage() {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Debounce search term
+    // debounce search term
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
@@ -106,7 +106,7 @@ export default function StopsPage() {
             toast.success(`Trạm dừng đã được ${data.id ? 'cập nhật' : 'tạo'} thành công!`);
             handleCloseDialog();
         } catch (error) {
-            console.error('Có lỗi khi lưu điểm dừng:', error);
+            console.error('Có lỗi khi lưu trạm dừng:', error);
         } finally {
             setIsSubmitting(false);
         }
@@ -136,7 +136,7 @@ export default function StopsPage() {
             await mutate();
             toast.success('Trạm dừng đã được xóa thành công!');
         } catch (error) {
-            console.error('Có lỗi khi xóa điểm dừng:', error);
+            console.error('Có lỗi khi xóa trạm dừng:', error);
         } finally {
             setIsDeleting(false);
         }
@@ -146,9 +146,9 @@ export default function StopsPage() {
         <div className={'p-8 bg-white'}>
             <div className={'flex justify-between mb-8 items-center'}>
                 <div>
-                    <h1 className={'text-4xl font-bold text-foreground'}>Danh sách điểm dừng</h1>
+                    <h1 className={'text-4xl font-bold text-foreground'}>Danh sách trạm dừng</h1>
                     <p className={'text-muted-foreground mt-2 mb-4'}>
-                        Quản lý tất cả các điểm dừng trong hệ thống
+                        Quản lý tất cả các trạm dừng trong hệ thống
                     </p>
                 </div>
                 <div className={'flex'}>
@@ -160,7 +160,7 @@ export default function StopsPage() {
                     />
                     <Button className={'gap-2'} onClick={handleAddBusStop}>
                         <Plus className={'w-4 h-4'}/>
-                        Thêm điểm dừng
+                        Thêm trạm dừng
                     </Button>
                 </div>
             </div>
@@ -190,8 +190,8 @@ export default function StopsPage() {
             <FormDialog
                 isOpen={isDialogOpen}
                 onClose={handleCloseDialog}
-                title={selectedBusStop?.id ? 'Chỉnh sửa điểm dừng' : 'Tạo điểm dừng'}
-                description={selectedBusStop?.id ? 'Chỉnh sửa thông tin điểm dừng.' : 'Nhập thông tin để tạo điểm dừng mới.'}
+                title={selectedBusStop?.id ? 'Chỉnh sửa trạm dừng' : 'Tạo trạm dừng'}
+                description={selectedBusStop?.id ? 'Chỉnh sửa thông tin trạm dừng.' : 'Nhập thông tin để tạo trạm dừng mới.'}
             >
                 <BusStopForm
                     initialData={selectedBusStop}
