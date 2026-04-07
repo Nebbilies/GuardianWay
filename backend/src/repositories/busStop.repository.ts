@@ -68,8 +68,11 @@ class BusStopRepository {
     }
 
     async delete(id: string): Promise<BusStop> {
-        return prisma.busStop.delete({
+        return prisma.busStop.update({
             where: { id },
+            data: {
+                deletedAt: new Date(),
+            }
         })
     }
 }
