@@ -12,17 +12,34 @@ export interface GetAllBusStopsParams {
 
 class BusStopRepository {
     async getAll(params: GetAllBusStopsParams = {}): Promise<PaginatedResponse<BusStop>> {
+        const searchTerm = params.search?.trim();
         const sortParam = params?.sort || 'name';
         const isDesc = sortParam.startsWith('-');
         const sortBy = isDesc ? sortParam.substring(1) : sortParam;
         const sortOrder = isDesc ? 'desc' : 'asc';
 
+        const whereClause: any = {
+            isSchoolStop: params.isSchoolStop,
+            deletedAt: null,
+        };
+
+        if (searchTerm) {
+            whereClause.OR = [
+                {
+                    name: {
+                        search: searchTerm
+                    }
+                },
+                {
+                    address: {
+                        search: searchTerm
+                    }
+                }
+            ];
+        }
+
         const [data, metadata] = await prisma.busStop.paginate({
-            where: {
-                name: params.search ? { contains: params.search, mode: 'insensitive' } : undefined,
-                isSchoolStop: params.isSchoolStop,
-                deletedAt: null,
-            },
+            where: whereClause,
             orderBy: { [sortBy]: sortOrder },
         }).withPages({
             page: params?.page || 1,
