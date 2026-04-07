@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { Edit2, Trash2, ArrowUpDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import {useState} from 'react'
+import {Edit2, Trash2, ArrowUpDown} from 'lucide-react'
+import {Button} from '@/components/ui/button'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
 import {
     AlertDialog,
@@ -20,6 +20,9 @@ interface BusStopsListProps {
     busStops: PaginatedResponse<BusStop>
     onEdit: (busStop: BusStop) => void
     onDelete: (id: string) => Promise<void>
+    onSortChange: (sortBy: string) => void
+    sortBy: string
+    sortOrder: 'asc' | 'desc'
     isDeleting: boolean;
 }
 
@@ -27,32 +30,24 @@ type SortKey = 'name' | 'address' | 'createdAt'
 type SortOrder = 'asc' | 'desc'
 
 export default function BusStopsList({
-                                 busStops,
-                                 onEdit,
-                                 onDelete,
-                                 isDeleting,
-                             }: BusStopsListProps) {
-    const [sortKey, setSortKey] = useState<SortKey>('createdAt')
-    const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+                                         busStops,
+                                         onEdit,
+                                         onDelete,
+                                         onSortChange,
+                                         sortBy,
+                                         sortOrder,
+                                         isDeleting,
+                                     }: BusStopsListProps) {
     const [deletingStopId, setDeletingStopId] = useState<string | null>(null)
 
-    const handleSort = (key: SortKey) => {
-        if (sortKey === key) {
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-        } else {
-            setSortKey(key)
-            setSortOrder('asc')
-        }
-    }
-
-    const SortHeader = ({ label, sortKeyValue }: { label: string; sortKeyValue: SortKey }) => (
+    const SortHeader = ({label, sortKeyValue}: { label: string; sortKeyValue: SortKey }) => (
         <button
-            onClick={() => handleSort(sortKeyValue)}
+            onClick={() => onSortChange(sortKeyValue)}
             className="flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
         >
             {label}
-            {sortKey === sortKeyValue && (
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} />
+            {sortBy === sortKeyValue && (
+                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`}/>
             )}
         </button>
     )
@@ -76,22 +71,22 @@ export default function BusStopsList({
                 <thead>
                 <tr className="border-b border-border bg-muted">
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Name" sortKeyValue="name" />
+                        <SortHeader label="Tên trạm dừng" sortKeyValue="name"/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Address" sortKeyValue="address" />
+                        <SortHeader label="Địa chỉ" sortKeyValue="address"/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
-                        Location
+                        Tọa độ
                     </th>
                     <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
-                        School Stop
+                        Trạm trường học
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Created" sortKeyValue="createdAt" />
+                        <SortHeader label="Đã tạo" sortKeyValue="createdAt"/>
                     </th>
                     <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
-                        Actions
+                        Hành động
                     </th>
                 </tr>
                 </thead>
@@ -126,9 +121,10 @@ export default function BusStopsList({
                                     onClick={() => onEdit(busStop)}
                                     className="text-primary hover:text-primary"
                                 >
-                                    <Edit2 className="w-4 h-4" />
+                                    <Edit2 className="w-4 h-4"/>
                                 </Button>
-                                <AlertDialog open={deletingStopId === busStop.id} onOpenChange={(open) => !open && setDeletingStopId(null)}>
+                                <AlertDialog open={deletingStopId === busStop.id}
+                                             onOpenChange={(open) => !open && setDeletingStopId(null)}>
                                     <AlertDialogTrigger asChild>
                                         <Button
                                             variant="ghost"
@@ -137,7 +133,7 @@ export default function BusStopsList({
                                             onClick={() => setDeletingStopId(busStop.id)}
                                             className="text-destructive hover:text-destructive"
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-4 h-4"/>
                                         </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>

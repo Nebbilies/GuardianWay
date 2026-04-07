@@ -26,6 +26,8 @@ export default function StopsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState<string>('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
     // Debounce search term
     useEffect(() => {
@@ -40,6 +42,19 @@ export default function StopsPage() {
     const params = new URLSearchParams();
     if (debouncedSearchTerm) {
         params.set('search', debouncedSearchTerm);
+    }
+    if (sortBy) {
+        params.set('sort', sortOrder === 'desc' ? `-${sortBy}` : sortBy);
+    }
+
+    // sort change from children list
+    const handleSortChange = (key: string) => {
+        if (sortBy === key) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(key);
+            setSortOrder('asc');
+        }
     }
 
     // fetch bus stops
@@ -147,6 +162,9 @@ export default function StopsPage() {
                             busStops={busStops}
                             onEdit={handleEditBusStop}
                             onDelete={handleDeleteBusStop}
+                            onSortChange={handleSortChange}
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
                             isDeleting={isDeleting}
                         />
                 )}
