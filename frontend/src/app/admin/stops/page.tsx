@@ -7,6 +7,7 @@ import {BusStop, PaginatedResponse} from "@/types/types";
 import BusStopsList from "@/app/admin/stops/_components/bus-stops-list";
 import {FormDialog} from "@/components/custom/form-dialog";
 import BusStopForm from "@/app/admin/stops/_components/bus-stops-form";
+import CustomPagination from "@/components/custom/custom-pagination";
 import {useEffect, useState} from "react";
 import {toast} from "sonner";
 import {Input} from "@/components/ui/input";
@@ -28,6 +29,7 @@ export default function StopsPage() {
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState<string>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Debounce search term
     useEffect(() => {
@@ -46,6 +48,9 @@ export default function StopsPage() {
     if (sortBy) {
         params.set('sort', sortOrder === 'desc' ? `-${sortBy}` : sortBy);
     }
+    if (currentPage > 1) {
+        params.set('page', currentPage.toString());
+    }
 
     // sort change from children list
     const handleSortChange = (key: string) => {
@@ -55,6 +60,12 @@ export default function StopsPage() {
             setSortBy(key);
             setSortOrder('asc');
         }
+        setCurrentPage(1); // Reset to first page when sorting changes
+    }
+
+    // page change from pagination
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
     }
 
     // fetch bus stops
@@ -158,15 +169,23 @@ export default function StopsPage() {
                     <p className="text-muted-foreground">Đang tải dữ liệu</p>
                 </div>
             ) : (
-                        <BusStopsList
-                            busStops={busStops}
-                            onEdit={handleEditBusStop}
-                            onDelete={handleDeleteBusStop}
-                            onSortChange={handleSortChange}
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            isDeleting={isDeleting}
-                        />
+                        <>
+                            <BusStopsList
+                                busStops={busStops}
+                                onEdit={handleEditBusStop}
+                                onDelete={handleDeleteBusStop}
+                                onSortChange={handleSortChange}
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                isDeleting={isDeleting}
+                            />
+                            <div className={'mt-4 flex justify-end'}>
+                                <CustomPagination
+                                    paginationData={busStops.metadata}
+                                    onPageChange={handlePageChange}
+                                />
+                            </div>
+                        </>
                 )}
             <FormDialog
                 isOpen={isDialogOpen}
