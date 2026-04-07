@@ -99,7 +99,8 @@ export default function StopsPage() {
             });
 
             if (!res.ok) {
-                throw new Error('Đã xảy ra lỗi: ' + res.statusText);
+                const errorData = await res.json().catch(() => ({ message: res.statusText }));
+                throw new Error(errorData.message || 'Đã xảy ra lỗi');
             }
 
             await mutate();
@@ -107,6 +108,7 @@ export default function StopsPage() {
             handleCloseDialog();
         } catch (error) {
             console.error('Có lỗi khi lưu trạm dừng:', error);
+            toast.error(error instanceof Error ? error.message : 'Đã xảy ra lỗi');
         } finally {
             setIsSubmitting(false);
         }
@@ -130,13 +132,15 @@ export default function StopsPage() {
             });
 
             if (!res.ok) {
-                throw new Error('Đã xảy ra lỗi: ' + res.statusText);
+                const errorData = await res.json().catch(() => ({ message: res.statusText }));
+                throw new Error(errorData.message || 'Đã xảy ra lỗi');
             }
 
             await mutate();
             toast.success('Trạm dừng đã được xóa thành công!');
         } catch (error) {
             console.error('Có lỗi khi xóa trạm dừng:', error);
+            toast.error(error instanceof Error ? error.message : 'Đã xảy ra lỗi');
         } finally {
             setIsDeleting(false);
         }
