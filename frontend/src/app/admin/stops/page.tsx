@@ -3,7 +3,7 @@
 import {Plus} from "lucide-react";
 import useSWR from 'swr';
 import {Button} from "@/components/ui/button";
-import {BusStop} from "@/types/types";
+import {BusStop, PaginatedResponse} from "@/types/types";
 import BusStopsList from "@/app/admin/stops/_components/bus-stops-list";
 import {FormDialog} from "@/components/custom/form-dialog";
 import BusStopForm from "@/app/admin/stops/_components/bus-stops-form";
@@ -22,6 +22,18 @@ export default function StopsPage() {
     const [selectedBusStop, setSelectedBusStop] = useState<BusStop | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // fetch bus stops
+    const {
+        data: busStops,
+        error,
+        isLoading,
+        mutate
+    } = useSWR<PaginatedResponse<BusStop>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops`, fetcher)
+
+    if (error) {
+        return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
+    }
 
     const handleCloseDialog = () => {
         setIsDialogOpen(false);
@@ -85,12 +97,6 @@ export default function StopsPage() {
         }
     }
 
-    const { data: busStops = [], error, isLoading, mutate } = useSWR<BusStop[]>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops`, fetcher)
-
-    if (error) {
-        return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
-    }
-
     return (
         <div className={'p-8 bg-white'}>
             <div className={'flex justify-between mb-8 items-center'}>
@@ -105,7 +111,7 @@ export default function StopsPage() {
                     Thêm điểm dừng
                 </Button>
             </div>
-            {isLoading ? (
+            {isLoading || !busStops ? (
                 <div className="bg-card border border-border rounded-lg p-8 text-center">
                     <p className="text-muted-foreground">Đang tải dữ liệu</p>
                 </div>

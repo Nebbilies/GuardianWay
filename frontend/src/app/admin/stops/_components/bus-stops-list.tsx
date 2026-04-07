@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -15,10 +14,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { BusStop } from '@/types/types'
+import {BusStop, PaginatedResponse} from '@/types/types'
 
 interface BusStopsListProps {
-    busStops: BusStop[]
+    busStops: PaginatedResponse<BusStop>
     onEdit: (busStop: BusStop) => void
     onDelete: (id: string) => Promise<void>
     isDeleting: boolean;
@@ -46,20 +45,6 @@ export default function BusStopsList({
         }
     }
 
-    const sortedBusStops = [...busStops].sort((a, b) => {
-        let aVal: any = a[sortKey]
-        let bVal: any = b[sortKey]
-
-        if (sortKey === 'createdAt') {
-            aVal = new Date(aVal).getTime()
-            bVal = new Date(bVal).getTime()
-        }
-
-        if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1
-        if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1
-        return 0
-    })
-
     const SortHeader = ({ label, sortKeyValue }: { label: string; sortKeyValue: SortKey }) => (
         <button
             onClick={() => handleSort(sortKeyValue)}
@@ -72,7 +57,7 @@ export default function BusStopsList({
         </button>
     )
 
-    if (busStops.length === 0) {
+    if (!busStops?.data || busStops.data.length === 0) {
         return (
             <Empty>
                 <EmptyTitle>
@@ -111,7 +96,7 @@ export default function BusStopsList({
                 </tr>
                 </thead>
                 <tbody>
-                {sortedBusStops.map((busStop) => (
+                {busStops.data.map((busStop) => (
                     <tr
                         key={busStop.id}
                         className="border-b border-border hover:bg-muted/50 transition-colors"
@@ -173,7 +158,6 @@ export default function BusStopsList({
                                                         await onDelete(busStop.id)
                                                         setDeletingStopId(null)
                                                     } catch (error) {
-                                                        // Handle error or let parent handle it
                                                         console.error(error)
                                                     }
                                                 }}
