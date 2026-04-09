@@ -1,4 +1,5 @@
 import {busRouteRepository, GetAllBusRoutesParams} from "../repositories/busRoute.repository";
+import {RouteStop} from "@prisma/client";
 
 class BusRouteService {
     async getAll(params: GetAllBusRoutesParams = {}) {
@@ -8,15 +9,21 @@ class BusRouteService {
     async create(data: {
         name?: string;
         description?: string;
+        stops?: Partial<RouteStop>[];
     }) {
-        const {name, description} = data;
+        const {name, description, stops} = data;
 
-        if (!name) {
+        if (!name || !stops) {
             throw new Error("Thiếu thông tin của tuyến đường");
+        }
+
+        if (stops?.length < 2) {
+            throw new Error("Tuyến đường phải có ít nhất 2 trạm dừng");
         }
 
         return busRouteRepository.create({
             name,
+            stops,
             description: description || null,
         });
     }
@@ -24,16 +31,22 @@ class BusRouteService {
     async edit(id: string, data: {
         name?: string;
         description?: string;
+        stops?: Partial<RouteStop>[];
     }) {
-        const {name, description} = data;
+        const {name, description, stops} = data;
 
-        if (!id || !name) {
+        if (!id || !name || !stops) {
             throw new Error("Thiếu thông tin của tuyến đường");
+        }
+
+        if (stops?.length < 2) {
+            throw new Error("Tuyến đường phải có ít nhất 2 trạm dừng");
         }
 
         return busRouteRepository.edit({
             id,
             name,
+            stops,
             description: description || null,
         })
     }

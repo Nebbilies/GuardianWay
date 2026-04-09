@@ -27,7 +27,9 @@ class BusRouteController {
             const busRoute = await busRouteService.create(req.body);
             res.status(201).json(busRoute);
         } catch (e) {
-            if (e instanceof Error && e.message === "Thiếu thông tin của tuyến đường") {
+            if (e instanceof Error &&
+                (e.message === "Thiếu thông tin của tuyến đường" || e.message === "Tuyến đường phải có ít nhất 2 trạm dừng")
+            ) {
                 return res.status(400).json({ message: e.message });
             }
             console.error("Có lỗi xảy ra khi tạo tuyến đường:", e);

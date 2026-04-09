@@ -9,6 +9,20 @@ export interface GetAllBusRoutesParams {
     sort?: string;
 }
 
+type RouteStopInput = {
+    stopId: string;
+    stopOrder: number;
+    scheduledTime?: Date;
+}
+
+export type CreateBusRouteInput = Pick<BusRoute, "name" | "description"> & {
+    stops: RouteStopInput[];
+}
+
+export type EditBusRouteInput = Pick<BusRoute, "id" | "name" | "description"> & {
+    stops: RouteStopInput[];
+}
+
 class BusRouteRepository {
     async getAll(params: GetAllBusRoutesParams = {}): Promise<PaginatedResponse<BusRoute>> {
         const searchTerm = params.search?.trim();
@@ -31,6 +45,13 @@ class BusRouteRepository {
             where: whereClause,
             orderBy: {
                 [sortBy]: sortOrder
+            },
+            include: {
+                routeStops: {
+                    include: {
+                        stop: true,
+                    }
+                }
             }
         }).withPages({
             page: params.page || 1,
@@ -44,18 +65,62 @@ class BusRouteRepository {
         };
     }
 
-    async create(data: Pick<BusRoute, "name" | "description">): Promise<BusRoute> {
-        return prisma.busRoute.create({
-            data,
+    async create(data: { name: string; stops: Partial<RouteStop>[]; description: string | null }): Promise<BusRoute> {
+        return prisma.$transaction(async (tx) => {
+            const {stops, ...busRouteData} = data;
+            const busRoute = await tx.busRoute.create({
+                data: busRouteData,
+            });
+
+            if (stops.length > 0) {
+                await tx.routeStop.createMany({
+                    data: stops.map((stop) => ({
+                        routeId: busRoute.id,
+                        stopId: stop.stopId,
+                        stopOrder: stop.stopOrder,
+                        scheduledTime: stop.scheduledTime,
+                    })),
+                });
+            }
+
+            return busRoute;
         });
     }
 
-    async edit(data: Pick<BusRoute, "id" | "name" | "description">): Promise<BusRoute> {
-        return prisma.busRoute.update({
-            where: {
-                id: data.id,
-            },
-            data,
+    async edit(data: {
+        id: string;
+        name: string;
+        stops: Partial<RouteStop>[];
+        description: string | null
+    }): Promise<BusRoute> {
+        return prisma.$transaction(async (tx) => {
+            const {id, stops, ...busRouteData} = data;
+
+            const busRoute = await tx.busRoute.update({
+                where: {
+                    id,
+                },
+                data: busRouteData,
+            });
+
+            await tx.routeStop.deleteMany({
+                where: {
+                    routeId: id,
+                },
+            });
+
+            if (stops.length > 0) {
+                await tx.routeStop.createMany({
+                    data: stops.map((stop) => ({
+                        routeId: id,
+                        stopId: stop.stopId,
+                        stopOrder: stop.stopOrder,
+                        scheduledTime: stop.scheduledTime,
+                    })),
+                });
+            }
+
+            return busRoute;
         });
     }
 
