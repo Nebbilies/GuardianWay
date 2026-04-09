@@ -14,11 +14,11 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import {BusRoute, PaginatedResponse} from '@/types/types'
+import {BusRoute, BusRouteWithStops, PaginatedResponse} from '@/types/types'
 
 interface BusRoutesListProps {
-    busRoutes: PaginatedResponse<BusRoute>
-    onEdit: (busRoute: BusRoute) => void
+    busRoutes: PaginatedResponse<BusRouteWithStops>
+    onEdit: (busRoute: BusRouteWithStops) => void
     onDelete: (id: string) => Promise<void>
     onSortChange: (sortBy: string) => void
     sortBy: string
@@ -73,6 +73,9 @@ export default function BusRoutesList({
                         <SortHeader label="Tên tuyến đường" sortKeyValue="name"/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
+                        Trạm dừng
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm">
                         Mô tả
                     </th>
                     <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
@@ -88,6 +91,9 @@ export default function BusRoutesList({
                     >
                         <td className="px-6 py-4 text-sm font-medium text-foreground">
                             {busRoute.name}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-foreground">
+                             {busRoute.routeStops.map((routeStop) => routeStop.stop.name).join(' → ')}
                         </td>
                         <td className="px-6 py-4 text-sm text-foreground">
                             {busRoute.description}
