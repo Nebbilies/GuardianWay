@@ -25,7 +25,7 @@ export function FormDialog({
 }: FormDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-3rem)] lg:w-auto max-w-[95vw] lg:max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     {description && (
