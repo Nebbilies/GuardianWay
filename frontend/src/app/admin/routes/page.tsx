@@ -3,14 +3,14 @@
 import {Plus} from "lucide-react";
 import useSWR from 'swr';
 import {Button} from "@/components/ui/button";
-import {BusRoute, PaginatedResponse} from "@/types/types";
+import {PaginatedResponse, BusStop, BusRouteWithStops} from "@/types/types";
 import {FormDialog} from "@/components/custom/form-dialog";
 import CustomPagination from "@/components/custom/custom-pagination";
 import {useEffect, useState} from "react";
 import {toast} from "sonner";
 import {Input} from "@/components/ui/input";
 import BusRoutesList from "@/app/admin/routes/_components/bus-routes-list";
-import BusRouteForm from "@/app/admin/routes/_components/bus-routes-form";
+import BusRouteForm, { BusRouteFormValues } from "@/app/admin/routes/_components/bus-routes-form";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     if (!res.ok) {
@@ -21,7 +21,7 @@ const fetcher = (url: string) => fetch(url).then(res => {
 
 export default function RoutesPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [selectedBusRoute, setSelectedBusRoute] = useState<BusRoute | undefined>();
+    const [selectedBusRoute, setSelectedBusRoute] = useState<BusRouteWithStops | undefined>(undefined);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -73,18 +73,21 @@ export default function RoutesPage() {
         error,
         isLoading,
         mutate,
-    } = useSWR<PaginatedResponse<BusRoute>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-routes?${params.toString()}`, fetcher);
+    } = useSWR<PaginatedResponse<BusRouteWithStops>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-routes?${params.toString()}`, fetcher);
 
     if (error) {
         return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
     }
+
+    // TODO: fails when there are more than 1000 bus stops, need to implement pagination
+    const { data: busStops } = useSWR<PaginatedResponse<BusStop>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops?limit=1000`, fetcher);
 
     const handleCloseDialog = () => {
         setIsDialogOpen(false);
         setSelectedBusRoute(undefined);
     }
 
-    const handleSubmit = async (data: Partial<BusRoute>) => {
+    const handleSubmit = async (data: BusRouteFormValues & { id?: string }) => {
         setIsSubmitting(true);
         try {
             const url = data.id ? `${process.env.NEXT_PUBLIC_API_URL}/bus-routes/${data.id}` : `${process.env.NEXT_PUBLIC_API_URL}/bus-routes`;
@@ -118,7 +121,7 @@ export default function RoutesPage() {
         setIsDialogOpen(true);
     }
 
-    const handleEditBusRoute = (busRoute: BusRoute) => {
+    const handleEditBusRoute = (busRoute: BusRouteWithStops) => {
         setSelectedBusRoute(busRoute);
         setIsDialogOpen(true);
     }
@@ -196,12 +199,19 @@ export default function RoutesPage() {
                 title={selectedBusRoute?.id ? 'Chỉnh sửa tuyến đường' : 'Tạo tuyến đường'}
                 description={selectedBusRoute?.id ? 'Chỉnh sửa thông tin tuyến đường.' : 'Nhập thông tin để tạo tuyến đường mới.'}
             >
-                <BusRouteForm
-                    initialData={selectedBusRoute}
-                    onSubmit={handleSubmit}
-                    onCancel={handleCloseDialog}
-                    isLoading={isSubmitting}
-                />
+                {!busStops ? (
+                    <div className="bg-card border border-border rounded-lg p-8 text-center">
+                        <p className="text-muted-foreground">Đang tải dữ liệu...</p>
+                    </div>
+                ) : (
+                    <BusRouteForm
+                        busStops={busStops.data}
+                        initialData={selectedBusRoute}
+                        onSubmit={handleSubmit}
+                        onCancel={handleCloseDialog}
+                        isLoading={isSubmitting}
+                    />
+                )}
             </FormDialog>
         </div>
     )
