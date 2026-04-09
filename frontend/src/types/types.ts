@@ -1,5 +1,16 @@
+import { Prisma } from "@gw/backend"
 import {User, StudentProfile, DriverProfile, Bus, BusStop, BusRoute, RouteStop, BusTrip, BoardingRecord, TrackingLog, Notification } from "@gw/backend"
 import { PaginationMetadata, PaginatedResponse } from "@gw/shared"
 
-export type { User, StudentProfile, DriverProfile, Bus, BusStop, BusRoute, RouteStop,
+type BusRouteWithStops = Prisma.BusRouteGetPayload<{
+    include: {
+        routeStops: {
+            include: {
+                stop: true;
+            }
+        }
+    }
+}>
+
+export type { User, StudentProfile, DriverProfile, Bus, BusStop, BusRoute, BusRouteWithStops, RouteStop,
     BusTrip, BoardingRecord, TrackingLog, Notification, PaginatedResponse, PaginationMetadata }
