@@ -4,16 +4,18 @@ import {RefObject, useRef, useState} from "react";
 import L, {latLng, LatLng} from "leaflet";
 
 interface MapDescendantProps {
-    onMapClick: (position: { lat: number, lng: number }) => void;
+    onMapClick?: (position: { lat: number, lng: number }) => void;
 }
 
 function MapDescendant({ onMapClick }: MapDescendantProps) {
     const map = useMapEvents({
         click(e) {
-            onMapClick(e.latlng);
-            map.flyTo(e.latlng, 17, {
-                duration: 1.2
-            })
+            if (onMapClick) {
+                onMapClick(e.latlng);
+                map.flyTo(e.latlng, 1, {
+                    duration: 1.2
+                })
+            }
         }
     })
     return null;
@@ -21,11 +23,12 @@ function MapDescendant({ onMapClick }: MapDescendantProps) {
 
 interface MapComponentProps {
     mapHeight?: number | string;
-    latLng: { lat: number, lng: number } | null;
-    setLatLng: (position: { lat: number, lng: number }) => void;
+    latLng?: { lat: number, lng: number } | null;
+    setLatLng?: (position: { lat: number, lng: number }) => void;
+    stopLocations?: { lat: number, lng: number }[];
 }
 
-export default function MapComponent({ mapHeight = "80vh", latLng, setLatLng }: MapComponentProps) {
+export default function MapComponent({ mapHeight = "80vh", latLng, setLatLng, stopLocations }: MapComponentProps) {
     const mapRef: RefObject<L.Map | null> = useRef<L.Map | null>(null);
     const heightStyle = typeof mapHeight === 'number' ? `${mapHeight}px` : mapHeight;
     return (
@@ -43,6 +46,13 @@ export default function MapComponent({ mapHeight = "80vh", latLng, setLatLng }: 
                         </Popup>
                     </Marker>
                 )}
+                {stopLocations && stopLocations.map((location, index) => (
+                    <Marker key={index} position={location}>
+                        <Popup>
+                            Trạm #{index + 1}
+                        </Popup>
+                    </Marker>
+                ))}
             </MapContainer>
     )
 }

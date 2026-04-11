@@ -6,11 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {Field, FieldLabel, FieldError} from '@/components/ui/field'
+import {Field, FieldLabel, FieldError, FieldDescription} from '@/components/ui/field'
 import {BusRoute, BusRouteWithStops, BusStop, RouteStop} from "@/types/types";
 import {Textarea} from "@/components/ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {GripVertical, Trash2} from "lucide-react";
+import MapComponent from "@/app/(landing)/map/MapComponent";
 
 const routeStopSchema = z.array(z.object({
     stopId: z.string().min(1, "Vui lòng chọn một điểm dừng"),
@@ -193,6 +194,21 @@ export default function BusRouteForm({
                             </Field>
                         )}
                     />
+                    <div className={'space-y-2'}>
+                        <FieldLabel>
+                            Vị trí các trạm
+                        </FieldLabel>
+                        <FieldDescription>
+                            Các trạm dừng đã chọn sẽ được hiển thị trên map.
+                        </FieldDescription>
+                        <MapComponent
+                            mapHeight={300}
+                            stopLocations={selectedStops.map(s => {
+                                const stop = busStops.find(stop => stop.id === s.stopId)
+                                return stop ? { lat: stop.latitude, lng: stop.longitude } : null
+                            }).filter(Boolean) as { lat: number, lng: number }[]}
+                        />
+                    </div>
                 </div>
                 <div className={'space-y-4'}>
                     <FieldLabel className={'mb-3'}>
