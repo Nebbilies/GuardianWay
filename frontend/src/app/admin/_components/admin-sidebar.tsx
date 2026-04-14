@@ -50,7 +50,7 @@ export default function AdminSidebar() {
                             </CollapsibleContent>
                         </SidebarMenuItem>
                     </Collapsible>
-                    <Collapsible defaultOpen className="group/collapsible">
+                    <Collapsible className="group/collapsible">
                         <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
                                 <SidebarMenuButton>
@@ -64,6 +64,26 @@ export default function AdminSidebar() {
                                     <SidebarMenuSubItem>
                                         <SidebarMenuSubButton href={'/admin/routes'}>
                                             Danh sách tuyến đường
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                    <Collapsible className="group/collapsible">
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton>
+                                    <Bus     className={'h-8 w-8'}/>
+                                    <span className={'font-semibold'}>Quản lý xe buýt</span>
+                                    <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton href={'/admin/buses'}>
+                                            Danh sách xe buýt
                                         </SidebarMenuSubButton>
                                     </SidebarMenuSubItem>
                                 </SidebarMenuSub>
