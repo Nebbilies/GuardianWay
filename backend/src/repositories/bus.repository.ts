@@ -1,4 +1,4 @@
-import {BusStatus} from "@prisma/client";
+import {Bus, BusStatus} from "@prisma/client";
 import prisma from "../config/prisma";
 
 export interface GetAllBusesParams {
@@ -45,6 +45,26 @@ class BusRepository {
             data,
             metadata,
         };
+    }
+
+    async create(data: Pick<Bus, "licensePlate" | "model" | "capacity" | "status">): Promise<Bus> {
+        return prisma.bus.create({
+            data,
+        });
+    }
+
+    async update(id: string, data: Partial<Pick<Bus, "licensePlate" | "model" | "capacity" | "status">>): Promise<Bus> {
+        return prisma.bus.update({
+            where: { id },
+            data,
+        });
+    }
+
+    async delete(id: string): Promise<void> {
+        await prisma.bus.update({
+            where: { id },
+            data: { deletedAt: new Date() },
+        });
     }
 }
 
