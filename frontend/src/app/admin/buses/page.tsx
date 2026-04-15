@@ -10,6 +10,7 @@ import CustomPagination from "@/components/custom/custom-pagination";
 import {useEffect, useState} from "react";
 import {toast} from "sonner";
 import {Input} from "@/components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import BusesList from "@/app/admin/buses/_components/buses-list";
 
 const fetcher = (url: string) => fetch(url).then(res => {
@@ -26,6 +27,7 @@ export default function StopsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
     const [sortBy, setSortBy] = useState<string>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -43,6 +45,9 @@ export default function StopsPage() {
     const params = new URLSearchParams();
     if (debouncedSearchTerm) {
         params.set('search', debouncedSearchTerm);
+    }
+    if (selectedStatus && selectedStatus !== 'ALL') {
+        params.set('status', selectedStatus);
     }
     if (sortBy) {
         params.set('sort', sortOrder === 'desc' ? `-${sortBy}` : sortBy);
@@ -155,6 +160,17 @@ export default function StopsPage() {
                     </p>
                 </div>
                 <div className={'flex'}>
+                    <Select value={selectedStatus} onValueChange={(val) => { setSelectedStatus(val); setCurrentPage(1); }}>
+                        <SelectTrigger className={'mr-4 w-48'}>
+                            <SelectValue placeholder={'Trạng thái'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={'ALL'}>Tất cả</SelectItem>
+                            <SelectItem value={'ACTIVE'}>Đang hoạt động</SelectItem>
+                            <SelectItem value={'MAINTENANCE'}>Đang bảo trì</SelectItem>
+                            <SelectItem value={'RETIRED'}>Ngừng hoạt động</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <Input
                         placeholder={'Tìm kiếm...'}
                         value={searchTerm}
