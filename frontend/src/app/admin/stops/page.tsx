@@ -11,7 +11,7 @@ import CustomPagination from "@/components/custom/custom-pagination";
 import {useEffect, useState} from "react";
 import {toast} from "sonner";
 import {Input} from "@/components/ui/input";
-import * as sea from "node:sea";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     if (!res.ok) {
@@ -27,6 +27,7 @@ export default function StopsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [isSchoolStop, setIsSchoolStop] = useState<string>('ALL');
     const [sortBy, setSortBy] = useState<string>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -44,6 +45,9 @@ export default function StopsPage() {
     const params = new URLSearchParams();
     if (debouncedSearchTerm) {
         params.set('search', debouncedSearchTerm);
+    }
+    if (isSchoolStop !== 'ALL') {
+        params.set('isSchoolStop', isSchoolStop);
     }
     if (sortBy) {
         params.set('sort', sortOrder === 'desc' ? `-${sortBy}` : sortBy);
@@ -156,6 +160,16 @@ export default function StopsPage() {
                     </p>
                 </div>
                 <div className={'flex'}>
+                    <Select value={isSchoolStop} onValueChange={(val) => { setIsSchoolStop(val); setCurrentPage(1); }}>
+                        <SelectTrigger className={'mr-4 w-48'}>
+                            <SelectValue placeholder={'Loại trạm'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={'ALL'}>Tất cả</SelectItem>
+                            <SelectItem value={'true'}>Trạm trường học</SelectItem>
+                            <SelectItem value={'false'}>Trạm thường</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <Input
                         placeholder={'Tìm kiếm...'}
                         value={searchTerm}
