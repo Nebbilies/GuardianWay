@@ -1,10 +1,24 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    restart: always
+
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     expose:
       - "3000"
+    depends_on:
+      - backend
     restart: always
 
   nginx:
@@ -15,4 +29,5 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - frontend
+      - backend
     restart: always
