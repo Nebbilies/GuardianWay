@@ -6,7 +6,7 @@ import {
     SidebarHeader, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuItem, SidebarMenuButton,
     SidebarMenuSubButton
 } from "@/components/ui/sidebar";
-import {Bus, ChevronDown, LogOut, MapPin, Route} from "lucide-react";
+import {Bus, ChevronDown, LogOut, MapPin, Route, Users} from "lucide-react";
 import Link from "next/link";
 import {Separator} from "@/components/ui/separator";
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
@@ -84,6 +84,26 @@ export default function AdminSidebar() {
                                     <SidebarMenuSubItem>
                                         <SidebarMenuSubButton href={'/admin/buses'}>
                                             Danh sách xe buýt
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                    <Collapsible className="group/collapsible">
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton>
+                                    <Users className={'h-8 w-8'}/>
+                                    <span className={'font-semibold'}>Quản lý người dùng</span>
+                                    <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton href={'/admin/users'}>
+                                            Danh sách người dùng
                                         </SidebarMenuSubButton>
                                     </SidebarMenuSubItem>
                                 </SidebarMenuSub>
