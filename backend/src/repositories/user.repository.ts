@@ -1,0 +1,217 @@
+import { Role } from "@prisma/client";
+import prisma from "../config/prisma";
+
+export interface GetAllUsersParams {
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+    role?: Role;
+}
+
+export interface CreateUserData {
+    name: string;
+    email: string;
+    password: string;
+    role: Role;
+    phoneNumber?: string;
+    address?: string;
+
+    studentId?: string;
+    studentClass?: string;
+    parentId?: string;
+
+    licenseNumber?: string;
+}
+
+export interface UpdateUserData {
+    name?: string;
+    email?: string;
+    password?: string;
+    role?: Role;
+    phoneNumber?: string;
+    address?: string;
+
+    studentId?: string;
+    studentClass?: string;
+    parentId?: string;
+
+    licenseNumber?: string;
+}
+
+class UserRepository {
+    async getAll(params: GetAllUsersParams = {}) {
+        const searchTerm = params.search?.trim();
+        const sortParam = params?.sort || "createdAt";
+        const isDesc = sortParam.startsWith("-");
+        const sortBy = isDesc ? sortParam.substring(1) : sortParam;
+        const sortOrder = isDesc ? "desc" : "asc";
+
+        const whereClause: any = {
+            deletedAt: null,
+        };
+
+        if (params.role) {
+            whereClause.role = params.role;
+        }
+
+        if (searchTerm) {
+            whereClause.OR = [
+                { name: { contains: searchTerm, mode: "insensitive" } },
+                { email: { contains: searchTerm, mode: "insensitive" } },
+            ];
+        }
+
+        const [data, metadata] = await prisma.user
+            .paginate({
+                where: whereClause,
+                orderBy: { [sortBy]: sortOrder },
+                include: {
+                    studentProfile: true,
+                    driverProfile: true,
+                },
+            })
+            .withPages({
+                page: params?.page || 1,
+                limit: params?.limit || 10,
+                includePageCount: true,
+            });
+
+        return { data, metadata };
+    }
+
+    async getById(id: string) {
+        return prisma.user.findUnique({
+            where: { id, deletedAt: null },
+            include: {
+                studentProfile: true,
+                driverProfile: true,
+            },
+        });
+    }
+
+    async getParents() {
+        return prisma.user.findMany({
+            where: {
+                role: "PARENT",
+                deletedAt: null,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+            },
+            orderBy: { name: "asc" },
+        });
+    }
+
+    async findByEmail(email: string) {
+        return prisma.user.findUnique({
+            where: { email },
+        });
+    }
+
+    async create(data: CreateUserData) {
+        const { studentId, studentClass, parentId, licenseNumber, ...userData } = data;
+
+        if (data.role === "STUDENT" && studentId && studentClass) {
+            return prisma.$transaction(async (tx: any) => {
+                const user = await tx.user.create({ data: userData });
+                await tx.studentProfile.create({
+                    data: {
+                        userId: user.id,
+                        studentId,
+                        studentClass,
+                        parentId: parentId || null,
+                    },
+                });
+                return tx.user.findUnique({
+                    where: { id: user.id },
+                    include: { studentProfile: true, driverProfile: true },
+                });
+            });
+        }
+
+        if (data.role === "DRIVER" && licenseNumber) {
+            return prisma.$transaction(async (tx: any) => {
+                const user = await tx.user.create({ data: userData });
+                await tx.driverProfile.create({
+                    data: {
+                        userId: user.id,
+                        licenseNumber,
+                    },
+                });
+                return tx.user.findUnique({
+                    where: { id: user.id },
+                    include: { studentProfile: true, driverProfile: true },
+                });
+            });
+        }
+
+        return prisma.user.create({
+            data: userData,
+            include: { studentProfile: true, driverProfile: true },
+        });
+    }
+
+    async update(id: string, data: UpdateUserData) {
+        const { studentId, studentClass, parentId, licenseNumber, ...userData } = data;
+
+        return prisma.$transaction(async (tx: any) => {
+            const user = await tx.user.update({
+                where: { id },
+                data: userData,
+            });
+
+            if (user.role === "STUDENT" && studentId && studentClass) {
+                await tx.studentProfile.upsert({
+                    where: { userId: id },
+                    create: {
+                        userId: id,
+                        studentId,
+                        studentClass,
+                        parentId: parentId || null,
+                    },
+                    update: {
+                        studentId,
+                        studentClass,
+                        parentId: parentId || null,
+                    },
+                });
+            } else if (user.role !== "STUDENT") {
+                // if change role from student, delete student profile
+                await tx.studentProfile.deleteMany({ where: { userId: id } });
+            }
+
+            if (user.role === "DRIVER" && licenseNumber) {
+                await tx.driverProfile.upsert({
+                    where: { userId: id },
+                    create: {
+                        userId: id,
+                        licenseNumber,
+                    },
+                    update: {
+                        licenseNumber,
+                    },
+                });
+            } else if (user.role !== "DRIVER") {
+                // if change role from driver, delete driver profile
+                await tx.driverProfile.deleteMany({ where: { userId: id } });
+            }
+
+            return tx.user.findUnique({
+                where: { id },
+                include: { studentProfile: true, driverProfile: true },
+            });
+        });
+    }
+
+    async delete(id: string): Promise<void> {
+        await prisma.user.update({
+            where: { id },
+            data: { deletedAt: new Date() },
+        });
+    }
+}
+
+export const userRepository = new UserRepository();
