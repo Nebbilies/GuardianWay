@@ -12,5 +12,12 @@ type BusRouteWithStops = Prisma.BusRouteGetPayload<{
     }
 }>
 
+type UserWithProfiles = Prisma.UserGetPayload<{
+    include: {
+        studentProfile: true;
+        driverProfile: true;
+    }
+}>
+
 export type { User, StudentProfile, DriverProfile, Bus, BusStop, BusRoute, BusRouteWithStops, RouteStop,
-    BusTrip, BoardingRecord, TrackingLog, Notification, PaginatedResponse, PaginationMetadata }
+    BusTrip, BoardingRecord, TrackingLog, Notification, PaginatedResponse, PaginationMetadata, UserWithProfiles }
