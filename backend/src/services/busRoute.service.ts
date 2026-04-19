@@ -1,5 +1,4 @@
-import {busRouteRepository, GetAllBusRoutesParams} from "../repositories/busRoute.repository";
-import {RouteStop} from "@prisma/client";
+import {busRouteRepository, GetAllBusRoutesParams, RouteStopInput} from "../repositories/busRoute.repository";
 
 class BusRouteService {
     async getAll(params: GetAllBusRoutesParams = {}) {
@@ -9,7 +8,7 @@ class BusRouteService {
     async create(data: {
         name?: string;
         description?: string;
-        stops?: Partial<RouteStop>[];
+        stops?: RouteStopInput[];
     }) {
         const {name, description, stops} = data;
 
@@ -31,7 +30,7 @@ class BusRouteService {
     async edit(id: string, data: {
         name?: string;
         description?: string;
-        stops?: Partial<RouteStop>[];
+        stops?: RouteStopInput[];
     }) {
         const {name, description, stops} = data;
 

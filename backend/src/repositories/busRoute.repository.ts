@@ -9,10 +9,10 @@ export interface GetAllBusRoutesParams {
     sort?: string;
 }
 
-type RouteStopInput = {
+export type RouteStopInput = {
     stopId: string;
     stopOrder: number;
-    scheduledTime?: Date;
+    scheduledTime?: Date | null;
 }
 
 export type CreateBusRouteInput = Pick<BusRoute, "name" | "description"> & {
@@ -65,7 +65,7 @@ class BusRouteRepository {
         };
     }
 
-    async create(data: { name: string; stops: Partial<RouteStop>[]; description: string | null }): Promise<BusRoute> {
+    async create(data: { name: string; stops: RouteStopInput[]; description: string | null }): Promise<BusRoute> {
         return prisma.$transaction(async (tx) => {
             const {stops, ...busRouteData} = data;
             const busRoute = await tx.busRoute.create({
@@ -90,7 +90,7 @@ class BusRouteRepository {
     async edit(data: {
         id: string;
         name: string;
-        stops: Partial<RouteStop>[];
+        stops: RouteStopInput[];
         description: string | null
     }): Promise<BusRoute> {
         return prisma.$transaction(async (tx) => {
