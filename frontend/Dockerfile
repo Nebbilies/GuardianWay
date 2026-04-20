@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG NODE_VERSION=22.16.0
-FROM node:${NODE_VERSION}-alpine@sha256:41e4389f3d988d2ed55392df4db1420ad048ae53324a8e2b7c6d19508288107e AS base
+FROM node:${NODE_VERSION}-alpine AS base
 WORKDIR /usr/src/app
 
 FROM base AS deps
@@ -13,14 +13,18 @@ COPY backend/package.json ./backend/package.json
 COPY shared/package.json ./shared/package.json
 COPY backend/prisma ./backend/prisma
 RUN --mount=type=cache,target=/root/.npm npm ci --workspace frontend --workspace backend --workspace shared --include-workspace-root=false
+RUN npm install --workspace frontend lightningcss-linux-arm64-musl@1.31.1 lightningcss-linux-x64-gnu@1.31.1 lightningcss-linux-x64-musl@1.31.1 @tailwindcss/oxide-linux-x64-musl@4.2.1 --save-optional
 
 FROM deps AS build
+ENV NODE_ENV=production
 COPY frontend ./frontend
 COPY backend/src ./backend/src
 COPY backend/prisma.config.ts ./backend/prisma.config.ts
 COPY shared ./shared
-RUN npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
-RUN npm run build --workspace frontend
+WORKDIR /usr/src/app/backend
+RUN DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm exec prisma generate -- --schema prisma/schema.prisma
+WORKDIR /usr/src/app/frontend
+RUN npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production

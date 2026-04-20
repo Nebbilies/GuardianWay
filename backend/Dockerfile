@@ -18,7 +18,7 @@ COPY backend/tsconfig.json ./backend/tsconfig.json
 COPY backend/src ./backend/src
 COPY shared/index.ts ./shared/index.ts
 COPY shared/types ./shared/types
-RUN npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+RUN DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
 RUN npm run build --workspace backend
 
 FROM base AS runtime
@@ -30,6 +30,7 @@ COPY shared/package.json ./shared/package.json
 COPY backend/prisma ./backend/prisma
 COPY backend/prisma.config.ts ./backend/prisma.config.ts
 RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace backend --workspace shared --include-workspace-root=false
+RUN DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
 
 COPY --chown=node:node --from=build /usr/src/app/backend/dist ./backend/dist
 COPY --chown=node:node --from=build /usr/src/app/shared ./shared
