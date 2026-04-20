@@ -12,8 +12,8 @@ function MapDescendant({ onMapClick }: MapDescendantProps) {
         click(e) {
             if (onMapClick) {
                 onMapClick(e.latlng);
-                map.flyTo(e.latlng, 1, {
-                    duration: 1.2
+                map.flyTo(e.latlng, 14, {
+                    duration: 1.2,
                 })
             }
         }
@@ -56,5 +56,3 @@ export default function MapComponent({ mapHeight = "80vh", latLng, setLatLng, st
             </MapContainer>
     )
 }
-
-
