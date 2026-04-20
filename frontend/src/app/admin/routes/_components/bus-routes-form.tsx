@@ -11,7 +11,11 @@ import {BusRoute, BusRouteWithStops, BusStop, RouteStop} from "@/types/types";
 import {Textarea} from "@/components/ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {GripVertical, Trash2} from "lucide-react";
-import MapComponent from "@/app/(landing)/map/MapComponent";
+import dynamic from "next/dynamic";
+
+const MapComponent = dynamic(() => import("@/app/(landing)/map/MapComponent"), {
+    ssr: false,
+});
 
 const routeStopSchema = z.array(z.object({
     stopId: z.string().min(1, "Vui lòng chọn một điểm dừng"),

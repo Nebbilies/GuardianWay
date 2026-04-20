@@ -122,7 +122,7 @@ export default function BusStopForm({
                 </FieldDescription>
                 <MapComponent
                     mapHeight={300}
-                    latLng={{ lat: form.watch('latitude') || 10.762622, lng: form.watch('longitude') || 106.660172 }} // Defaulting to HCMC coordinates if undefined for map view
+                    latLng={{lat: form.watch('latitude') || 10.762622, lng: form.watch('longitude') || 106.660172}}
                     setLatLng={({lat, lng}) => {
                         form.setValue('latitude', lat, { shouldDirty: true, shouldValidate: true })
                         form.setValue('longitude', lng, { shouldDirty: true, shouldValidate: true })
