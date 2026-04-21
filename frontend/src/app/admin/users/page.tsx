@@ -1,6 +1,6 @@
 'use client'
 
-import {Plus} from "lucide-react";
+import {Download, Plus} from "lucide-react";
 import useSWR from 'swr';
 import {Button} from "@/components/ui/button";
 import {UserWithProfiles, PaginatedResponse} from "@/types/types";
@@ -12,6 +12,7 @@ import {toast} from "sonner";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import UsersList from "@/app/admin/users/_components/users-list";
+import writeExcelFile from "write-excel-file/browser";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     if (!res.ok) {
@@ -20,11 +21,50 @@ const fetcher = (url: string) => fetch(url).then(res => {
     return res.json()
 });
 
+interface ExportUser {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    phoneNumber: string | null;
+    address: string | null;
+    studentId: string | null;
+    studentClass: string | null;
+    parentId: string | null;
+    licenseNumber: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface ExportUsersResponse {
+    data: ExportUser[];
+    metadata: {
+        total: number;
+        exportedAt: string;
+    };
+}
+
+type UserFormPayload = {
+    id?: string;
+    [key: string]: unknown;
+};
+
+const sanitizeExcelValue = (value: string | null | undefined) => {
+    if (!value) {
+        return '';
+    }
+    if (['=', '+', '-', '@'].includes(value[0])) {
+        return `'${value}`;
+    }
+    return value;
+};
+
 export default function UsersPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserWithProfiles | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [selectedRole, setSelectedRole] = useState<string>('ALL');
@@ -89,7 +129,7 @@ export default function UsersPage() {
         setSelectedUser(undefined);
     }
 
-    const handleSubmit = async (data: any) => {
+    const handleSubmit = async (data: UserFormPayload) => {
         setIsSubmitting(true);
         try {
             const url = data.id ? `${process.env.NEXT_PUBLIC_API_URL}/users/${data.id}` : `${process.env.NEXT_PUBLIC_API_URL}/users`;
@@ -150,6 +190,78 @@ export default function UsersPage() {
         }
     }
 
+    // export users
+    const handleExportUsers = async () => {
+        setIsExporting(true);
+        try {
+            const exportParams = new URLSearchParams();
+            if (debouncedSearchTerm) {
+                exportParams.set('search', debouncedSearchTerm);
+            }
+            if (selectedRole && selectedRole !== 'ALL') {
+                exportParams.set('role', selectedRole);
+            }
+            if (sortBy) {
+                exportParams.set('sort', sortOrder === 'desc' ? `-${sortBy}` : sortBy);
+            }
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/export?${exportParams.toString()}`);
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({message: res.statusText}));
+                throw new Error(errorData.message || 'Đã xảy ra lỗi');
+            }
+
+            const result: ExportUsersResponse = await res.json();
+
+            const objects = result.data.map((user) => (
+                {
+                    id: sanitizeExcelValue(user.id),
+                    name: sanitizeExcelValue(user.name),
+                    email: sanitizeExcelValue(user.email),
+                    role: sanitizeExcelValue(user.role),
+                    phoneNumber: sanitizeExcelValue(user.phoneNumber),
+                    address: sanitizeExcelValue(user.address),
+                    studentId: sanitizeExcelValue(user.studentId),
+                    studentClass: sanitizeExcelValue(user.studentClass),
+                    parentId: sanitizeExcelValue(user.parentId),
+                    licenseNumber: sanitizeExcelValue(user.licenseNumber),
+                    createdAt: new Date(user.createdAt),
+                    updatedAt: new Date(user.updatedAt),
+                }
+            ));
+            console.log('Objects to export:', objects);
+
+            await writeExcelFile(objects
+                ,
+                {
+                    schema: [
+                        {column: 'ID', width: 20, type: String, value: (row) => row.id},
+                        {column: 'Họ tên', width: 20, type: String, value: (row) => row.name},
+                        {column: 'Email', width: 20, type: String, value: (row) => row.email},
+                        {column: 'Vai trò', type: String, value: (row) => row.role},
+                        {column: 'Số điện thoại', type: String, value: (row) => row.phoneNumber},
+                        {column: 'Địa chỉ', width: 25, type: String, value: (row) => row.address},
+                        {column: 'Mã học sinh', type: String, value: (row) => row.studentId},
+                        {column: 'Lớp', type: String, value: (row) => row.studentClass},
+                        {column: 'ID phụ huynh', type: String, value: (row) => row.parentId},
+                        {column: 'Số GPLX', type: String, value: (row) => row.licenseNumber},
+                        {column: 'Ngày tạo', type: Date, format: 'dd/mm/yyyy', value: (row) => row.createdAt},
+                        {column: 'Ngày cập nhật', type: Date, format: 'dd/mm/yyyy', value: (row) => row.updatedAt},
+                    ],
+                    fileName: `gw-users-export-${new Date().toISOString().split('T')[0]}.xlsx`,
+                }
+            );
+
+            toast.success(`Xuất ${result.metadata.total} người dùng thành công!`);
+        } catch (error) {
+            console.error('Có lỗi khi xuất danh sách người dùng:', error);
+            toast.error(error instanceof Error ? error.message : 'Đã xảy ra lỗi');
+        } finally {
+            setIsExporting(false);
+        }
+    }
+
     return (
         <div className={'p-8 bg-white'}>
             <div className={'flex justify-between mb-8 items-center'}>
@@ -182,6 +294,10 @@ export default function UsersPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className={'mr-4'}
                     />
+                    <Button className={'gap-2 mr-4'} onClick={handleExportUsers} disabled={isExporting}>
+                        <Download className={'w-4 h-4'}/>
+                        {isExporting ? 'Đang xuất...' : 'Xuất Excel'}
+                    </Button>
                     <Button className={'gap-2'} onClick={handleAddUser}>
                         <Plus className={'w-4 h-4'}/>
                         Thêm người dùng
