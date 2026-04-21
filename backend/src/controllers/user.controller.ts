@@ -20,6 +20,24 @@ class UserController {
         } catch (e) {
             console.error("Có lỗi xảy ra khi lấy danh sách người dùng:", e);
             const errorMessage = e instanceof Error ? e.message : e;
+            res.status(500).json({message: "Internal server error: " + errorMessage});
+        }
+    }
+
+    async exportAll(req: Request, res: Response) {
+        const {search, sort, role} = req.query;
+        try {
+            const params: GetAllUsersParams = {};
+
+            if (typeof search === "string") params.search = search;
+            if (typeof sort === "string") params.sort = sort;
+            if (typeof role === "string") params.role = role as Role;
+
+            const users = await userService.exportAll(params);
+            res.json(users);
+        } catch (e) {
+            console.error("Có lỗi xảy ra khi xuất danh sách người dùng:", e);
+            const errorMessage = e instanceof Error ? e.message : e;
             res.status(500).json({ message: "Internal server error: " + errorMessage });
         }
     }

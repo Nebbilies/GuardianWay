@@ -80,6 +80,77 @@ class UserRepository {
         return { data, metadata };
     }
 
+    async getAllForExport(params: GetAllUsersParams = {}) {
+        const searchTerm = params.search?.trim();
+        const sortParam = params?.sort || "createdAt";
+        const isDesc = sortParam.startsWith("-");
+        const sortBy = isDesc ? sortParam.substring(1) : sortParam;
+        const sortOrder = isDesc ? "desc" : "asc";
+
+        const whereClause: any = {
+            deletedAt: null,
+        };
+
+        if (params.role) {
+            whereClause.role = params.role;
+        }
+
+        if (searchTerm) {
+            whereClause.OR = [
+                {name: {contains: searchTerm, mode: "insensitive"}},
+                {email: {contains: searchTerm, mode: "insensitive"}},
+            ];
+        }
+
+        const users = await prisma.user.findMany({
+            where: whereClause,
+            orderBy: {[sortBy]: sortOrder},
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                phoneNumber: true,
+                address: true,
+                createdAt: true,
+                updatedAt: true,
+                studentProfile: {
+                    select: {
+                        studentId: true,
+                        studentClass: true,
+                        parentId: true,
+                    },
+                },
+                driverProfile: {
+                    select: {
+                        licenseNumber: true,
+                    },
+                },
+            },
+        });
+
+        return {
+            data: users.map((user) => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phoneNumber: user.phoneNumber,
+                address: user.address,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                studentId: user.studentProfile?.studentId ?? null,
+                studentClass: user.studentProfile?.studentClass ?? null,
+                parentId: user.studentProfile?.parentId ?? null,
+                licenseNumber: user.driverProfile?.licenseNumber ?? null,
+            })),
+            metadata: {
+                total: users.length,
+                exportedAt: new Date().toISOString(),
+            },
+        };
+    }
+
     async getById(id: string) {
         return prisma.user.findUnique({
             where: { id, deletedAt: null },

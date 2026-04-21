@@ -13,6 +13,10 @@ class UserService {
         return userRepository.getAll(params);
     }
 
+    async exportAll(params: GetAllUsersParams = {}) {
+        return userRepository.getAllForExport(params);
+    }
+
     async getById(id: string) {
         if (!id) {
             throw new Error("Thiếu thông tin người dùng");
