@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@gw/backend": "*",
     "@gw/shared": "^1.0.0",
     "@hookform/resolvers": "^5.2.2",
     "axios": "^1.14.0",

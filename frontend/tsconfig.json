@@ -19,8 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@gw/backend": ["../backend/src/index.ts"],
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
