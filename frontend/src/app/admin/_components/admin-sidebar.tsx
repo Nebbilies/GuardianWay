@@ -94,6 +94,27 @@ export default function AdminSidebar() {
                         <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
                                 <SidebarMenuButton>
+                                    <Route className={'h-8 w-8'}/>
+                                    <span className={'font-semibold'}>Quản lý chuyến đi</span>
+                                    <ChevronDown
+                                        className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180"/>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton href={'/admin/trips'}>
+                                            Danh sách chuyến đi
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                    <Collapsible className="group/collapsible">
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton>
                                     <Users className={'h-8 w-8'}/>
                                     <span className={'font-semibold'}>Quản lý người dùng</span>
                                     <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
