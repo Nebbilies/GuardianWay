@@ -9,33 +9,19 @@ ENV NODE_ENV=development
 
 COPY package.json package-lock.json ./
 COPY frontend/package.json ./frontend/package.json
-COPY backend/package.json ./backend/package.json
 COPY shared/package.json ./shared/package.json
-COPY backend/prisma ./backend/prisma
-RUN --mount=type=cache,target=/root/.npm npm ci --workspace frontend --workspace backend --workspace shared --include-workspace-root=false
+RUN --mount=type=cache,target=/root/.npm npm ci --workspace frontend --workspace shared --include-workspace-root=false
 RUN npm install --workspace frontend lightningcss-linux-arm64-musl@1.31.1 lightningcss-linux-x64-gnu@1.31.1 lightningcss-linux-x64-musl@1.31.1 @tailwindcss/oxide-linux-x64-musl@4.2.1 --save-optional
 
 FROM deps AS build
 ENV NODE_ENV=production
 COPY frontend ./frontend
-COPY backend/src ./backend/src
-COPY backend/prisma.config.ts ./backend/prisma.config.ts
 COPY shared ./shared
-WORKDIR /usr/src/app/backend
-RUN DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm exec prisma generate -- --schema prisma/schema.prisma
 WORKDIR /usr/src/app/frontend
 RUN npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production
-
-COPY package.json package-lock.json ./
-COPY frontend/package.json ./frontend/package.json
-COPY backend/package.json ./backend/package.json
-COPY shared/package.json ./shared/package.json
-COPY backend/prisma ./backend/prisma
-COPY backend/prisma.config.ts ./backend/prisma.config.ts
-RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace frontend --workspace backend --workspace shared --include-workspace-root=false
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

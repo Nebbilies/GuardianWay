@@ -1,0 +1,11 @@
+.git
+.git/**
+.claude
+node_modules
+**/node_modules
+**/.next
+backend
+backend/**
+backend/dist
+models.txt
+*.log
