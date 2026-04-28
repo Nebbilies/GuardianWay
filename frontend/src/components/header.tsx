@@ -31,8 +31,10 @@ export default function Header() {
                 </nav>
 
                 <div className={'hidden md:flex items-center gap-3'}>
-                    <Button size={'sm'} variant={'default'} className={'font-bold'}>
-                        Bắt đầu ngay
+                    <Button asChild size={'sm'} variant={'default'} className={'font-bold'}>
+                        <Link href={'/start'}>
+                            Bắt đầu ngay
+                        </Link>
                     </Button>
                 </div>
 
@@ -60,8 +62,10 @@ export default function Header() {
                         </Link>
                     </nav>
                     <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                        <Button size="sm">
-                            Bắt đầu ngay
+                        <Button asChild size="sm">
+                            <Link href={'/start'}>
+                                Bắt đầu ngay
+                            </Link>
                         </Button>
                     </div>
                 </div>
