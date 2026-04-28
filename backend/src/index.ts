@@ -5,6 +5,7 @@ import busRouteRoutes from "./routes/busRoute.routes";
 import busRoutes from "./routes/bus.routes";
 import userRoutes from "./routes/user.routes";
 import busTripRoutes from "./routes/busTrip.routes";
+import publicRoutes from "./routes/public.routes";
 export { default as prisma } from "./config/prisma";
 export * from "./config/prisma";
 
@@ -17,6 +18,7 @@ app.use("/api/bus-routes", busRouteRoutes);
 app.use("/api/buses", busRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/bus-trips", busTripRoutes);
+app.use("/api/public", publicRoutes);
 app.get("/", (req: Request, res: any) => {
     res.send("Hello, api is on!");
 })
