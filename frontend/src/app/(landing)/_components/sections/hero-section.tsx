@@ -25,7 +25,7 @@ export default function HeroSection() {
             className={'relative overflow-hidden py-18 sm:py-24 lg:py-28'}
         >
             <div
-                className={'absolute inset-0 bg-[radial-gradient(120%_80%_at_20%_0%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent)]'}/>
+                className={'absolute inset-0 bg-background'}/>
             <div className={'container relative mx-auto grid gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8'}>
                 <motion.div style={{y: textY}} className={'flex flex-col gap-7'}>
                     <Badge variant={'secondary'}
