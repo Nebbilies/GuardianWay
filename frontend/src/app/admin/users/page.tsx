@@ -64,9 +64,11 @@ export default function UsersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [selectedRole, setSelectedRole] = useState<string>('ALL');
+    const [accountStatusFilter, setAccountStatusFilter] = useState<'ACTIVE' | 'DELETED_ONLY'>('ACTIVE');
     const [sortBy, setSortBy] = useState<string>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [currentPage, setCurrentPage] = useState(1);
+    const [isRestoring, setIsRestoring] = useState(false);
 
     // debounce search term
     useEffect(() => {
@@ -87,6 +89,9 @@ export default function UsersPage() {
     }
     if (sortBy) {
         params.set('sort', sortOrder === 'desc' ? `-${sortBy}` : sortBy);
+    }
+    if (accountStatusFilter === 'DELETED_ONLY') {
+        params.set('deleted', 'only');
     }
     if (currentPage > 1) {
         params.set('page', currentPage.toString());
@@ -170,6 +175,23 @@ export default function UsersPage() {
             toast.error(error instanceof Error ? error.message : 'Đã xảy ra lỗi');
         } finally {
             setIsDeleting(false);
+        }
+    }
+
+    const handleRestoreUser = async (id: string) => {
+        setIsRestoring(true);
+        try {
+            await apiRequest(`/users/${id}/restore`, {
+                method: 'PATCH',
+            });
+
+            await mutate();
+            toast.success('Người dùng đã được khôi phục thành công!');
+        } catch (error) {
+            console.error('Có lỗi khi khôi phục người dùng:', error);
+            toast.error(error instanceof Error ? error.message : 'Đã xảy ra lỗi');
+        } finally {
+            setIsRestoring(false);
         }
     }
 
@@ -264,17 +286,31 @@ export default function UsersPage() {
                             <SelectItem value={'PARENT'}>Phụ huynh</SelectItem>
                         </SelectContent>
                     </Select>
+                    <Select value={accountStatusFilter} onValueChange={(val: 'ACTIVE' | 'DELETED_ONLY') => {
+                        setAccountStatusFilter(val);
+                        setCurrentPage(1);
+                    }}>
+                        <SelectTrigger className={'mr-4 w-48'}>
+                            <SelectValue placeholder={'Trạng thái'}/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={'ACTIVE'}>Đang hoạt động</SelectItem>
+                            <SelectItem value={'DELETED_ONLY'}>Đã xóa</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <Input
                         placeholder={'Tìm kiếm...'}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className={'mr-4'}
                     />
-                    <Button className={'gap-2 mr-4'} onClick={handleExportUsers} disabled={isExporting}>
+                    <Button className={'gap-2 mr-4'} onClick={handleExportUsers}
+                            disabled={isExporting || accountStatusFilter === 'DELETED_ONLY'}>
                         <Download className={'w-4 h-4'}/>
                         {isExporting ? 'Đang xuất...' : 'Xuất Excel'}
                     </Button>
-                    <Button className={'gap-2'} onClick={handleAddUser}>
+                    <Button className={'gap-2'} onClick={handleAddUser}
+                            disabled={accountStatusFilter === 'DELETED_ONLY'}>
                         <Plus className={'w-4 h-4'}/>
                         Thêm người dùng
                     </Button>
@@ -290,10 +326,13 @@ export default function UsersPage() {
                         users={users}
                         onEdit={handleEditUser}
                         onDelete={handleDeleteUser}
+                        onRestore={handleRestoreUser}
                         onSortChange={handleSortChange}
                         sortBy={sortBy}
                         sortOrder={sortOrder}
                         isDeleting={isDeleting}
+                        isRestoring={isRestoring}
+                        isDeletedMode={accountStatusFilter === 'DELETED_ONLY'}
                     />
                     <div className={'mt-4 flex justify-end'}>
                         <CustomPagination
