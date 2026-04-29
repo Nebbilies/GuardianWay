@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres"]
 }
 
@@ -8,20 +8,25 @@ datasource db {
 }
 
 model User {
-  id             String           @id @default(dbgenerated("gen_random_uuid()"))
-  name           String
-  email          String           @unique
-  password       String
-  role           Role
-  phoneNumber    String?
-  address        String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  deletedAt      DateTime?
-  driverProfile  DriverProfile?
-  notifications  Notification[]
-  children       StudentProfile[] @relation("ParentToStudent")
-  studentProfile StudentProfile?
+  id                    String            @id @default(dbgenerated("gen_random_uuid()"))
+  name                  String
+  email                 String            @unique
+  password              String?
+  passwordSetupRequired Boolean           @default(true)
+  isActive              Boolean           @default(true)
+  lastLoginAt           DateTime?
+  role                  Role
+  phoneNumber           String?
+  address               String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  deletedAt             DateTime?
+  driverProfile         DriverProfile?
+  notifications         Notification[]
+  children              StudentProfile[]  @relation("ParentToStudent")
+  studentProfile        StudentProfile?
+  inviteTokens          UserInviteToken[]
+  refreshTokens         RefreshToken[]
 }
 
 model StudentProfile {
@@ -144,6 +149,39 @@ model Notification {
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
   recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+model UserInviteToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model RefreshToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 enum Role {
