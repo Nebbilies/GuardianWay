@@ -1,4 +1,4 @@
-/import { Request, Response } from 'express'
+import { Request, Response } from 'express'
 import {publicService} from '../services/public.service'
 
 class PublicController {
