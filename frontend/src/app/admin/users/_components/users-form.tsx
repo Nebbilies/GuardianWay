@@ -22,7 +22,6 @@ const ROLE_OPTIONS = [
 const userSchema = z.object({
     name: z.string().min(1, "Vui lòng nhập họ tên"),
     email: z.string().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
-    password: z.string().optional(),
     phoneNumber: z.string().regex(/^\d{10,11}$/, "Số điện thoại không hợp lệ").optional(),
     address: z.string().optional(),
     role: z.enum(['ADMIN', 'STAFF', 'DRIVER', 'STUDENT', 'PARENT'], {
@@ -68,7 +67,7 @@ interface ParentOption {
     email: string
 }
 
-const parentsFetcher = (url: string) => fetch(url).then(res => {
+const parentsFetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => {
     if (!res.ok) throw new Error('Failed to fetch parents')
     return res.json()
 })
@@ -88,31 +87,11 @@ export default function UserForm({
                                  }: UserFormProps) {
     const isEditing = !!initialData?.id
 
-    // create schema with password required on create
-    const schemaWithPassword = isEditing
-        ? userSchema
-        : userSchema.superRefine((data, ctx) => {
-            if (!data.password || data.password.trim() === '') {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Vui lòng nhập mật khẩu",
-                    path: ['password'],
-                })
-            } else if (data.password.length < 8) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Mật khẩu phải có ít nhất 8 ký tự",
-                    path: ['password'],
-                })
-            }
-        })
-
     const form = useForm<UserFormValues>({
-        resolver: zodResolver(schemaWithPassword),
+        resolver: zodResolver(userSchema),
         defaultValues: {
             name: initialData?.name || '',
             email: initialData?.email || '',
-            password: '',
             phoneNumber: initialData?.phoneNumber || '',
             address: initialData?.address || '',
             role: initialData?.role || 'STUDENT',
@@ -128,7 +107,7 @@ export default function UserForm({
 
     // Fetch parents for student role
     const {data: parents} = useSWR<ParentOption[]>(
-        watchedRole === 'STUDENT' ? `${process.env.NEXT_PUBLIC_API_URL}/users/parents` : null,
+        watchedRole === 'STUDENT' ? `/users/parents` : null,
         parentsFetcher
     )
 
@@ -137,7 +116,6 @@ export default function UserForm({
             form.reset({
                 name: initialData.name || '',
                 email: initialData.email || '',
-                password: '',
                 phoneNumber: initialData.phoneNumber || '',
                 address: initialData.address || '',
                 role: initialData.role || 'STUDENT',
@@ -159,10 +137,6 @@ export default function UserForm({
         if (data.role !== 'DRIVER') {
             delete cleanData.licenseNumber
         }
-        if (isEditing && (!cleanData.password || cleanData.password.trim() === '')) {
-            delete cleanData.password
-        }
-
         if (initialData?.id) {
             await onSubmit({...cleanData, id: initialData.id})
         } else {
@@ -213,26 +187,11 @@ export default function UserForm({
                 )}
             />
 
-            <Controller
-                name="password"
-                control={form.control}
-                render={({field, fieldState}) => (
-                    <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>
-                            Mật khẩu {!isEditing && <span className={'text-destructive'}>*</span>}
-                        </FieldLabel>
-                        <Input
-                            {...field}
-                            id={field.name}
-                            type="password"
-                            placeholder={isEditing ? "Để trống nếu không thay đổi" : "Nhập mật khẩu"}
-                            aria-invalid={fieldState.invalid}
-                            disabled={isLoading}
-                        />
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]}/>}
-                    </Field>
-                )}
-            />
+            {!isEditing && (
+                <div className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+                    Người dùng mới sẽ nhận liên kết mời để thiết lập mật khẩu.
+                </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
                 <Controller

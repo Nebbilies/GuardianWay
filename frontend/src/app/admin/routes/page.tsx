@@ -12,12 +12,9 @@ import {Input} from "@/components/ui/input";
 import BusRoutesList from "@/app/admin/routes/_components/bus-routes-list";
 import BusRouteForm, { BusRouteFormValues } from "@/app/admin/routes/_components/bus-routes-form";
 
-const fetcher = (url: string) => fetch(url).then(res => {
-    if (!res.ok) {
-        throw new Error('Failed to fetch: ' + res.statusText)
-    }
-    return res.json()
-});
+import { apiRequest } from "@/lib/api-client";
+
+const fetcher = <T,>(url: string) => apiRequest<T>(url);
 
 export default function RoutesPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -73,14 +70,14 @@ export default function RoutesPage() {
         error,
         isLoading,
         mutate,
-    } = useSWR<PaginatedResponse<BusRouteWithStops>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-routes?${params.toString()}`, fetcher);
+    } = useSWR<PaginatedResponse<BusRouteWithStops>>(`/bus-routes?${params.toString()}`, fetcher);
 
     if (error) {
         return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
     }
 
     // TODO: fails when there are more than 1000 bus stops, need to implement pagination
-    const { data: busStops } = useSWR<PaginatedResponse<BusStop>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops?limit=1000`, fetcher);
+    const { data: busStops } = useSWR<PaginatedResponse<BusStop>>(`/bus-stops?limit=1000`, fetcher);
 
     const handleCloseDialog = () => {
         setIsDialogOpen(false);
@@ -90,20 +87,12 @@ export default function RoutesPage() {
     const handleSubmit = async (data: BusRouteFormValues & { id?: string }) => {
         setIsSubmitting(true);
         try {
-            const url = data.id ? `${process.env.NEXT_PUBLIC_API_URL}/bus-routes/${data.id}` : `${process.env.NEXT_PUBLIC_API_URL}/bus-routes`;
+            const url = data.id ? `/bus-routes/${data.id}` : `/bus-routes`;
             const method = data.id ? 'PUT' : 'POST';
-            const res = await fetch(url, {
+            await apiRequest(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(data),
             });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: res.statusText }));
-                throw new Error(errorData.message || 'Đã xảy ra lỗi');
-            }
 
             await mutate();
             toast.success(`Tuyến đường đã được ${data.id ? 'cập nhật' : 'tạo'} thành công!`);
@@ -129,14 +118,9 @@ export default function RoutesPage() {
     const handleDeleteBusRoute = async (id: string)=> {
         setIsDeleting(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bus-routes/${id}`, {
+            await apiRequest(`/bus-routes/${id}`, {
                 method: 'DELETE',
             });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: res.statusText }));
-                throw new Error(errorData.message || 'Đã xảy ra lỗi');
-            }
 
             await mutate();
             toast.success('Tuyến đường đã được xóa thành công!');

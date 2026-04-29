@@ -13,12 +13,9 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import BusTripsList from '@/app/admin/trips/_components/bus-trips-list'
 import BusTripForm, {BusTripFormValues} from '@/app/admin/trips/_components/bus-trips-form'
 
-const fetcher = (url: string) => fetch(url).then(res => {
-    if (!res.ok) {
-        throw new Error('Failed to fetch: ' + res.statusText)
-    }
-    return res.json()
-})
+import { apiRequest } from "@/lib/api-client";
+
+const fetcher = <T,>(url: string) => apiRequest<T>(url);
 
 export default function TripsPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -73,11 +70,11 @@ export default function TripsPage() {
         error,
         isLoading,
         mutate,
-    } = useSWR<PaginatedResponse<BusTripWithDetails>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-trips?${params.toString()}`, fetcher)
+    } = useSWR<PaginatedResponse<BusTripWithDetails>>(`/bus-trips?${params.toString()}`, fetcher)
 
-    const {data: busRoutes} = useSWR<PaginatedResponse<BusRouteWithStops>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-routes?limit=1000`, fetcher)
-    const {data: buses} = useSWR<PaginatedResponse<Bus>>(`${process.env.NEXT_PUBLIC_API_URL}/buses?limit=1000`, fetcher)
-    const {data: drivers} = useSWR<PaginatedResponse<UserWithProfiles>>(`${process.env.NEXT_PUBLIC_API_URL}/users?role=DRIVER&limit=1000`, fetcher)
+    const {data: busRoutes} = useSWR<PaginatedResponse<BusRouteWithStops>>(`/bus-routes?limit=1000`, fetcher)
+    const {data: buses} = useSWR<PaginatedResponse<Bus>>(`/buses?limit=1000`, fetcher)
+    const {data: drivers} = useSWR<PaginatedResponse<UserWithProfiles>>(`/users?role=DRIVER&limit=1000`, fetcher)
 
     if (error) {
         return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
@@ -91,20 +88,12 @@ export default function TripsPage() {
     const handleSubmit = async (data: BusTripFormValues & { id?: string }) => {
         setIsSubmitting(true)
         try {
-            const url = data.id ? `${process.env.NEXT_PUBLIC_API_URL}/bus-trips/${data.id}` : `${process.env.NEXT_PUBLIC_API_URL}/bus-trips`
+            const url = data.id ? `/bus-trips/${data.id}` : `/bus-trips`
             const method = data.id ? 'PUT' : 'POST'
-            const res = await fetch(url, {
+            await apiRequest(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(data),
             })
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({message: res.statusText}))
-                throw new Error(errorData.message || 'Đã xảy ra lỗi')
-            }
 
             await mutate()
             toast.success(`Chuyến đi đã được ${data.id ? 'cập nhật' : 'tạo'} thành công!`)
@@ -130,14 +119,9 @@ export default function TripsPage() {
     const handleDeleteBusTrip = async (id: string) => {
         setIsDeleting(true)
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bus-trips/${id}`, {
+            await apiRequest(`/bus-trips/${id}`, {
                 method: 'DELETE',
             })
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({message: res.statusText}))
-                throw new Error(errorData.message || 'Đã xảy ra lỗi')
-            }
 
             await mutate()
             toast.success('Chuyến đi đã được xóa thành công!')

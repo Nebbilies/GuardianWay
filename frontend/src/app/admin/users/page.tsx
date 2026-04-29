@@ -13,13 +13,9 @@ import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import UsersList from "@/app/admin/users/_components/users-list";
 import writeExcelFile from "write-excel-file/browser";
+import { apiRequest } from "@/lib/api-client";
 
-const fetcher = (url: string) => fetch(url).then(res => {
-    if (!res.ok) {
-        throw new Error('Failed to fetch: ' + res.statusText)
-    }
-    return res.json()
-});
+const fetcher = <T,>(url: string) => apiRequest<T>(url);
 
 interface ExportUser {
     id: string;
@@ -118,7 +114,7 @@ export default function UsersPage() {
         error,
         isLoading,
         mutate,
-    } = useSWR<PaginatedResponse<UserWithProfiles>>(`${process.env.NEXT_PUBLIC_API_URL}/users?${params.toString()}`, fetcher);
+    } = useSWR<PaginatedResponse<UserWithProfiles>>(`/users?${params.toString()}`, fetcher);
 
     if (error) {
         return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
@@ -132,20 +128,12 @@ export default function UsersPage() {
     const handleSubmit = async (data: UserFormPayload) => {
         setIsSubmitting(true);
         try {
-            const url = data.id ? `${process.env.NEXT_PUBLIC_API_URL}/users/${data.id}` : `${process.env.NEXT_PUBLIC_API_URL}/users`;
+            const url = data.id ? `/users/${data.id}` : `/users`;
             const method = data.id ? 'PUT' : 'POST';
-            const res = await fetch(url, {
+            await apiRequest(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(data),
             });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({message: res.statusText}));
-                throw new Error(errorData.message || 'Đã xảy ra lỗi');
-            }
 
             await mutate();
             toast.success(`Người dùng đã được ${data.id ? 'cập nhật' : 'thêm'} thành công!`);
@@ -171,14 +159,9 @@ export default function UsersPage() {
     const handleDeleteUser = async (id: string) => {
         setIsDeleting(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
+            await apiRequest(`/users/${id}`, {
                 method: 'DELETE',
             });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({message: res.statusText}));
-                throw new Error(errorData.message || 'Đã xảy ra lỗi');
-            }
 
             await mutate();
             toast.success('Người dùng đã được xóa thành công!');
@@ -205,14 +188,7 @@ export default function UsersPage() {
                 exportParams.set('sort', sortOrder === 'desc' ? `-${sortBy}` : sortBy);
             }
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/export?${exportParams.toString()}`);
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({message: res.statusText}));
-                throw new Error(errorData.message || 'Đã xảy ra lỗi');
-            }
-
-            const result: ExportUsersResponse = await res.json();
+            const result: ExportUsersResponse = await apiRequest(`/users/export?${exportParams.toString()}`);
 
             const objects = result.data.map((user) => (
                 {

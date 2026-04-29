@@ -13,12 +13,9 @@ import {toast} from "sonner";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
-const fetcher = (url: string) => fetch(url).then(res => {
-    if (!res.ok) {
-        throw new Error('Failed to fetch: ' + res.statusText)
-    }
-    return res.json()
-});
+import { apiRequest } from "@/lib/api-client";
+
+const fetcher = <T,>(url: string) => apiRequest<T>(url);
 
 export default function StopsPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -78,7 +75,7 @@ export default function StopsPage() {
         error,
         isLoading,
         mutate,
-    } = useSWR<PaginatedResponse<BusStop>>(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops?${params.toString()}`, fetcher);
+    } = useSWR<PaginatedResponse<BusStop>>(`/bus-stops?${params.toString()}`, fetcher);
 
     if (error) {
         return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
@@ -92,20 +89,12 @@ export default function StopsPage() {
     const handleSubmit = async (data: Partial<BusStop>) => {
         setIsSubmitting(true);
         try {
-            const url = data.id ? `${process.env.NEXT_PUBLIC_API_URL}/bus-stops/${data.id}` : `${process.env.NEXT_PUBLIC_API_URL}/bus-stops`;
+            const url = data.id ? `/bus-stops/${data.id}` : `/bus-stops`;
             const method = data.id ? 'PUT' : 'POST';
-            const res = await fetch(url, {
+            await apiRequest(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(data),
             });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: res.statusText }));
-                throw new Error(errorData.message || 'Đã xảy ra lỗi');
-            }
 
             await mutate();
             toast.success(`Trạm dừng đã được ${data.id ? 'cập nhật' : 'tạo'} thành công!`);
@@ -131,14 +120,9 @@ export default function StopsPage() {
     const handleDeleteBusStop = async (id: string)=> {
         setIsDeleting(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bus-stops/${id}`, {
+            await apiRequest(`/bus-stops/${id}`, {
                 method: 'DELETE',
             });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: res.statusText }));
-                throw new Error(errorData.message || 'Đã xảy ra lỗi');
-            }
 
             await mutate();
             toast.success('Trạm dừng đã được xóa thành công!');
