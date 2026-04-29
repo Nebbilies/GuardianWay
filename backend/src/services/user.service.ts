@@ -5,6 +5,7 @@ import {
     CreateUserData,
     UpdateUserData,
 } from "../repositories/user.repository";
+import { authService } from "./auth.service";
 
 const SALT_ROUNDS = 10;
 
@@ -32,20 +33,26 @@ class UserService {
         return userRepository.getParents();
     }
 
-    async create(data: CreateUserData) {
-        const { name, email, password, role } = data;
+    async create(data: CreateUserData, createdBy?: string) {
+        const { name, email, role } = data;
 
-        if (!name || !email || !password || !role) {
+        if (!name || !email || !role) {
             throw new Error("Thiếu thông tin người dùng");
         }
 
-        // Check email uniqueness
+        if (data.password) {
+            throw new Error("Không được thiết lập mật khẩu khi tạo người dùng");
+        }
+
+        if (!createdBy) {
+            throw new Error("Thiếu thông tin người tạo");
+        }
+
         const existingUser = await userRepository.findByEmail(email);
         if (existingUser) {
             throw new Error("Email đã được sử dụng");
         }
 
-        // Validate role-specific fields
         if (role === "STUDENT") {
             if (!data.studentId || !data.studentClass) {
                 throw new Error("Thiếu thông tin hồ sơ học sinh");
@@ -58,13 +65,18 @@ class UserService {
             }
         }
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-        return userRepository.create({
+        const user = await userRepository.create({
             ...data,
-            password: hashedPassword,
+            password: null,
+            passwordSetupRequired: true,
         });
+
+        const invite = await authService.issueInvite(user.id, createdBy);
+
+        return {
+            ...user,
+            invite,
+        };
     }
 
     async update(id: string, data: UpdateUserData) {

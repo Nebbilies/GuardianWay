@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { GetAllUsersParams } from "../repositories/user.repository";
 import { Role } from "@prisma/client";
 import { userService } from "../services/user.service";
+import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 
 class UserController {
     async getAll(req: Request, res: Response) {
@@ -67,9 +68,10 @@ class UserController {
         }
     }
 
-    async create(req: Request, res: Response) {
+    async create(req: AuthenticatedRequest, res: Response) {
         try {
-            const user = await userService.create(req.body);
+            const createdBy = req.user?.userId;
+            const user = await userService.create(req.body, createdBy);
             res.status(201).json(user);
         } catch (e) {
             if (
@@ -77,7 +79,9 @@ class UserController {
                 (e.message === "Thiếu thông tin người dùng" ||
                     e.message === "Email đã được sử dụng" ||
                     e.message === "Thiếu thông tin hồ sơ học sinh" ||
-                    e.message === "Thiếu thông tin giấy phép lái xe")
+                    e.message === "Thiếu thông tin giấy phép lái xe" ||
+                    e.message === "Không được thiết lập mật khẩu khi tạo người dùng" ||
+                    e.message === "Thiếu thông tin người tạo")
             ) {
                 return res.status(400).json({ message: e.message });
             }

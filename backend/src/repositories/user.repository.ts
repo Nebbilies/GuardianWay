@@ -12,7 +12,6 @@ export interface GetAllUsersParams {
 export interface CreateUserData {
     name: string;
     email: string;
-    password: string;
     role: Role;
     phoneNumber?: string;
     address?: string;
@@ -22,6 +21,9 @@ export interface CreateUserData {
     parentId?: string;
 
     licenseNumber?: string;
+
+    password?: string | null;
+    passwordSetupRequired?: boolean;
 }
 
 export interface UpdateUserData {
@@ -178,7 +180,7 @@ class UserRepository {
 
     async findByEmail(email: string) {
         return prisma.user.findUnique({
-            where: { email },
+            where: { email, deletedAt: null },
         });
     }
 
