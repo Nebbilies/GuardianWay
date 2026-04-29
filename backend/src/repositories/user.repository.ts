@@ -7,6 +7,7 @@ export interface GetAllUsersParams {
     limit?: number;
     sort?: string;
     role?: Role;
+    deleted?: string;
 }
 
 export interface CreateUserData {
@@ -48,10 +49,15 @@ class UserRepository {
         const isDesc = sortParam.startsWith("-");
         const sortBy = isDesc ? sortParam.substring(1) : sortParam;
         const sortOrder = isDesc ? "desc" : "asc";
+        const deleted = params.deleted || "exclude";
 
-        const whereClause: any = {
-            deletedAt: null,
-        };
+        const whereClause: any = {};
+
+        if (deleted === "exclude") {
+            whereClause.deletedAt = null;
+        } else if (deleted === "only") {
+            whereClause.deletedAt = {not: null};
+        }
 
         if (params.role) {
             whereClause.role = params.role;
@@ -153,9 +159,9 @@ class UserRepository {
         };
     }
 
-    async getById(id: string) {
+    async getById(id: string, includeDeleted = false) {
         return prisma.user.findUnique({
-            where: { id, deletedAt: null },
+            where: {id, deletedAt: includeDeleted ? undefined : null},
             include: {
                 studentProfile: true,
                 driverProfile: true,
@@ -222,7 +228,7 @@ class UserRepository {
         }
 
         return prisma.user.create({
-            data: userData,
+            data: data,
             include: { studentProfile: true, driverProfile: true },
         });
     }
@@ -284,6 +290,13 @@ class UserRepository {
             where: { id },
             data: { deletedAt: new Date() },
         });
+    }
+
+    async restore(id: string): Promise<void> {
+        await prisma.user.update({
+            where: {id},
+            data: {deletedAt: null},
+        })
     }
 }
 

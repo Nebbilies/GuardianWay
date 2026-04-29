@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 
 class UserController {
     async getAll(req: Request, res: Response) {
-        const { search, page, limit, sort, role } = req.query;
+        const {search, page, limit, sort, role, deleted} = req.query;
         try {
             const params: GetAllUsersParams = {};
 
@@ -15,6 +15,7 @@ class UserController {
             if (typeof limit === "string") params.limit = parseInt(limit, 10);
             if (typeof sort === "string") params.sort = sort;
             if (typeof role === "string") params.role = role as Role;
+            if (typeof deleted === "string") params.deleted = deleted;
 
             const users = await userService.getAll(params);
             res.json(users);
@@ -124,6 +125,25 @@ class UserController {
             console.error("Có lỗi xảy ra khi xóa người dùng:", e);
             const errorMessage = e instanceof Error ? e.message : e;
             return res.status(500).json({ message: "Internal server error: " + errorMessage });
+        }
+    }
+
+    async restore(req: Request, res: Response) {
+        try {
+            await userService.restore(String(req.params.id));
+            res.status(200).json({message: "Khôi phục người dùng thành công"});
+        } catch (e) {
+            if (e instanceof Error && e.message === "Thiếu thông tin người dùng") {
+                return res.status(400).json({message: e.message});
+            } else if (e instanceof Error && e.message === "Không tìm thấy người dùng") {
+                return res.status(404).json({message: e.message});
+            } else if (e instanceof Error && e.message === "Người dùng chưa bị xóa") {
+                return res.status(400).json({message: e.message});
+            } else {
+                console.error("Có lỗi xảy ra khi khôi phục người dùng:", e);
+                const errorMessage = e instanceof Error ? e.message : e;
+                return res.status(500).json({message: "Internal server error: " + errorMessage});
+            }
         }
     }
 }

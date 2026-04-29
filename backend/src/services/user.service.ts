@@ -135,6 +135,21 @@ class UserService {
         }
         return userRepository.delete(id);
     }
+
+    async restore(id: string) {
+        if (!id) {
+            throw new Error("Thiếu thông tin người dùng");
+        }
+        const existingUser = await userRepository.getById(id, true);
+        if (!existingUser) {
+            throw new Error("Không tìm thấy người dùng");
+        } else {
+            if (!existingUser.deletedAt) {
+                throw new Error("Người dùng chưa bị xóa");
+            }
+        }
+        return userRepository.restore(id);
+    }
 }
 
 export const userService = new UserService();
