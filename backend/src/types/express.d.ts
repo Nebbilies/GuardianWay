@@ -7,6 +7,8 @@ declare global {
                 userId: string;
                 role: Role;
             };
+            traceId: string;
+            requestStartTimeMs: number;
         }
     }
 }
