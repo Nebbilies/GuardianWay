@@ -1,4 +1,5 @@
 import { busStopRepository, GetAllBusStopsParams } from "../repositories/busStop.repository";
+import {ValidationError} from "../errors/http-errors";
 
 class BusStopService {
   async getAll(params: GetAllBusStopsParams = {}) {
@@ -15,7 +16,7 @@ class BusStopService {
     const { name, address, latitude, longitude, isSchoolStop } = data;
 
     if (!name || !address || typeof latitude !== "number" || typeof longitude !== "number") {
-      throw new Error("Thiếu thông tin của trạm dừng");
+      throw new ValidationError("Thiếu thông tin của trạm dừng");
     }
 
     return busStopRepository.create({
@@ -37,7 +38,7 @@ class BusStopService {
     const { name, address, latitude, longitude, isSchoolStop } = data;
 
     if (!id || !name || !address || typeof latitude !== "number" || typeof longitude !== "number") {
-        throw new Error("Thiếu thông tin của trạm dừng");
+      throw new ValidationError("Thiếu thông tin của trạm dừng");
     }
 
     return busStopRepository.edit({
@@ -52,7 +53,7 @@ class BusStopService {
 
     async delete(id: string) {
         if (!id) {
-            throw new Error("Thiếu thông tin của trạm dừng");
+          throw new ValidationError("Thiếu thông tin của trạm dừng");
         }
         return busStopRepository.delete(id);
     }

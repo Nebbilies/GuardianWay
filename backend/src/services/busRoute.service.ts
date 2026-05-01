@@ -1,4 +1,5 @@
 import {busRouteRepository, GetAllBusRoutesParams, RouteStopInput} from "../repositories/busRoute.repository";
+import {ValidationError} from "../errors/http-errors";
 
 class BusRouteService {
     async getAll(params: GetAllBusRoutesParams = {}) {
@@ -13,11 +14,11 @@ class BusRouteService {
         const {name, description, stops} = data;
 
         if (!name || !stops) {
-            throw new Error("Thiếu thông tin của tuyến đường");
+            throw new ValidationError("Thiếu thông tin của tuyến đường");
         }
 
         if (stops?.length < 2) {
-            throw new Error("Tuyến đường phải có ít nhất 2 trạm dừng");
+            throw new ValidationError("Tuyến đường phải có ít nhất 2 trạm dừng");
         }
 
         return busRouteRepository.create({
@@ -35,11 +36,11 @@ class BusRouteService {
         const {name, description, stops} = data;
 
         if (!id || !name || !stops) {
-            throw new Error("Thiếu thông tin của tuyến đường");
+            throw new ValidationError("Thiếu thông tin của tuyến đường");
         }
 
         if (stops?.length < 2) {
-            throw new Error("Tuyến đường phải có ít nhất 2 trạm dừng");
+            throw new ValidationError("Tuyến đường phải có ít nhất 2 trạm dừng");
         }
 
         return busRouteRepository.edit({
@@ -52,7 +53,7 @@ class BusRouteService {
 
     async delete(id: string) {
         if (!id) {
-            throw new Error("Thiếu thông tin của tuyến đường");
+            throw new ValidationError("Thiếu thông tin của tuyến đường");
         }
 
         return busRouteRepository.delete(id);

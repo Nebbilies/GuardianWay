@@ -5,69 +5,33 @@ import {busService} from "../services/bus.service";
 
 class BusController {
     async getAll(req: Request, res: Response) {
-        const { search, page, limit, sort, status } = req.query;
-        try {
-            const params: GetAllBusesParams = {};
+        const {search, page, limit, sort, status} = req.query;
+        const params: GetAllBusesParams = {};
 
-            if (typeof search === 'string') params.search = search;
-            if (typeof page === 'string') params.page = parseInt(page, 1);
-            if (typeof limit === 'string') params.limit = parseInt(limit, 10);
-            if (typeof sort === 'string') params.sort = sort;
-            if (typeof status === 'string') params.status = status as BusStatus;
+        if (typeof search === 'string') params.search = search;
+        if (typeof page === 'string') params.page = parseInt(page, 1);
+        if (typeof limit === 'string') params.limit = parseInt(limit, 10);
+        if (typeof sort === 'string') params.sort = sort;
+        if (typeof status === 'string') params.status = status as BusStatus;
 
-            const buses = await busService.getAll(params);
-            res.json(buses);
-        } catch (e) {
-            console.error("Có lỗi xảy ra khi lấy danh sách xe buýt:", e);
-            const errorMessage = e instanceof Error ? e.message : e;
-            res.status(500).json({ message: "Internal server error" + errorMessage });
-        }
+        const buses = await busService.getAll(params);
+        res.status(200).json(buses);
     }
 
     async create(req: Request, res: Response) {
-        try {
-            const bus = await busService.create(req.body);
-            res.status(201).json(bus);
-        } catch (e) {
-            if (e instanceof Error && e.message === "Thiếu thông tin của xe buýt") {
-                return res.status(400).json({ message: e.message });
-            }
-            console.error("Có lỗi xảy ra khi tạo xe buýt:", e);
-            const errorMessage = e instanceof Error ? e.message : e;
-            return res.status(500).json({ message: "Internal server error" + errorMessage });
-        }
+        const bus = await busService.create(req.body);
+        res.status(201).json(bus);
+
     }
 
     async edit(req: Request, res: Response) {
-        try {
-            const bus = await busService.update(String(req.params.id), req.body);
-            res.status(200).json(bus);
-        } catch (e) {
-            if (e instanceof Error && e.message === "Thiếu thông tin của xe buýt") {
-                return res.status(400).json({ message: e.message });
-            } else if (e instanceof Error && e.message === "Thông tin của xe buýt không hợp lệ") {
-                return res.status(400).json({ message: e.message });
-            } else {
-                console.error("Có lỗi xảy ra khi chỉnh sửa xe buýt:", e);
-                const errorMessage = e instanceof Error ? e.message : e;
-                return res.status(500).json({ message: "Internal server error" + errorMessage });
-            }
-        }
+        const bus = await busService.update(String(req.params.id), req.body);
+        res.status(200).json(bus);
     }
 
     async delete(req: Request, res: Response) {
-        try {
-            const bus = await busService.delete(String(req.params.id));
-            res.status(200).json(bus);
-        } catch (e) {
-            if (e instanceof Error && e.message === "Thiếu thông tin của xe buýt") {
-                return res.status(400).json({ message: e.message });
-            } else {
-                console.error("Có lỗi xảy ra khi xóa xe buýt:", e);
-                const errorMessage = e instanceof Error ? e.message : e;
-                return res.status(500).json({ message: "Internal server error" + errorMessage });
-            }
-        }
+        const bus = await busService.delete(String(req.params.id));
+        res.status(200).json(bus);
     }
 }
 

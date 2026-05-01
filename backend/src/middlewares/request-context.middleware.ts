@@ -2,6 +2,8 @@ import {NextFunction, Request, Response} from "express";
 import {randomUUID} from "crypto";
 import {logger} from "../utils/logger";
 
+
+// This middleware helps track each req with unique traceId, log request completion with duration and status code
 export function requestContext(req: Request, res: Response, next: NextFunction) {
     const incomingTraceId = req.header("x-request-id");
     const traceId = incomingTraceId && incomingTraceId.trim() ? incomingTraceId : randomUUID();

@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { Role } from "@prisma/client";
-import { authRepository } from "../repositories/auth.repository";
-import { AuthTokenPayload } from "../types/auth";
+import {Role} from "@prisma/client";
+import {authRepository} from "../repositories/auth.repository";
+import {AuthTokenPayload} from "../types/auth";
+import {AuthenticationError, NotFoundError, ValidationError} from "../errors/http-errors";
 
 const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
 const REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
@@ -76,9 +77,9 @@ class AuthService {
         });
     }
 
+    // must verify because need to check expiration and signature
     verifyAccessToken(token: string) {
-        const decoded = jwt.verify(token, this.getAccessSecret()) as AuthTokenPayload;
-        return decoded;
+        return jwt.verify(token, this.getAccessSecret()) as AuthTokenPayload;
     }
 
     private verifyRefreshToken(token: string) {
@@ -129,18 +130,18 @@ class AuthService {
 
     async setupPassword(token: string, newPassword: string) {
         if (!token || !newPassword) {
-            throw new Error("Thiếu thông tin thiết lập mật khẩu");
+            throw new ValidationError("Thiếu thông tin thiết lập mật khẩu");
         }
 
         if (newPassword.length < 8) {
-            throw new Error("Mật khẩu phải có ít nhất 8 ký tự");
+            throw new ValidationError("Mật khẩu phải có ít nhất 8 ký tự");
         }
 
         const tokenHash = this.hashToken(token);
         const invite = await authRepository.getActiveInviteTokenByHash(tokenHash);
 
         if (!invite) {
-            throw new Error("Liên kết thiết lập mật khẩu không hợp lệ hoặc đã hết hạn");
+            throw new ValidationError("Liên kết thiết lập mật khẩu không hợp lệ hoặc đã hết hạn");
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
@@ -153,21 +154,21 @@ class AuthService {
 
     async login(email: string, password: string, context: RequestContext = {}): Promise<LoginResult> {
         if (!email || !password) {
-            throw new Error("Email hoặc mật khẩu không đúng");
+            throw new AuthenticationError("Email hoặc mật khẩu không đúng");
         }
 
         const user = await authRepository.findActiveUserByEmail(email);
         if (!user || !user.password) {
-            throw new Error("Email hoặc mật khẩu không đúng");
+            throw new AuthenticationError("Email hoặc mật khẩu không đúng");
         }
 
         if (user.passwordSetupRequired) {
-            throw new Error("Tài khoản chưa hoàn tất thiết lập mật khẩu");
+            throw new AuthenticationError("Tài khoản chưa hoàn tất thiết lập mật khẩu");
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new Error("Email hoặc mật khẩu không đúng");
+            throw new AuthenticationError("Email hoặc mật khẩu không đúng");
         }
 
         const payload: AuthTokenPayload = {
@@ -200,23 +201,24 @@ class AuthService {
         };
     }
 
+    // revoke old -> create new access + refresh -> save new refresh, return new tokens
     async refresh(refreshToken: string, context: RequestContext = {}): Promise<LoginResult> {
         if (!refreshToken) {
-            throw new Error("Phiên đăng nhập không hợp lệ");
+            throw new AuthenticationError("Phiên đăng nhập không hợp lệ");
         }
 
         let payload: AuthTokenPayload;
         try {
             payload = this.verifyRefreshToken(refreshToken);
         } catch {
-            throw new Error("Phiên đăng nhập không hợp lệ");
+            throw new AuthenticationError("Phiên đăng nhập không hợp lệ");
         }
 
         const tokenHash = this.hashToken(refreshToken);
         const tokenRecord = await authRepository.getActiveRefreshTokenByHash(tokenHash);
 
         if (!tokenRecord || tokenRecord.userId !== payload.userId || !tokenRecord.user) {
-            throw new Error("Phiên đăng nhập không hợp lệ");
+            throw new AuthenticationError("Phiên đăng nhập không hợp lệ");
         }
 
         await authRepository.revokeRefreshToken(tokenRecord.id);
@@ -267,7 +269,7 @@ class AuthService {
     async issueInviteByEmail(email: string, createdBy: string) {
         const user = await authRepository.findActiveUserByEmail(email);
         if (!user) {
-            throw new Error("Không tìm thấy người dùng");
+            throw new NotFoundError("Không tìm thấy người dùng");
         }
 
         return this.issueInvite(user.id, createdBy);

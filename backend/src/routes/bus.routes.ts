@@ -1,11 +1,12 @@
 import {Router} from "express";
 import {busController} from "../controllers/bus.controller";
+import {asyncHandler} from "../utils/asyncHandler";
 
 const router = Router();
 
-router.get('/', busController.getAll);
-router.post('/', busController.create);
-router.put('/:id', busController.edit);
-router.delete('/:id', busController.delete);
+router.get('/', asyncHandler(busController.getAll));
+router.post('/', asyncHandler(busController.create));
+router.put('/:id', asyncHandler(busController.edit));
+router.delete('/:id', asyncHandler(busController.delete));
 
 export default router;

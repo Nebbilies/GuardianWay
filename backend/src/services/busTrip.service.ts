@@ -1,5 +1,6 @@
 import {BusTripStatus} from "@prisma/client";
 import {busTripRepository, GetAllBusTripsParams, UpsertBusTripInput} from "../repositories/busTrip.repository";
+import {ValidationError} from "../errors/http-errors";
 
 interface BusTripPayload {
     routeId?: string;
@@ -23,7 +24,7 @@ class BusTripService {
 
     async update(id: string, data: BusTripPayload) {
         if (!id) {
-            throw new Error("Thiếu thông tin chuyến đi");
+            throw new ValidationError("Thiếu thông tin chuyến đi");
         }
         const parsed = this.parseAndValidatePayload(data);
         return busTripRepository.update(id, parsed);
@@ -31,7 +32,7 @@ class BusTripService {
 
     async delete(id: string) {
         if (!id) {
-            throw new Error("Thiếu thông tin chuyến đi");
+            throw new ValidationError("Thiếu thông tin chuyến đi");
         }
         return busTripRepository.delete(id);
     }
@@ -40,27 +41,27 @@ class BusTripService {
         const {routeId, busId, driverId, date, startTime, endTime, status} = data;
 
         if (!routeId || !busId || !driverId || !date || !startTime) {
-            throw new Error("Thiếu thông tin chuyến đi");
+            throw new ValidationError("Thiếu thông tin chuyến đi");
         }
 
         const tripDate = new Date(date);
         if (isNaN(tripDate.getTime())) {
-            throw new Error("Ngày chạy không hợp lệ");
+            throw new ValidationError("Ngày chạy không hợp lệ");
         }
 
         const parsedStartTime = this.parseTime(startTime);
         if (!parsedStartTime) {
-            throw new Error("Giờ bắt đầu không hợp lệ");
+            throw new ValidationError("Giờ bắt đầu không hợp lệ");
         }
 
         let parsedEndTime: Date | null = null;
         if (typeof endTime === "string" && endTime.trim().length > 0) {
             parsedEndTime = this.parseTime(endTime);
             if (!parsedEndTime) {
-                throw new Error("Giờ kết thúc không hợp lệ");
+                throw new ValidationError("Giờ kết thúc không hợp lệ");
             }
             if (parsedEndTime.getTime() <= parsedStartTime.getTime()) {
-                throw new Error("Giờ kết thúc phải sau giờ bắt đầu");
+                throw new ValidationError("Giờ kết thúc phải sau giờ bắt đầu");
             }
         }
 
