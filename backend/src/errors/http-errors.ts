@@ -1,12 +1,13 @@
-import {AppError} from "./app-error";
+import {AppError, FieldError} from "./app-error";
 
 export class ValidationError extends AppError {
-    constructor(detail = "Validation failed") {
+    constructor(detail = "Validation failed", errors?: FieldError[]) {
         super({
             code: "VALIDATION_ERROR",
             status: 400,
             title: "Validation failed",
             detail,
+            errors,
         });
     }
 }

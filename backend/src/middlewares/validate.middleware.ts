@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 import {ZodError, ZodSchema} from "zod";
 import {ValidationError} from "../errors/http-errors";
+import {FieldError} from "../errors/app-error";
 
 interface ValidationSchemas {
     body?: ZodSchema;
@@ -26,7 +27,13 @@ export function validate(schemas: ValidationSchemas) {
             next();
         } catch (error) {
             if (error instanceof ZodError) {
-                throw new ValidationError(error.issues.map((issue) => issue.message).join("; "));
+                const fieldErrors: FieldError[] = error.issues.map((issue) => ({
+                    field: issue.path.join("."),
+                    message: issue.message,
+                    code: issue.code,
+                }));
+                const detail = fieldErrors.map((e) => `${e.field}: ${e.message}`).join("; ");
+                throw new ValidationError(detail || "Validation failed", fieldErrors);
             }
             throw error;
         }

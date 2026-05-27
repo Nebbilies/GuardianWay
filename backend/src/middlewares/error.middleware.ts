@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from "express";
-import {AppError} from "../errors/app-error";
+import {AppError, FieldError} from "../errors/app-error";
 import {InternalError, NotFoundError} from "../errors/http-errors";
 import {logger} from "../utils/logger";
 
@@ -13,13 +13,14 @@ interface ProblemDetails {
     instance: string;
     traceId: string;
     timestamp: string;
+    errors?: FieldError[];
 }
 
 // keep every error response the same format based of rfc7807
 function toProblemDetails(req: Request, error: AppError): ProblemDetails {
     const detail = error.detail || error.title;
 
-    return {
+    const body: ProblemDetails = {
         type: `https://api.guardianway.local/problems/${error.code.toLowerCase()}`,
         title: error.title,
         status: error.status,
@@ -30,6 +31,12 @@ function toProblemDetails(req: Request, error: AppError): ProblemDetails {
         traceId: req.traceId,
         timestamp: new Date().toISOString(),
     };
+
+    if (error.errors && error.errors.length > 0) {
+        body.errors = error.errors;
+    }
+
+    return body;
 }
 
 // return AppError else generic InternalError to avoid leaking internal details
@@ -56,6 +63,7 @@ export function errorHandler(error: unknown, req: Request, res: Response, _next:
         statusCode: normalized.status,
         code: normalized.code,
         message: normalized.message,
+        isOperational: normalized.isOperational,
         stack: error instanceof Error ? error.stack : undefined,
     });
 
