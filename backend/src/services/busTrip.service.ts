@@ -3,11 +3,11 @@ import {busTripRepository, GetAllBusTripsParams, UpsertBusTripInput} from "../re
 import {ValidationError} from "../errors/http-errors";
 
 interface BusTripPayload {
-    routeId?: string;
-    busId?: string;
-    driverId?: string;
-    date?: string;
-    startTime?: string;
+    routeId: string;
+    busId: string;
+    driverId: string;
+    date: string;
+    startTime: string;
     endTime?: string | null;
     status?: BusTripStatus;
 }
@@ -18,31 +18,19 @@ class BusTripService {
     }
 
     async create(data: BusTripPayload) {
-        const parsed = this.parseAndValidatePayload(data);
-        return busTripRepository.create(parsed);
+        return busTripRepository.create(this.parsePayload(data));
     }
 
     async update(id: string, data: BusTripPayload) {
-        if (!id) {
-            throw new ValidationError("Thiếu thông tin chuyến đi");
-        }
-        const parsed = this.parseAndValidatePayload(data);
-        return busTripRepository.update(id, parsed);
+        return busTripRepository.update(id, this.parsePayload(data));
     }
 
     async delete(id: string) {
-        if (!id) {
-            throw new ValidationError("Thiếu thông tin chuyến đi");
-        }
         return busTripRepository.delete(id);
     }
 
-    private parseAndValidatePayload(data: BusTripPayload): UpsertBusTripInput {
+    private parsePayload(data: BusTripPayload): UpsertBusTripInput {
         const {routeId, busId, driverId, date, startTime, endTime, status} = data;
-
-        if (!routeId || !busId || !driverId || !date || !startTime) {
-            throw new ValidationError("Thiếu thông tin chuyến đi");
-        }
 
         const tripDate = new Date(date);
         if (isNaN(tripDate.getTime())) {

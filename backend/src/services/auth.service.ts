@@ -129,14 +129,6 @@ class AuthService {
     }
 
     async setupPassword(token: string, newPassword: string) {
-        if (!token || !newPassword) {
-            throw new ValidationError("Thiếu thông tin thiết lập mật khẩu");
-        }
-
-        if (newPassword.length < 8) {
-            throw new ValidationError("Mật khẩu phải có ít nhất 8 ký tự");
-        }
-
         const tokenHash = this.hashToken(token);
         const invite = await authRepository.getActiveInviteTokenByHash(tokenHash);
 
@@ -153,10 +145,6 @@ class AuthService {
     }
 
     async login(email: string, password: string, context: RequestContext = {}): Promise<LoginResult> {
-        if (!email || !password) {
-            throw new AuthenticationError("Email hoặc mật khẩu không đúng");
-        }
-
         const user = await authRepository.findActiveUserByEmail(email);
         if (!user || !user.password) {
             throw new AuthenticationError("Email hoặc mật khẩu không đúng");
