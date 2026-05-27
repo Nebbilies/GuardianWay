@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import {Role} from "@prisma/client";
 import {authRepository} from "../repositories/auth.repository";
 import {AuthTokenPayload} from "../types/auth";
-import {AuthenticationError, NotFoundError, ValidationError} from "../errors/http-errors";
+import {AuthenticationError, InternalError, NotFoundError, ValidationError} from "../errors/http-errors";
 
 const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
 const REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
@@ -40,7 +40,7 @@ class AuthService {
     private getAccessSecret() {
         const secret = process.env.JWT_ACCESS_SECRET;
         if (!secret) {
-            throw new Error("Missing JWT access secret");
+            throw new InternalError("Missing JWT access secret");
         }
         return secret;
     }
@@ -48,7 +48,7 @@ class AuthService {
     private getRefreshSecret() {
         const secret = process.env.JWT_REFRESH_SECRET;
         if (!secret) {
-            throw new Error("Missing JWT refresh secret");
+            throw new InternalError("Missing JWT refresh secret");
         }
         return secret;
     }
@@ -56,7 +56,7 @@ class AuthService {
     private getWebBaseUrl() {
         const baseUrl = process.env.WEB_BASE_URL;
         if (!baseUrl) {
-            throw new Error("Missing WEB_BASE_URL");
+            throw new InternalError("Missing WEB_BASE_URL");
         }
         return baseUrl.replace(/\/$/, "");
     }

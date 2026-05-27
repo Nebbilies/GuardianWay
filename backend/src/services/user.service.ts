@@ -25,7 +25,7 @@ class UserService {
         }
         const user = await userRepository.getById(id);
         if (!user) {
-            throw new ValidationError("Không tìm thấy người dùng");
+            throw new NotFoundError("Không tìm thấy người dùng");
         }
         return user;
     }
