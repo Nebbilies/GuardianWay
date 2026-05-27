@@ -32,9 +32,9 @@ function shouldSkipRefresh(path: string) {
 async function parseErrorMessage(response: Response) {
     const errorData = await response
         .json()
-        .catch(() => ({message: response.statusText || "Đã xảy ra lỗi"}));
+        .catch(() => ({detail: response.statusText || "Đã xảy ra lỗi"}));
 
-    return errorData.message || "Đã xảy ra lỗi";
+    return errorData.detail || errorData.message || "Đã xảy ra lỗi";
 }
 
 async function requestOnce(url: string, init: RequestInit = {}) {

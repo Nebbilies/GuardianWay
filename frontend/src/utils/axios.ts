@@ -23,7 +23,8 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response: any) => response.data,
     (error: any) => {
-        const message = error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+        const data = error.response?.data;
+        const message = data?.detail || data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
         return Promise.reject({ ...error, message });
     }
 );
