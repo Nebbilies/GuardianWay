@@ -9,7 +9,6 @@ interface ProblemDetails {
     status: number;
     code: string;
     detail: string;
-    message: string;
     instance: string;
     traceId: string;
     timestamp: string;
@@ -26,7 +25,6 @@ function toProblemDetails(req: Request, error: AppError): ProblemDetails {
         status: error.status,
         code: error.code,
         detail,
-        message: detail,
         instance: req.originalUrl,
         traceId: req.traceId,
         timestamp: new Date().toISOString(),
