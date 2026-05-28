@@ -4,8 +4,7 @@
 node_modules
 **/node_modules
 **/.next
-backend
-backend/**
 backend/dist
+backend/.env
 models.txt
 *.log

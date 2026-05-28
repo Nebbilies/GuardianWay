@@ -22,6 +22,10 @@ RUN npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production
+# Next standalone binds to $HOSTNAME; Docker sets it to the container ID,
+# which breaks 127.0.0.1 healthchecks and k8s probes. Bind to all interfaces.
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
