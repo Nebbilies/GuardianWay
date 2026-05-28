@@ -1,8 +1,9 @@
 'use client'
 
 import {useState} from 'react'
-import {Edit2, Trash2, ArrowUpDown} from 'lucide-react'
+import {Edit2, Trash2} from 'lucide-react'
 import {Button} from '@/components/ui/button'
+import {SortHeader} from '@/components/custom/sort-header'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
 import {
     AlertDialog,
@@ -14,7 +15,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import {BusRoute, BusRouteWithStops, PaginatedResponse} from '@/types/types'
+import {BusRouteWithStops, PaginatedResponse} from '@/types/types'
 
 interface BusRoutesListProps {
     busRoutes: PaginatedResponse<BusRouteWithStops>
@@ -26,8 +27,6 @@ interface BusRoutesListProps {
     isDeleting: boolean;
 }
 
-type SortKey = 'name'
-
 export default function BusRoutesList({
                                          busRoutes,
                                          onEdit,
@@ -38,18 +37,6 @@ export default function BusRoutesList({
                                          isDeleting,
                                      }: BusRoutesListProps) {
     const [deletingRouteId, setDeletingRouteId] = useState<string | null>(null)
-
-    const SortHeader = ({label, sortKeyValue}: { label: string; sortKeyValue: SortKey }) => (
-        <button
-            onClick={() => onSortChange(sortKeyValue)}
-            className="flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
-        >
-            {label}
-            {sortBy === sortKeyValue && (
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`}/>
-            )}
-        </button>
-    )
 
     if (!busRoutes?.data || busRoutes.data.length === 0) {
         return (
@@ -70,7 +57,8 @@ export default function BusRoutesList({
                 <thead>
                 <tr className="border-b border-border bg-muted">
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Tên tuyến đường" sortKeyValue="name"/>
+                        <SortHeader label="Tên tuyến đường" sortKeyValue="name" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
                         Trạm dừng

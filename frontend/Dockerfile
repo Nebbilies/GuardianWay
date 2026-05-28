@@ -15,6 +15,10 @@ RUN npm install --workspace frontend lightningcss-linux-arm64-musl@1.31.1 lightn
 
 FROM deps AS build
 ENV NODE_ENV=production
+# NEXT_PUBLIC_* is baked in at build time. Default to same-origin /api
+# (nginx/ingress proxies it to the backend); override with --build-arg if needed.
+ARG NEXT_PUBLIC_API_URL=/api
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY frontend ./frontend
 COPY shared ./shared
 WORKDIR /usr/src/app/frontend
