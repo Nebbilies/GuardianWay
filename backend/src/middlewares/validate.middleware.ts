@@ -17,7 +17,13 @@ export function validate(schemas: ValidationSchemas) {
             }
 
             if (schemas.query) {
-                req.query = schemas.query.parse(req.query) as Request["query"];
+                const parsedQuery = schemas.query.parse(req.query) as Request["query"];
+                Object.defineProperty(req, "query", {
+                    value: parsedQuery,
+                    writable: true,
+                    configurable: true,
+                    enumerable: true,
+                });
             }
 
             if (schemas.params) {

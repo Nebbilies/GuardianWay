@@ -1,8 +1,9 @@
 'use client'
 
 import {useState} from 'react'
-import {Edit2, Trash2, RotateCcw, ArrowUpDown} from 'lucide-react'
+import {Edit2, Trash2, RotateCcw} from 'lucide-react'
 import {Button} from '@/components/ui/button'
+import {SortHeader} from '@/components/custom/sort-header'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
 import {
     AlertDialog,
@@ -37,8 +38,6 @@ interface UsersListProps {
     isDeletedMode: boolean
 }
 
-type SortKey = 'name' | 'email' | 'role' | 'createdAt'
-
 export default function UsersList({
                                       users,
                                       onEdit,
@@ -53,18 +52,6 @@ export default function UsersList({
                                   }: UsersListProps) {
     const [deletingUserId, setDeletingUserId] = useState<string | null>(null)
     const [restoringUserId, setRestoringUserId] = useState<string | null>(null)
-
-    const SortHeader = ({label, sortKeyValue}: { label: string; sortKeyValue: SortKey }) => (
-        <button
-            onClick={() => onSortChange(sortKeyValue)}
-            className="flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
-        >
-            {label}
-            {sortBy === sortKeyValue && (
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`}/>
-            )}
-        </button>
-    )
 
     if (!users?.data || users.data.length === 0) {
         return (
@@ -85,19 +72,23 @@ export default function UsersList({
                 <thead>
                 <tr className="border-b border-border bg-muted">
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Họ tên" sortKeyValue="name"/>
+                        <SortHeader label="Họ tên" sortKeyValue="name" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Email" sortKeyValue="email"/>
+                        <SortHeader label="Email" sortKeyValue="email" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Vai trò" sortKeyValue="role"/>
+                        <SortHeader label="Vai trò" sortKeyValue="role" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
                         Số điện thoại
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Ngày tạo" sortKeyValue="createdAt"/>
+                        <SortHeader label="Ngày tạo" sortKeyValue="createdAt" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
                         Hành động
