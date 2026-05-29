@@ -14,6 +14,7 @@ COPY backend/prisma ./backend/prisma
 RUN --mount=type=cache,target=/root/.npm npm ci --workspace backend --workspace shared --include-workspace-root=false
 
 FROM deps AS build
+COPY backend/prisma.config.ts ./backend/prisma.config.ts
 COPY backend/tsconfig.json ./backend/tsconfig.json
 COPY backend/src ./backend/src
 COPY shared/index.ts ./shared/index.ts

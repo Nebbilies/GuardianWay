@@ -126,4 +126,5 @@ jobs:
         run: |
           kubectl -n guardianway get pods -o wide
           kubectl -n guardianway describe pods
+          kubectl -n guardianway logs job/prisma-migrate --tail=200 || true
           kubectl -n guardianway logs -l app=backend --tail=100 || true
