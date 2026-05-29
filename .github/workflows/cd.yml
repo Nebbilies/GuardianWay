@@ -56,3 +56,74 @@ jobs:
             ghcr.io/${{ steps.meta.outputs.owner_lc }}/gw-frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      OWNER_LC: ${{ needs.build-and-push.outputs.owner_lc }}
+      SHA_TAG: ${{ needs.build-and-push.outputs.sha_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: guardianway
+
+      - name: Build images locally for kind (incl. migrate image from build stage)
+        run: |
+          BACKEND_IMAGE=ghcr.io/$OWNER_LC/gw-backend:$SHA_TAG
+          FRONTEND_IMAGE=ghcr.io/$OWNER_LC/gw-frontend:$SHA_TAG
+          MIGRATE_IMAGE=gw-migrate:$SHA_TAG
+          
+          docker build -f backend/Dockerfile --target runtime -t "$BACKEND_IMAGE" .
+          docker build -f frontend/Dockerfile -t "$FRONTEND_IMAGE" .
+          docker build -f backend/Dockerfile --target build -t "$MIGRATE_IMAGE" .
+          
+          echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$GITHUB_ENV"
+          echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$GITHUB_ENV"
+          echo "MIGRATE_IMAGE=$MIGRATE_IMAGE" >> "$GITHUB_ENV"
+
+      - name: Load images into kind
+        run: |
+          kind load docker-image "$BACKEND_IMAGE" --name guardianway
+          kind load docker-image "$FRONTEND_IMAGE" --name guardianway
+          kind load docker-image "$MIGRATE_IMAGE" --name guardianway
+
+      - name: Apply base resources (namespace, secret, datastores)
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/secret.yaml
+          kubectl apply -f k8s/postgres.yaml
+          kubectl apply -f k8s/redis.yaml
+          kubectl -n guardianway rollout status deploy/postgres --timeout=120s
+          kubectl -n guardianway rollout status deploy/redis --timeout=120s
+
+      - name: Run migrations (Job)
+        run: |
+          envsubst < k8s/migrate-job.yaml | kubectl apply -f -
+          kubectl -n guardianway wait --for=condition=complete job/prisma-migrate --timeout=120s
+
+      - name: Deploy app
+        run: |
+          envsubst < k8s/backend.yaml | kubectl apply -f -
+          envsubst < k8s/frontend.yaml | kubectl apply -f -
+          kubectl -n guardianway rollout status deploy/backend --timeout=120s
+          kubectl -n guardianway rollout status deploy/frontend --timeout=120s
+
+      - name: Smoke test (in-cluster)
+        run: |
+          kubectl -n guardianway run smoke-backend --image=curlimages/curl:latest \
+            --restart=Never --rm -i --quiet -- \
+            curl -sf http://backend:8000/
+          kubectl -n guardianway run smoke-frontend --image=curlimages/curl:latest \
+            --restart=Never --rm -i --quiet -- \
+            curl -sf http://frontend:3000/
+
+      - name: Dump diagnostics on failure
+        if: failure()
+        run: |
+          kubectl -n guardianway get pods -o wide
+          kubectl -n guardianway describe pods
+          kubectl -n guardianway logs -l app=backend --tail=100 || true
