@@ -7,7 +7,7 @@ import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {Field, FieldLabel, FieldError, FieldDescription} from '@/components/ui/field'
-import {BusRoute, BusRouteWithStops, BusStop, RouteStop} from "@/types/types";
+import {BusRouteWithStops, BusStop} from "@/types/types";
 import {Textarea} from "@/components/ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {GripVertical, Trash2} from "lucide-react";
@@ -144,6 +144,9 @@ export default function BusRouteForm({
             description: initialData.description ?? "",
             stops: mappedStops,
         })
+        // Intentional prop->state sync when editing an existing route; runs only
+        // when initialData changes, so the extra render is acceptable here.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedStops(mappedStops)
     }, [initialData, form])
 

@@ -1,8 +1,9 @@
 'use client'
 
 import {useState} from 'react'
-import {ArrowUpDown, Edit2, Trash2} from 'lucide-react'
+import {Edit2, Trash2} from 'lucide-react'
 import {Button} from '@/components/ui/button'
+import {SortHeader} from '@/components/custom/sort-header'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
 import {
     AlertDialog,
@@ -25,8 +26,6 @@ interface BusTripsListProps {
     sortOrder: 'asc' | 'desc'
     isDeleting: boolean
 }
-
-type SortKey = 'date' | 'startTime' | 'status' | 'createdAt'
 
 const statusLabelMap: Record<BusTripStatus, string> = {
     SCHEDULED: 'Đã lên lịch',
@@ -55,18 +54,6 @@ export default function BusTripsList({
                                      }: BusTripsListProps) {
     const [deletingTripId, setDeletingTripId] = useState<string | null>(null)
 
-    const SortHeader = ({label, sortKeyValue}: { label: string; sortKeyValue: SortKey }) => (
-        <button
-            onClick={() => onSortChange(sortKeyValue)}
-            className="flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
-        >
-            {label}
-            {sortBy === sortKeyValue && (
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`}/>
-            )}
-        </button>
-    )
-
     if (!busTrips?.data || busTrips.data.length === 0) {
         return (
             <Empty>
@@ -89,17 +76,21 @@ export default function BusTripsList({
                     <th className="px-6 py-3 text-left text-sm">Xe buýt</th>
                     <th className="px-6 py-3 text-left text-sm">Tài xế</th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Ngày chạy" sortKeyValue="date"/>
+                        <SortHeader label="Ngày chạy" sortKeyValue="date" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Giờ bắt đầu" sortKeyValue="startTime"/>
+                        <SortHeader label="Giờ bắt đầu" sortKeyValue="startTime" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">Giờ kết thúc</th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Trạng thái" sortKeyValue="status"/>
+                        <SortHeader label="Trạng thái" sortKeyValue="status" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Đã tạo" sortKeyValue="createdAt"/>
+                        <SortHeader label="Đã tạo" sortKeyValue="createdAt" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">Hành động</th>
                 </tr>

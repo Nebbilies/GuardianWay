@@ -72,12 +72,13 @@ export default function RoutesPage() {
         mutate,
     } = useSWR<PaginatedResponse<BusRouteWithStops>>(`/bus-routes?${params.toString()}`, fetcher);
 
+    // TODO: fails when there are more than 1000 bus stops, need to implement pagination
+    // Must be called before any early return so hook order stays stable (rules-of-hooks).
+    const { data: busStops } = useSWR<PaginatedResponse<BusStop>>(`/bus-stops?limit=1000`, fetcher);
+
     if (error) {
         return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
     }
-
-    // TODO: fails when there are more than 1000 bus stops, need to implement pagination
-    const { data: busStops } = useSWR<PaginatedResponse<BusStop>>(`/bus-stops?limit=1000`, fetcher);
 
     const handleCloseDialog = () => {
         setIsDialogOpen(false);

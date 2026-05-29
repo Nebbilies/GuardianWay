@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint --workspace frontend
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate Prisma client (types needed for typecheck)
+        run: npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+      - run: npm run typecheck --workspace backend
+      - run: npm run typecheck --workspace frontend
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate Prisma client (mapper test imports @prisma/client)
+        run: npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+      - run: npm run test --workspace backend
+      - run: npm run test --workspace frontend
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate Prisma client
+        run: npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+      - run: npm run build --workspace backend
+      - run: npm run build --workspace frontend

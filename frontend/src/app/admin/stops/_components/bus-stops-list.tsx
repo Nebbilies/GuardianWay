@@ -1,8 +1,9 @@
 'use client'
 
 import {useState} from 'react'
-import {Edit2, Trash2, ArrowUpDown} from 'lucide-react'
+import {Edit2, Trash2} from 'lucide-react'
 import {Button} from '@/components/ui/button'
+import {SortHeader} from '@/components/custom/sort-header'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
 import {
     AlertDialog,
@@ -26,9 +27,6 @@ interface BusStopsListProps {
     isDeleting: boolean;
 }
 
-type SortKey = 'name' | 'address' | 'createdAt'
-type SortOrder = 'asc' | 'desc'
-
 export default function BusStopsList({
                                          busStops,
                                          onEdit,
@@ -39,18 +37,6 @@ export default function BusStopsList({
                                          isDeleting,
                                      }: BusStopsListProps) {
     const [deletingStopId, setDeletingStopId] = useState<string | null>(null)
-
-    const SortHeader = ({label, sortKeyValue}: { label: string; sortKeyValue: SortKey }) => (
-        <button
-            onClick={() => onSortChange(sortKeyValue)}
-            className="flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
-        >
-            {label}
-            {sortBy === sortKeyValue && (
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`}/>
-            )}
-        </button>
-    )
 
     if (!busStops?.data || busStops.data.length === 0) {
         return (
@@ -71,10 +57,12 @@ export default function BusStopsList({
                 <thead>
                 <tr className="border-b border-border bg-muted">
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Tên trạm dừng" sortKeyValue="name"/>
+                        <SortHeader label="Tên trạm dừng" sortKeyValue="name" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Địa chỉ" sortKeyValue="address"/>
+                        <SortHeader label="Địa chỉ" sortKeyValue="address" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
                         Tọa độ
@@ -83,7 +71,8 @@ export default function BusStopsList({
                         Trạm trường học
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Đã tạo" sortKeyValue="createdAt"/>
+                        <SortHeader label="Đã tạo" sortKeyValue="createdAt" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
                         Hành động

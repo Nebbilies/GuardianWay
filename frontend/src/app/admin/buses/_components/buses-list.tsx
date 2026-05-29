@@ -1,8 +1,9 @@
 'use client'
 
 import {useState} from 'react'
-import {Edit2, Trash2, ArrowUpDown} from 'lucide-react'
+import {Edit2, Trash2} from 'lucide-react'
 import {Button} from '@/components/ui/button'
+import {SortHeader} from '@/components/custom/sort-header'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
 import {
     AlertDialog,
@@ -26,8 +27,6 @@ interface BusesListProps {
     isDeleting: boolean;
 }
 
-type SortKey = 'licensePlate' | 'model' | 'capacity' | 'createdAt'
-
 export default function BusesList({
                                          buses,
                                          onEdit,
@@ -38,18 +37,6 @@ export default function BusesList({
                                          isDeleting,
                                      }: BusesListProps) {
     const [deletingBusId, setDeletingBusId] = useState<string | null>(null)
-
-    const SortHeader = ({label, sortKeyValue}: { label: string; sortKeyValue: SortKey }) => (
-        <button
-            onClick={() => onSortChange(sortKeyValue)}
-            className="flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
-        >
-            {label}
-            {sortBy === sortKeyValue && (
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`}/>
-            )}
-        </button>
-    )
 
     if (!buses?.data || buses.data.length === 0) {
         return (
@@ -70,19 +57,23 @@ export default function BusesList({
                 <thead>
                 <tr className="border-b border-border bg-muted">
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Biển số" sortKeyValue="licensePlate"/>
+                        <SortHeader label="Biển số" sortKeyValue="licensePlate" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Mẫu xe" sortKeyValue="model"/>
+                        <SortHeader label="Mẫu xe" sortKeyValue="model" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
-                        <SortHeader label="Chỗ ngồi" sortKeyValue="capacity"/>
+                        <SortHeader label="Chỗ ngồi" sortKeyValue="capacity" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
                         Trạng thái
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Đã tạo" sortKeyValue="createdAt"/>
+                        <SortHeader label="Đã tạo" sortKeyValue="createdAt" sortBy={sortBy} sortOrder={sortOrder}
+                                    onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
                         Hành động
