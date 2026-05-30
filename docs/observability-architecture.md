@@ -1,7 +1,5 @@
 # GuardianWay — Observability Stack
 
-Data flows verified live on `feat/observability-stack`. Three pipelines (metrics, logs, alerting) joined at Grafana.
-
 ```mermaid
 flowchart LR
     user(["You / Presenter"])
@@ -64,17 +62,3 @@ flowchart LR
     class be,pg ap
 ```
 
-## Legend
-
-- **Solid arrows** = network calls (scrape / query / webhook). **Dashed arrows** = container stdout collected by Alloy via the Docker socket.
-- **Metrics (pull):** Prometheus scrapes `backend:8000/metrics` (prom-client histogram) and `postgres_exporter:9187` every 15s.
-- **Alerting:** Prometheus evaluates 4 rules — `HighErrorRate`, `BackendDown`, `HighP95Latency`, `HighP99Latency` — and pushes firing alerts to Alertmanager, which webhooks them to `webhook-echo`.
-- **Logs (push):** backend writes pino-http JSON to stdout; Alloy tails every container's logs (including `webhook-echo`, so alert JSON loops back into Loki) and pushes to Loki.
-- **Grafana** queries Prometheus (metrics panels) and Loki (logs panel) — single pane of glass.
-
-| Service | Host URL |
-|---|---|
-| Grafana | http://localhost:3001 (admin/admin) |
-| Prometheus | http://localhost:9090 |
-| Alertmanager | http://localhost:9093 |
-| Backend metrics | http://localhost:8000/metrics |
