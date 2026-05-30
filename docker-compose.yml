@@ -91,6 +91,8 @@ services:
       - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml
+      # single-node
+      - --cluster.listen-address=
     ports:
       - "9093:9093"
     restart: always
