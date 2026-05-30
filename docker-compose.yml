@@ -130,6 +130,8 @@ services:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.16.0
     environment:
       DATA_SOURCE_NAME: "postgresql://gw:gw_pw@postgres:5432/guardianway?sslmode=disable"
+    command:
+      - --no-collector.stat_bgwriter
     depends_on:
       postgres:
         condition: service_healthy
