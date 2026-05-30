@@ -8,7 +8,6 @@ declare global {
                 role: Role;
             };
             traceId: string;
-            requestStartTimeMs: number;
         }
     }
 }
