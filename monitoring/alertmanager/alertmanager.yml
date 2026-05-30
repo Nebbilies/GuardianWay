@@ -1,0 +1,14 @@
+route:
+  receiver: webhook
+  group_by: ["alertname"]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 5m
+
+receivers:
+  - name: webhook
+    webhook_configs:
+      # webhook-echo prints the received alert JSON to its stdout (default port 8080),
+      # which Alloy then tails into Loki — visible in Grafana.
+      - url: "http://webhook-echo:8080/"
+        send_resolved: true
