@@ -32,7 +32,7 @@ flowchart LR
     pe -- "query stats" --> pg
 
     %% alerting
-    prom -- "fire (5xx%, down, P95>1s, P99>2s)" --> am
+    prom -- "fire: 5xx&gt;5% · down · P95&gt;1s · P99&gt;2s" --> am
     am -- "webhook" --> wh
 
     %% logs
