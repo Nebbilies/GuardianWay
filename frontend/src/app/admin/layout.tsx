@@ -6,7 +6,7 @@ import AdminHeader from "@/app/admin/_components/admin-header";
 export default function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <SidebarProvider>
-            <div className={'min-h-screen w-full bg-background flex'}>
+            <div className={'min-h-screen w-full bg-white flex'}>
                 <AdminSidebar/>
                 <div className={'flex-1 flex flex-col'}>
                     <AdminHeader />
