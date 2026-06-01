@@ -133,11 +133,13 @@ export default function UsersPage() {
     const handleSubmit = async (data: UserFormPayload) => {
         setIsSubmitting(true);
         try {
-            const url = data.id ? `/users/${data.id}` : `/users`;
-            const method = data.id ? 'PUT' : 'POST';
+            // id is path param, not in body field
+            const {id, ...payload} = data;
+            const url = id ? `/users/${id}` : `/users`;
+            const method = id ? 'PUT' : 'POST';
             await apiRequest(url, {
                 method,
-                body: JSON.stringify(data),
+                body: JSON.stringify(payload),
             });
 
             await mutate();
