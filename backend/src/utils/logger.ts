@@ -1,28 +1,23 @@
-type LogLevel = "info" | "error";
+import pino from "pino";
 
 type LogPayload = Record<string, unknown>;
 
-function write(level: LogLevel, message: string, payload: LogPayload = {}) {
-    const entry = {
-        level,
-        message,
-        timestamp: new Date().toISOString(),
-        ...payload,
-    };
-
-    const serialized = JSON.stringify(entry);
-    if (level === "error") {
-        console.error(serialized);
-        return;
-    }
-    console.log(serialized);
-}
-
-export const logger = {
-    info(message: string, payload?: LogPayload) {
-        write("info", message, payload);
+// Raw pino instance — used directly by pino-http.
+export const baseLogger = pino({
+    level: process.env.LOG_LEVEL || "info",
+    formatters: {
+        level: (label) => ({ level: label }),
     },
-    error(message: string, payload?: LogPayload) {
-        write("error", message, payload);
+    timestamp: pino.stdTimeFunctions.isoTime,
+    base: undefined, // drop pid/hostname noise; keep logs lean for Loki
+});
+
+// Wrapper preserving the existing (message, payload) call sites.
+export const logger = {
+    info(message: string, payload: LogPayload = {}) {
+        baseLogger.info(payload, message);
+    },
+    error(message: string, payload: LogPayload = {}) {
+        baseLogger.error(payload, message);
     },
 };

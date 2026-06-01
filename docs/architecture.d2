@@ -1,0 +1,126 @@
+# GuardianWay — System Architecture
+# Render:  d2 --theme 200 --layout elk docs/architecture.d2 docs/architecture.svg
+# Icons pulled from simpleicons CDN (https://cdn.simpleicons.org/<slug>)
+
+direction: right
+
+vars: {
+  d2-config: {
+    layout-engine: elk
+  }
+}
+
+classes: {
+  layer: {
+    style: { font-size: 22; bold: true; stroke-dash: 0; fill: "#f7f9fc" }
+  }
+  store: {
+    style: { fill: "#fff7ed" }
+  }
+  obs: {
+    style: { fill: "#f3f0ff" }
+  }
+}
+
+# ─────────────────────────── Clients ───────────────────────────
+clients: Clients {
+  class: layer
+  browser: Web Browser { icon: https://cdn.simpleicons.org/googlechrome; shape: image }
+  mobile: Mobile App { icon: https://cdn.simpleicons.org/expo; shape: image }
+}
+
+# ─────────────────────────── Edge ───────────────────────────
+edge: Edge {
+  class: layer
+  nginx: Nginx\nreverse proxy { icon: https://cdn.simpleicons.org/nginx; shape: image }
+}
+
+# ─────────────────────────── Application ───────────────────────────
+app: Application {
+  class: layer
+
+  frontend: Frontend {
+    icon: https://cdn.simpleicons.org/nextdotjs
+    next: Next.js + React { icon: https://cdn.simpleicons.org/react; shape: image }
+  }
+
+  backend: Backend {
+    icon: https://cdn.simpleicons.org/nodedotjs
+    express: Node + Express\nREST /api { icon: https://cdn.simpleicons.org/express; shape: image }
+    prisma: Prisma ORM { icon: https://cdn.simpleicons.org/prisma; shape: image }
+    metrics: "/metrics (prom-client)" { shape: page }
+    logs: "stdout (pino-http JSON)" { shape: page }
+  }
+}
+
+# ─────────────────────────── Data stores ───────────────────────────
+data: Data Stores {
+  class: layer
+  postgres: PostgreSQL { class: store; icon: https://cdn.simpleicons.org/postgresql; shape: image }
+  redis: Redis { class: store; icon: https://cdn.simpleicons.org/redis; shape: image }
+}
+
+# ─────────────────────────── Observability ───────────────────────────
+obs: Observability Stack {
+  class: layer
+
+  alloy: Grafana Alloy\n(log collector) { class: obs; icon: https://cdn.simpleicons.org/grafana; shape: image }
+  loki: Loki\n(log store) { class: obs; icon: https://cdn.simpleicons.org/grafana; shape: image }
+  prometheus: Prometheus\n(metrics + rules) { class: obs; icon: https://cdn.simpleicons.org/prometheus; shape: image }
+  pg_exp: postgres_exporter { class: obs; icon: https://cdn.simpleicons.org/postgresql; shape: image }
+  alertmanager: Alertmanager { class: obs; icon: https://cdn.simpleicons.org/prometheus; shape: image }
+  webhook: webhook-echo\n(alert sink) { class: obs; shape: hexagon }
+  grafana: Grafana\n(dashboards) { class: obs; icon: https://cdn.simpleicons.org/grafana; shape: image }
+}
+
+# ─────────────────────────── CI / CD ───────────────────────────
+cicd: CI / CD (GitHub Actions) {
+  class: layer
+  icon: https://cdn.simpleicons.org/githubactions
+
+  repo: GitHub repo\n(push / PR → main) { icon: https://cdn.simpleicons.org/github; shape: image }
+
+  ci: CI pipeline {
+    lint: lint { shape: step }
+    typecheck: typecheck { shape: step }
+    test: test { shape: step }
+    build: build { shape: step }
+    lint -> typecheck -> test -> build
+  }
+
+  cd: CD pipeline {
+    bp: build & push images { icon: https://cdn.simpleicons.org/docker; shape: image }
+    ghcr: GHCR registry { icon: https://cdn.simpleicons.org/github; shape: image }
+    k8s: Kubernetes (kind)\nbackend·frontend·pg·redis\n+ prisma migrate Job { icon: https://cdn.simpleicons.org/kubernetes; shape: image }
+    bp -> ghcr: push :sha / :latest
+    ghcr -> k8s: pull images
+    bp -> k8s: deploy manifests
+  }
+
+  repo -> ci: on push / PR
+  repo -> cd: on push → main
+}
+
+# ═══════════════════════ Runtime request flow ═══════════════════════
+clients.browser -> edge.nginx: HTTPS :8080
+clients.mobile -> edge.nginx: HTTPS :8080
+edge.nginx -> app.frontend.next: "/  (:3000)"
+edge.nginx -> app.backend.express: "/api  (:8000)"
+
+app.backend.express -> app.backend.prisma
+app.backend.prisma -> data.postgres: SQL
+app.backend.express -> data.redis: cache / sessions
+
+# ═══════════════════════ Metrics pipeline ═══════════════════════
+obs.prometheus -> app.backend.metrics: scrape
+obs.prometheus -> obs.pg_exp: scrape
+obs.pg_exp -> data.postgres: query stats
+obs.prometheus -> obs.alertmanager: fire alerts
+obs.alertmanager -> obs.webhook: webhook
+obs.grafana -> obs.prometheus: query
+
+# ═══════════════════════ Logs pipeline ═══════════════════════
+app.backend.logs -> obs.alloy: tail container logs
+obs.webhook -> obs.alloy: alert JSON logs
+obs.alloy -> obs.loki: push
+obs.grafana -> obs.loki: query
