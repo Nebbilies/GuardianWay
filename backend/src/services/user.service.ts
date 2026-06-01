@@ -42,11 +42,19 @@ class UserService {
             passwordSetupRequired: true,
         });
 
-        const invite = await authService.issueInvite(user.id, createdBy);
+        let invite;
+        try {
+            invite = await authService.issueInvite(user.id, createdBy);
+        } catch (error) {
+            // roll back if invite creation fails
+            await userRepository.hardDelete(user.id);
+            throw error;
+        }
+
+        await authService.sendInviteEmail(data.email, invite.inviteLink);
 
         return {
             ...user,
-            invite,
         };
     }
 

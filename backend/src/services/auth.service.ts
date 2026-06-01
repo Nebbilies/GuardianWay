@@ -5,6 +5,7 @@ import {Role} from "@prisma/client";
 import {authRepository} from "../repositories/auth.repository";
 import {AuthTokenPayload} from "../types/auth";
 import {AuthenticationError, InternalError, NotFoundError, ValidationError} from "../errors/http-errors";
+import transporter from "../utils/mailer";
 
 const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
 const REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
@@ -254,13 +255,34 @@ class AuthService {
         return { success: true };
     }
 
+    async sendInviteEmail(to: string, inviteLink: string) {
+        const message = {
+            to,
+            subject: "[GuardianWay] Thiết lập mật khẩu tài khoản",
+            html: "<p>Bạn đã được mời <b>thiết lập mật khẩu</b> cho tài khoản GuardianWay của mình. Vui lòng nhấp vào liên kết dưới đây để hoàn tất quá trình:</p>" +
+                "<p><a href=\"" + inviteLink + "\">Thiết lập mật khẩu</a></p>" +
+                "<p>Liên kết này sẽ hết hạn sau 3 ngày. Nếu bạn không yêu cầu thiết lập mật khẩu, vui lòng bỏ qua email này.</p>",
+        };
+
+        try {
+            await transporter.sendMail(message);
+        } catch {
+            throw new InternalError("Không thể gửi email mời thiết lập mật khẩu");
+        }
+    }
+
+    // resend / recovery path: re-issue an invite for an existing account and send
+    // it. issueInvite invalidates any previous active token first
     async issueInviteByEmail(email: string, createdBy: string) {
         const user = await authRepository.findActiveUserByEmail(email);
         if (!user) {
             throw new NotFoundError("Không tìm thấy người dùng");
         }
 
-        return this.issueInvite(user.id, createdBy);
+        const invite = await this.issueInvite(user.id, createdBy);
+        await this.sendInviteEmail(email, invite.inviteLink);
+
+        return {success: true};
     }
 }
 

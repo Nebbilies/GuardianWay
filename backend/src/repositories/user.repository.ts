@@ -292,6 +292,15 @@ class UserRepository {
         });
     }
 
+    // hard delete: used to roll back a freshly-created user when invite issuance
+    // fails. email is @unique, so a soft delete would lock that email forever.
+    // onDelete: Cascade removes any profile / invite token rows.
+    async hardDelete(id: string): Promise<void> {
+        await prisma.user.delete({
+            where: {id},
+        });
+    }
+
     async restore(id: string): Promise<void> {
         await prisma.user.update({
             where: {id},
