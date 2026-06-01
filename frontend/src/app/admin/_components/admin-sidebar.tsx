@@ -6,10 +6,11 @@ import {
     SidebarHeader, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuItem, SidebarMenuButton,
     SidebarMenuSubButton
 } from "@/components/ui/sidebar";
-import {Bus, ChevronDown, LogOut, MapPin, Route, Users} from "lucide-react";
+import {Bus, ChevronDown, MapPin, Route, Users} from "lucide-react";
 import Link from "next/link";
 import {Separator} from "@/components/ui/separator";
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
+import LogoutButton from "./logout-button";
 
 export default function AdminSidebar() {
     return (
@@ -135,12 +136,7 @@ export default function AdminSidebar() {
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
-                    <SidebarMenuButton>
-                        <LogOut className={'w-8 h-8 text-destructive'}/>
-                        <span className={'text-destructive'}>
-                            Đăng xuất
-                        </span>
-                    </SidebarMenuButton>
+                    <LogoutButton/>
                 </SidebarMenu>
             </SidebarFooter>
         </Sidebar>
