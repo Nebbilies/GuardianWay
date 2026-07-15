@@ -7,159 +7,249 @@ datasource db {
   provider = "postgresql"
 }
 
+model School {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  address   String
+  slug      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt DateTime? @db.Timestamptz(3)
+
+  users      User[]
+  students   StudentProfile[]
+  buses      Bus[]
+  routes     BusRoute[]
+  stops      BusStop[]
+  trips      BusTrip[]
+  tripEvents TripEvent[]
+}
+
 model User {
-  id                    String            @id @default(dbgenerated("gen_random_uuid()"))
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                  String
+  schoolId        String?          @db.Uuid
   email                 String            @unique
   password              String?
   passwordSetupRequired Boolean           @default(true)
   isActive              Boolean           @default(true)
-  lastLoginAt           DateTime?
+  lastLoginAt     DateTime?        @db.Timestamptz(3)
   role                  Role
   phoneNumber           String?
   address               String?
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
-  deletedAt             DateTime?
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(3)
+  deletedAt       DateTime?        @db.Timestamptz(3)
   driverProfile         DriverProfile?
   notifications         Notification[]
   children              StudentProfile[]  @relation("ParentToStudent")
-  studentProfile        StudentProfile?
   inviteTokens          UserInviteToken[]
   refreshTokens         RefreshToken[]
+  school          School?          @relation(fields: [schoolId], references: [id])
+  boardingRecords BoardingRecord[] @relation("BoardingRecorder")
+
+  @@index([schoolId])
 }
 
 model StudentProfile {
-  id              String           @id @default(dbgenerated("gen_random_uuid()"))
-  userId          String           @unique
-  studentId       String           @unique
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId      String   @db.Uuid
+  fullName      String
+  dateOfBirth   DateTime
+  studentId     String
   studentClass    String
-  parentId        String?
+  cardTokenHash String?  @unique
+  parentId      String?  @db.Uuid
   boardingRecords BoardingRecord[]
   parent          User?            @relation("ParentToStudent", fields: [parentId], references: [id])
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school        School   @relation(fields: [schoolId], references: [id])
+
+  @@unique([studentId, schoolId])
+  @@index([schoolId])
+  @@index([parentId])
 }
 
 model DriverProfile {
-  id            String    @id @default(dbgenerated("gen_random_uuid()"))
-  userId        String    @unique
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @unique @db.Uuid
   licenseNumber String
   trips         BusTrip[]
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Bus {
-  id           String    @id @default(dbgenerated("gen_random_uuid()"))
-  licensePlate String    @unique
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId     String    @db.Uuid
+  licensePlate String
   model        String
   capacity     Int
   status       BusStatus @default(ACTIVE)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt    DateTime? @db.Timestamptz(3)
   trips        BusTrip[]
+  school       School    @relation(fields: [schoolId], references: [id])
+
+  @@unique([schoolId, licensePlate])
 }
 
 model BusStop {
-  id              String           @id @default(dbgenerated("gen_random_uuid()"))
+  id             String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name            String
   address         String
   latitude        Float
   longitude       Float
-  isSchoolStop    Boolean          @default(false)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  deletedAt       DateTime?
+  location       Unsupported("geography(Point, 4326)")?
+  isSchoolStop   Boolean                                @default(false)
+  geofenceRadius Float?                                 @default(75)
+  createdAt      DateTime                               @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime                               @updatedAt @db.Timestamptz(3)
+  deletedAt      DateTime?                              @db.Timestamptz(3)
+  schoolId       String                                 @db.Uuid
   boardingRecords BoardingRecord[]
   routeStops      RouteStop[]
+  tripEvents     TripEvent[]
+  school         School                                 @relation(fields: [schoolId], references: [id])
+
+  @@index([schoolId])
+  @@index([location], type: Gist)
 }
 
 model BusRoute {
-  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String
   description   String?
   totalDistance Float       @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  deletedAt     DateTime?
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt DateTime? @db.Timestamptz(3)
+  schoolId  String    @db.Uuid
   trips         BusTrip[]
   routeStops    RouteStop[]
+  school    School    @relation(fields: [schoolId], references: [id])
+
+  @@index([schoolId])
 }
 
 model RouteStop {
-  routeId       String
-  stopId        String
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  routeId String @db.Uuid
+  stopId  String @db.Uuid
   stopOrder     Int
   scheduledTime DateTime? @db.Time(6)
   isFinalStop   Boolean   @default(false)
   route         BusRoute  @relation(fields: [routeId], references: [id], onDelete: Cascade)
   stop          BusStop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
 
-  @@id([routeId, stopId])
+  @@unique([routeId, stopOrder])
 }
 
 model BusTrip {
-  id              String           @id @default(dbgenerated("gen_random_uuid()"))
-  routeId         String
-  busId           String
-  driverId        String
-  date            DateTime         @db.Date
-  startTime       DateTime         @db.Time(6)
-  endTime         DateTime?        @db.Time(6)
-  status          BusTripStatus    @default(SCHEDULED)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  deletedAt       DateTime?
-  boardingRecords BoardingRecord[]
-  bus             Bus              @relation(fields: [busId], references: [id])
-  driver          DriverProfile    @relation(fields: [driverId], references: [id])
-  route           BusRoute         @relation(fields: [routeId], references: [id])
-  trackingLogs    TrackingLog[]
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId           String           @db.Uuid
+  routeId            String           @db.Uuid
+  busId              String           @db.Uuid
+  driverId           String           @db.Uuid
+  tripType           TripType
+  scheduledStartTime DateTime         @db.Timestamptz(3)
+  scheduledEndTime   DateTime         @db.Timestamptz(3)
+  actualStartTime    DateTime?        @db.Timestamptz(3)
+  actualEndTime      DateTime?        @db.Timestamptz(3)
+  status             BusTripStatus    @default(SCHEDULED)
+  createdAt          DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime         @updatedAt @db.Timestamptz(3)
+  deletedAt          DateTime?        @db.Timestamptz(3)
+  boardingRecords    BoardingRecord[]
+  bus                Bus              @relation(fields: [busId], references: [id])
+  driver             DriverProfile    @relation(fields: [driverId], references: [id])
+  route              BusRoute         @relation(fields: [routeId], references: [id])
+  trackingLogs       TrackingLog[]
+  tripEvents         TripEvent[]
+  school             School           @relation(fields: [schoolId], references: [id])
+
+  @@index([schoolId])
+  @@index([busId])
+  @@index([driverId])
+  @@index([routeId])
+}
+
+model TripEvent {
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId   String        @db.Uuid
+  busTripId  String        @db.Uuid
+  eventType  TripEventType
+  stopId     String?       @db.Uuid
+  occurredAt DateTime      @default(now()) @db.Timestamptz(3)
+
+  trip   BusTrip  @relation(fields: [busTripId], references: [id], onDelete: Cascade)
+  stop   BusStop? @relation(fields: [stopId], references: [id], onDelete: SetNull)
+  school School   @relation(fields: [schoolId], references: [id])
+
+  @@index([busTripId, occurredAt])
+  @@index([schoolId])
 }
 
 model BoardingRecord {
-  id         String         @id @default(dbgenerated("gen_random_uuid()"))
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   actionType BoardingAction
-  studentId  String
-  tripId     String
-  stopId     String
-  timestamp  DateTime       @default(now())
+  recordedBy String   @db.Uuid
+  studentId  String   @db.Uuid
+  tripId     String   @db.Uuid
+  stopId     String   @db.Uuid
+  occurredAt DateTime @default(now()) @db.Timestamptz(3)
   note       String?
   stop       BusStop        @relation(fields: [stopId], references: [id])
   student    StudentProfile @relation(fields: [studentId], references: [id])
   trip       BusTrip        @relation(fields: [tripId], references: [id])
+  recorder   User     @relation("BoardingRecorder", fields: [recordedBy], references: [id])
+
+  @@unique([tripId, studentId, actionType, occurredAt])
+  @@index([studentId])
+  @@index([tripId])
+  @@index([recordedBy])
 }
 
+// TimescaleDB hypertable (hot write path). schoolId is intentionally a
+// denormalized scalar with NO School relation/FK — avoids a per-insert FK
+// check on high-volume position ingest. Tenant integrity enforced in app layer.
 model TrackingLog {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
-  busTripId String
-  latitude  Float
-  longitude Float
-  speed     Float
-  timestamp DateTime @default(now())
-  trip      BusTrip  @relation(fields: [busTripId], references: [id], onDelete: Cascade)
+  id         String                                 @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId   String                                 @db.Uuid
+  busTripId  String                                 @db.Uuid
+  location   Unsupported("geography(Point, 4326)")?
+  speed      Float?
+  heading    Float?
+  accuracy   Float?
+  recordedAt DateTime                               @default(now()) @db.Timestamptz(3)
+  receivedAt DateTime                               @default(now()) @db.Timestamptz(3)
+  trip       BusTrip                                @relation(fields: [busTripId], references: [id], onDelete: Cascade)
+
+  @@id([recordedAt, id])
+  @@index([busTripId, recordedAt])
+  @@index([location], type: Gist)
 }
 
 model Notification {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  recipientId String
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipientId String   @db.Uuid
   title       String
   message     String
   type        String
   isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
   recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 }
 
 model UserInviteToken {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
-  userId    String
-  tokenHash String   @unique
-  expiresAt DateTime
-  consumedAt DateTime?
-  createdBy String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique
+  expiresAt  DateTime  @db.Timestamptz(3)
+  consumedAt DateTime? @db.Timestamptz(3)
+  createdBy  String    @db.Uuid
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -168,15 +258,15 @@ model UserInviteToken {
 }
 
 model RefreshToken {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
-  userId    String
-  tokenHash String   @unique
-  expiresAt DateTime
-  revokedAt DateTime?
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz(3)
+  revokedAt DateTime? @db.Timestamptz(3)
   userAgent String?
   ipAddress String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -185,10 +275,9 @@ model RefreshToken {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
-  STAFF
   DRIVER
-  STUDENT
   PARENT
 }
 
@@ -206,6 +295,22 @@ enum BusTripStatus {
 }
 
 enum BoardingAction {
-  BOARDING
+  BOARDED
+  ALIGHTED
   ABSENT
+  NO_SHOW
+  EXCEPTION
+}
+
+enum TripType {
+  PICKUP
+  DROPOFF
+}
+
+enum TripEventType {
+  STARTED
+  ARRIVED_STOP
+  DEPARTED_STOP
+  DELAYED
+  COMPLETED
 }
