@@ -163,6 +163,7 @@ class AuthService {
         const payload: AuthTokenPayload = {
             userId: user.id,
             role: user.role,
+            schoolId: user.schoolId,
         };
 
         const accessToken = this.createAccessToken(payload);
@@ -216,6 +217,7 @@ class AuthService {
         const newPayload: AuthTokenPayload = {
             userId: user.id,
             role: user.role,
+            schoolId: user.schoolId,
         };
 
         const accessToken = this.createAccessToken(newPayload);

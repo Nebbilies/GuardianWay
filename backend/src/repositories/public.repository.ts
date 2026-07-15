@@ -40,14 +40,14 @@ class PublicRepository {
                 where: {
                     deletedAt: null,
                     status: BusTripStatus.COMPLETED,
-                    date: {
+                    scheduledStartTime: {
                         gte: thirtyDaysAgo,
                     },
                 },
             }),
             prisma.trackingLog.aggregate({
                 where: {
-                    timestamp: {
+                    recordedAt: {
                         gte: twentyFourHoursAgo,
                     },
                 },
@@ -55,7 +55,7 @@ class PublicRepository {
                     id: true,
                 },
                 _max: {
-                    timestamp: true,
+                    recordedAt: true,
                 },
             }),
         ])
@@ -66,7 +66,7 @@ class PublicRepository {
             schoolStops,
             completedTripsLast30Days,
             trackingLogsLast24Hours: trackingLogsResult._count.id,
-            latestTrackingAt: trackingLogsResult._max.timestamp,
+            latestTrackingAt: trackingLogsResult._max.recordedAt,
         }
     }
 }

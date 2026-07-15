@@ -5,20 +5,21 @@ class BusRouteService {
         return busRouteRepository.getAll(params);
     }
 
-    async create(data: {
+    async create(schoolId: string, data: {
         name: string;
         description?: string;
         stops: RouteStopInput[];
     }) {
         const {name, description, stops} = data;
         return busRouteRepository.create({
+            schoolId,
             name,
             stops,
             description: description || null,
         });
     }
 
-    async edit(id: string, data: {
+    async edit(id: string, schoolId: string, data: {
         name: string;
         description?: string;
         stops: RouteStopInput[];
@@ -26,14 +27,15 @@ class BusRouteService {
         const {name, description, stops} = data;
         return busRouteRepository.edit({
             id,
+            schoolId,
             name,
             stops,
             description: description || null,
         })
     }
 
-    async delete(id: string) {
-        return busRouteRepository.delete(id);
+    async delete(id: string, schoolId: string) {
+        return busRouteRepository.delete(id, schoolId);
     }
 }
 

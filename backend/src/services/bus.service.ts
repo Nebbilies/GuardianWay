@@ -1,4 +1,4 @@
-import {busRepository, GetAllBusesParams} from "../repositories/bus.repository";
+import {busRepository, CreateBusInput, GetAllBusesParams, UpdateBusInput} from "../repositories/bus.repository";
 import {Bus} from "@prisma/client";
 
 class BusService {
@@ -6,16 +6,16 @@ class BusService {
         return busRepository.getAll(params);
     }
 
-    async create(data: Pick<Bus, "licensePlate" | "model" | "capacity" | "status">): Promise<Bus> {
-        return busRepository.create(data);
+    async create(schoolId: string, data: Omit<CreateBusInput, "schoolId">): Promise<Bus> {
+        return busRepository.create({...data, schoolId});
     }
 
-    async update(id: string, data: Partial<Pick<Bus, "licensePlate" | "model" | "capacity" | "status">>): Promise<Bus> {
-        return busRepository.update(id, data);
+    async update(id: string, schoolId: string, data: UpdateBusInput): Promise<Bus> {
+        return busRepository.update(id, schoolId, data);
     }
 
-    async delete(id: string) {
-        return busRepository.delete(id);
+    async delete(id: string, schoolId: string) {
+        return busRepository.delete(id, schoolId);
     }
 }
 

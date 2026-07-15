@@ -1,6 +1,7 @@
 import prisma from "../config/prisma";
 import {BusStop} from "@prisma/client";
 import {PaginatedResponse} from "@gw/shared"
+import {NotFoundError} from "../errors/http-errors";
 
 export interface GetAllBusStopsParams {
     search?: string;
@@ -8,7 +9,12 @@ export interface GetAllBusStopsParams {
     page?: number;
     limit?: number;
     sort?: string;
+    // undefined => SUPER_ADMIN, no tenant filter.
+    schoolId?: string;
 }
+
+export type CreateBusStopInput = Pick<BusStop, "schoolId" | "name" | "address" | "latitude" | "longitude" | "isSchoolStop">;
+export type EditBusStopInput = Pick<BusStop, "name" | "address" | "latitude" | "longitude" | "isSchoolStop">;
 
 class BusStopRepository {
     async getAll(params: GetAllBusStopsParams = {}): Promise<PaginatedResponse<BusStop>> {
@@ -21,6 +27,7 @@ class BusStopRepository {
         const whereClause: any = {
             isSchoolStop: params.isSchoolStop,
             deletedAt: null,
+            schoolId: params.schoolId,
         };
 
         if (searchTerm) {
@@ -53,27 +60,38 @@ class BusStopRepository {
         };
     }
 
-    async create(data: Pick<BusStop, "name" | "address" | "latitude" | "longitude" | "isSchoolStop">): Promise<BusStop> {
+    async create(data: CreateBusStopInput): Promise<BusStop> {
         return prisma.busStop.create({
             data,
         });
     }
 
-    async edit(data: Pick<BusStop, "id" | "name" | "address" | "latitude" | "longitude" | "isSchoolStop">): Promise<BusStop> {
-        const { id, ... updateData } = data;
+    async edit(id: string, schoolId: string, data: EditBusStopInput): Promise<BusStop> {
+        await this.assertOwned(id, schoolId);
         return prisma.busStop.update({
             where: { id },
-            data: updateData,
+            data,
         })
     }
 
-    async delete(id: string): Promise<BusStop> {
+    async delete(id: string, schoolId: string): Promise<BusStop> {
+        await this.assertOwned(id, schoolId);
         return prisma.busStop.update({
             where: { id },
             data: {
                 deletedAt: new Date(),
             }
         })
+    }
+
+    private async assertOwned(id: string, schoolId: string): Promise<void> {
+        const existing = await prisma.busStop.findFirst({
+            where: {id, schoolId, deletedAt: null},
+            select: {id: true},
+        });
+        if (!existing) {
+            throw new NotFoundError("Không tìm thấy điểm dừng");
+        }
     }
 }
 

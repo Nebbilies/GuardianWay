@@ -1,6 +1,7 @@
-import {BusTripStatus, Prisma} from "@prisma/client";
+import {BusTripStatus, Prisma, TripType} from "@prisma/client";
 import prisma from "../config/prisma";
 import {PaginatedResponse} from "@gw/shared";
+import {NotFoundError} from "../errors/http-errors";
 
 export interface GetAllBusTripsParams {
     search?: string;
@@ -8,10 +9,14 @@ export interface GetAllBusTripsParams {
     routeId?: string;
     busId?: string;
     driverId?: string;
+    tripType?: TripType;
+    // calendar day (YYYY-MM-DD) to filter by scheduled start.
     date?: string;
     page?: number;
     limit?: number;
     sort?: string;
+    // undefined => SUPER_ADMIN, no tenant filter.
+    schoolId?: string;
 }
 
 export type BusTripWithDetails = Prisma.BusTripGetPayload<{
@@ -27,12 +32,13 @@ export type BusTripWithDetails = Prisma.BusTripGetPayload<{
 }>;
 
 export interface UpsertBusTripInput {
+    schoolId: string;
     routeId: string;
     busId: string;
     driverId: string;
-    date: Date;
-    startTime: Date;
-    endTime?: Date | null;
+    tripType: TripType;
+    scheduledStartTime: Date;
+    scheduledEndTime: Date;
     status: BusTripStatus;
 }
 
@@ -50,12 +56,17 @@ class BusTripRepository {
             routeId: params.routeId,
             busId: params.busId,
             driverId: params.driverId,
+            tripType: params.tripType,
+            schoolId: params.schoolId,
         };
 
         if (params.date) {
-            const date = new Date(params.date);
-            if (!isNaN(date.getTime())) {
-                whereClause.date = date;
+            const dayStart = new Date(`${params.date}T00:00:00.000Z`);
+            if (!isNaN(dayStart.getTime())) {
+                const dayEnd = new Date(dayStart);
+                dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+                // trips scheduled to start on that calendar day (UTC).
+                whereClause.scheduledStartTime = {gte: dayStart, lt: dayEnd};
             }
         }
 
@@ -132,6 +143,13 @@ class BusTripRepository {
     }
 
     async update(id: string, data: UpsertBusTripInput): Promise<BusTripWithDetails> {
+        const owned = await prisma.busTrip.findFirst({
+            where: {id, schoolId: data.schoolId, deletedAt: null},
+            select: {id: true},
+        });
+        if (!owned) {
+            throw new NotFoundError("Không tìm thấy chuyến đi");
+        }
         return prisma.busTrip.update({
             where: {id},
             data,
@@ -147,7 +165,14 @@ class BusTripRepository {
         });
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(id: string, schoolId: string): Promise<void> {
+        const owned = await prisma.busTrip.findFirst({
+            where: {id, schoolId, deletedAt: null},
+            select: {id: true},
+        });
+        if (!owned) {
+            throw new NotFoundError("Không tìm thấy chuyến đi");
+        }
         await prisma.busTrip.update({
             where: {id},
             data: {

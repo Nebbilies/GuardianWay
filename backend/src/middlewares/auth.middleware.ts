@@ -23,6 +23,7 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
         req.user = {
             userId: payload.userId,
             role: payload.role,
+            schoolId: payload.schoolId ?? null,
         };
 
         return next();

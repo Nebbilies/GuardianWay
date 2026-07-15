@@ -1,12 +1,15 @@
 import {BusRoute} from "@prisma/client";
 import {PaginatedResponse} from "@gw/shared"
 import prisma from "../config/prisma";
+import {NotFoundError} from "../errors/http-errors";
 
 export interface GetAllBusRoutesParams {
     search?: string;
     page?: number;
     limit?: number;
     sort?: string;
+    // undefined => SUPER_ADMIN, no tenant filter.
+    schoolId?: string;
 }
 
 export type RouteStopInput = {
@@ -33,6 +36,7 @@ class BusRouteRepository {
 
         const whereClause: any = {
             deletedAt: null,
+            schoolId: params.schoolId,
         };
 
         if (searchTerm) {
@@ -65,7 +69,12 @@ class BusRouteRepository {
         };
     }
 
-    async create(data: { name: string; stops: RouteStopInput[]; description: string | null }): Promise<BusRoute> {
+    async create(data: {
+        schoolId: string;
+        name: string;
+        stops: RouteStopInput[];
+        description: string | null
+    }): Promise<BusRoute> {
         return prisma.$transaction(async (tx) => {
             const {stops, ...busRouteData} = data;
             const busRoute = await tx.busRoute.create({
@@ -89,12 +98,21 @@ class BusRouteRepository {
 
     async edit(data: {
         id: string;
+        schoolId: string;
         name: string;
         stops: RouteStopInput[];
         description: string | null
     }): Promise<BusRoute> {
         return prisma.$transaction(async (tx) => {
-            const {id, stops, ...busRouteData} = data;
+            const {id, schoolId, stops, ...busRouteData} = data;
+
+            const owned = await tx.busRoute.findFirst({
+                where: {id, schoolId, deletedAt: null},
+                select: {id: true},
+            });
+            if (!owned) {
+                throw new NotFoundError("Không tìm thấy tuyến đường");
+            }
 
             const busRoute = await tx.busRoute.update({
                 where: {
@@ -124,7 +142,14 @@ class BusRouteRepository {
         });
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(id: string, schoolId: string): Promise<void> {
+        const owned = await prisma.busRoute.findFirst({
+            where: {id, schoolId, deletedAt: null},
+            select: {id: true},
+        });
+        if (!owned) {
+            throw new NotFoundError("Không tìm thấy tuyến đường");
+        }
         await prisma.busRoute.update({
             where: {
                 id,
