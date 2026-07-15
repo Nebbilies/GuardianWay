@@ -23,16 +23,9 @@ export const createUserBodySchema = z
         role: roleEnum,
         phoneNumber: z.string().optional(),
         address: z.string().optional(),
-        studentId: z.string().optional(),
-        studentClass: z.string().optional(),
-        parentId: z.string().optional(),
         licenseNumber: z.string().optional(),
     })
     .strict()
-    .refine(
-        (data) => data.role !== "STUDENT" || (!!data.studentId && !!data.studentClass),
-        {message: "Thiếu thông tin hồ sơ học sinh", path: ["studentId"]},
-    )
     .refine(
         (data) => data.role !== "DRIVER" || !!data.licenseNumber,
         {message: "Thiếu thông tin giấy phép lái xe", path: ["licenseNumber"]},
@@ -46,9 +39,6 @@ export const updateUserBodySchema = z
         role: roleEnum.optional(),
         phoneNumber: z.string().optional(),
         address: z.string().optional(),
-        studentId: z.string().optional(),
-        studentClass: z.string().optional(),
-        parentId: z.string().optional(),
         licenseNumber: z.string().optional(),
     })
     .strict();

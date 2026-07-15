@@ -66,16 +66,6 @@ class UserService {
 
         const role = data.role || existingUser.role;
 
-        if (role === "STUDENT") {
-            const studentId = data.studentId || existingUser.studentProfile?.studentId;
-            const studentClass = data.studentClass || existingUser.studentProfile?.studentClass;
-            if (!studentId || !studentClass) {
-                throw new ValidationError("Thiếu thông tin hồ sơ học sinh");
-            }
-            data.studentId = studentId;
-            data.studentClass = studentClass;
-        }
-
         if (role === "DRIVER") {
             const licenseNumber = data.licenseNumber || existingUser.driverProfile?.licenseNumber;
             if (!licenseNumber) {

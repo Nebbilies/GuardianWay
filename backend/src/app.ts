@@ -46,10 +46,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/public", publicRoutes);
 
 app.use("/api/users", authenticate, authorize(["ADMIN"]), userRoutes);
-app.use("/api/buses", authenticate, authorize(["ADMIN", "STAFF"]), busRoutes);
-app.use("/api/bus-routes", authenticate, authorize(["ADMIN", "STAFF"]), busRouteRoutes);
-app.use("/api/bus-stops", authenticate, authorize(["ADMIN", "STAFF"]), busStopRoutes);
-app.use("/api/bus-trips", authenticate, authorize(["ADMIN", "STAFF"]), busTripRoutes);
+app.use("/api/buses", authenticate, authorize(["ADMIN"]), busRoutes);
+app.use("/api/bus-routes", authenticate, authorize(["ADMIN"]), busRouteRoutes);
+app.use("/api/bus-stops", authenticate, authorize(["ADMIN"]), busStopRoutes);
+app.use("/api/bus-trips", authenticate, authorize(["ADMIN"]), busTripRoutes);
 
 app.get("/", (_req, res) => {
     res.send("Hello, api is on!");

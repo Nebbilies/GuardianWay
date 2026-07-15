@@ -17,10 +17,6 @@ export interface CreateUserData {
     phoneNumber?: string;
     address?: string;
 
-    studentId?: string;
-    studentClass?: string;
-    parentId?: string;
-
     licenseNumber?: string;
 
     password?: string | null;
@@ -34,10 +30,6 @@ export interface UpdateUserData {
     role?: Role;
     phoneNumber?: string;
     address?: string;
-
-    studentId?: string;
-    studentClass?: string;
-    parentId?: string;
 
     licenseNumber?: string;
 }
@@ -75,7 +67,6 @@ class UserRepository {
                 where: whereClause,
                 orderBy: { [sortBy]: sortOrder },
                 include: {
-                    studentProfile: true,
                     driverProfile: true,
                 },
             })
@@ -122,13 +113,6 @@ class UserRepository {
                 address: true,
                 createdAt: true,
                 updatedAt: true,
-                studentProfile: {
-                    select: {
-                        studentId: true,
-                        studentClass: true,
-                        parentId: true,
-                    },
-                },
                 driverProfile: {
                     select: {
                         licenseNumber: true,
@@ -147,9 +131,6 @@ class UserRepository {
                 address: user.address,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
-                studentId: user.studentProfile?.studentId ?? null,
-                studentClass: user.studentProfile?.studentClass ?? null,
-                parentId: user.studentProfile?.parentId ?? null,
                 licenseNumber: user.driverProfile?.licenseNumber ?? null,
             })),
             metadata: {
@@ -163,7 +144,6 @@ class UserRepository {
         return prisma.user.findUnique({
             where: {id, deletedAt: includeDeleted ? undefined : null},
             include: {
-                studentProfile: true,
                 driverProfile: true,
             },
         });
@@ -191,25 +171,7 @@ class UserRepository {
     }
 
     async create(data: CreateUserData) {
-        const { studentId, studentClass, parentId, licenseNumber, ...userData } = data;
-
-        if (data.role === "STUDENT" && studentId && studentClass) {
-            return prisma.$transaction(async (tx: any) => {
-                const user = await tx.user.create({ data: userData });
-                await tx.studentProfile.create({
-                    data: {
-                        userId: user.id,
-                        studentId,
-                        studentClass,
-                        parentId: parentId || null,
-                    },
-                });
-                return tx.user.findUnique({
-                    where: { id: user.id },
-                    include: { studentProfile: true, driverProfile: true },
-                });
-            });
-        }
+        const {licenseNumber, ...userData} = data;
 
         if (data.role === "DRIVER" && licenseNumber) {
             return prisma.$transaction(async (tx: any) => {
@@ -222,45 +184,25 @@ class UserRepository {
                 });
                 return tx.user.findUnique({
                     where: { id: user.id },
-                    include: { studentProfile: true, driverProfile: true },
+                    include: {driverProfile: true},
                 });
             });
         }
 
         return prisma.user.create({
-            data: data,
-            include: { studentProfile: true, driverProfile: true },
+            data: userData,
+            include: {driverProfile: true},
         });
     }
 
     async update(id: string, data: UpdateUserData) {
-        const { studentId, studentClass, parentId, licenseNumber, ...userData } = data;
+        const {licenseNumber, ...userData} = data;
 
         return prisma.$transaction(async (tx: any) => {
             const user = await tx.user.update({
                 where: { id },
                 data: userData,
             });
-
-            if (user.role === "STUDENT" && studentId && studentClass) {
-                await tx.studentProfile.upsert({
-                    where: { userId: id },
-                    create: {
-                        userId: id,
-                        studentId,
-                        studentClass,
-                        parentId: parentId || null,
-                    },
-                    update: {
-                        studentId,
-                        studentClass,
-                        parentId: parentId || null,
-                    },
-                });
-            } else if (user.role !== "STUDENT") {
-                // if change role from student, delete student profile
-                await tx.studentProfile.deleteMany({ where: { userId: id } });
-            }
 
             if (user.role === "DRIVER" && licenseNumber) {
                 await tx.driverProfile.upsert({
@@ -280,7 +222,7 @@ class UserRepository {
 
             return tx.user.findUnique({
                 where: { id },
-                include: { studentProfile: true, driverProfile: true },
+                include: {driverProfile: true},
             });
         });
     }
