@@ -1,5 +1,5 @@
 import {BusTripStatus, Prisma, TripType} from "@prisma/client";
-import prisma from "../config/prisma";
+import {db, requireCurrentSchoolId} from "../config/tenant-db";
 import {PaginatedResponse} from "@gw/shared";
 import {NotFoundError} from "../errors/http-errors";
 
@@ -15,24 +15,21 @@ export interface GetAllBusTripsParams {
     page?: number;
     limit?: number;
     sort?: string;
-    // undefined => SUPER_ADMIN, no tenant filter.
-    schoolId?: string;
 }
 
-export type BusTripWithDetails = Prisma.BusTripGetPayload<{
-    include: {
-        route: true;
-        bus: true;
-        driver: {
-            include: {
-                user: true;
-            }
-        }
-    }
-}>;
+const TRIP_INCLUDE = {
+    route: true,
+    bus: true,
+    driver: {
+        include: {
+            user: true,
+        },
+    },
+} satisfies Prisma.BusTripInclude;
+
+export type BusTripWithDetails = Prisma.BusTripGetPayload<{ include: typeof TRIP_INCLUDE }>;
 
 export interface UpsertBusTripInput {
-    schoolId: string;
     routeId: string;
     busId: string;
     driverId: string;
@@ -42,6 +39,7 @@ export interface UpsertBusTripInput {
     status: BusTripStatus;
 }
 
+// db() auto-scopes BusTrip reads/updateMany by schoolId; create supplies it.
 class BusTripRepository {
     async getAll(params: GetAllBusTripsParams = {}): Promise<PaginatedResponse<BusTripWithDetails>> {
         const searchTerm = params.search?.trim();
@@ -57,7 +55,6 @@ class BusTripRepository {
             busId: params.busId,
             driverId: params.driverId,
             tripType: params.tripType,
-            schoolId: params.schoolId,
         };
 
         if (params.date) {
@@ -101,20 +98,12 @@ class BusTripRepository {
             ];
         }
 
-        const [data, metadata] = await prisma.busTrip.paginate({
+        const [data, metadata] = await db().busTrip.paginate({
             where: whereClause,
             orderBy: {
                 [sortBy]: sortOrder,
             },
-            include: {
-                route: true,
-                bus: true,
-                driver: {
-                    include: {
-                        user: true,
-                    }
-                }
-            }
+            include: TRIP_INCLUDE,
         }).withPages({
             page: params.page || 1,
             limit: params.limit || 10,
@@ -128,57 +117,28 @@ class BusTripRepository {
     }
 
     async create(data: UpsertBusTripInput): Promise<BusTripWithDetails> {
-        return prisma.busTrip.create({
-            data,
-            include: {
-                route: true,
-                bus: true,
-                driver: {
-                    include: {
-                        user: true,
-                    }
-                }
-            }
+        return db().busTrip.create({
+            data: { ...data, schoolId: requireCurrentSchoolId() },
+            include: TRIP_INCLUDE,
         });
     }
 
     async update(id: string, data: UpsertBusTripInput): Promise<BusTripWithDetails> {
-        const owned = await prisma.busTrip.findFirst({
-            where: {id, schoolId: data.schoolId, deletedAt: null},
-            select: {id: true},
-        });
-        if (!owned) {
+        const { count } = await db().busTrip.updateMany({ where: { id, deletedAt: null }, data });
+        if (count === 0) {
             throw new NotFoundError("Không tìm thấy chuyến đi");
         }
-        return prisma.busTrip.update({
-            where: {id},
-            data,
-            include: {
-                route: true,
-                bus: true,
-                driver: {
-                    include: {
-                        user: true,
-                    }
-                }
-            }
-        });
+        return db().busTrip.findFirstOrThrow({ where: { id }, include: TRIP_INCLUDE });
     }
 
-    async delete(id: string, schoolId: string): Promise<void> {
-        const owned = await prisma.busTrip.findFirst({
-            where: {id, schoolId, deletedAt: null},
-            select: {id: true},
+    async delete(id: string): Promise<void> {
+        const { count } = await db().busTrip.updateMany({
+            where: { id, deletedAt: null },
+            data: { deletedAt: new Date() },
         });
-        if (!owned) {
+        if (count === 0) {
             throw new NotFoundError("Không tìm thấy chuyến đi");
         }
-        await prisma.busTrip.update({
-            where: {id},
-            data: {
-                deletedAt: new Date(),
-            }
-        });
     }
 }
 

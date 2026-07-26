@@ -1,6 +1,6 @@
 import {BusRoute} from "@prisma/client";
 import {PaginatedResponse} from "@gw/shared"
-import prisma from "../config/prisma";
+import {db, requireCurrentSchoolId} from "../config/tenant-db";
 import {NotFoundError} from "../errors/http-errors";
 
 export interface GetAllBusRoutesParams {
@@ -8,8 +8,6 @@ export interface GetAllBusRoutesParams {
     page?: number;
     limit?: number;
     sort?: string;
-    // undefined => SUPER_ADMIN, no tenant filter.
-    schoolId?: string;
 }
 
 export type RouteStopInput = {
@@ -26,6 +24,8 @@ export type EditBusRouteInput = Pick<BusRoute, "id" | "name" | "description"> & 
     stops: RouteStopInput[];
 }
 
+// db() auto-scopes BusRoute reads/updateMany. RouteStop has no schoolId — it's
+// reached only via a route we've already tenant-checked, so it needs no scoping.
 class BusRouteRepository {
     async getAll(params: GetAllBusRoutesParams = {}): Promise<PaginatedResponse<BusRoute>> {
         const searchTerm = params.search?.trim();
@@ -36,7 +36,6 @@ class BusRouteRepository {
 
         const whereClause: any = {
             deletedAt: null,
-            schoolId: params.schoolId,
         };
 
         if (searchTerm) {
@@ -45,7 +44,7 @@ class BusRouteRepository {
             }
         }
 
-        const [data, metadata] = await prisma.busRoute.paginate({
+        const [data, metadata] = await db().busRoute.paginate({
             where: whereClause,
             orderBy: {
                 [sortBy]: sortOrder
@@ -70,15 +69,15 @@ class BusRouteRepository {
     }
 
     async create(data: {
-        schoolId: string;
         name: string;
         stops: RouteStopInput[];
         description: string | null
     }): Promise<BusRoute> {
-        return prisma.$transaction(async (tx) => {
+        const schoolId = requireCurrentSchoolId();
+        return db().$transaction(async (tx) => {
             const {stops, ...busRouteData} = data;
             const busRoute = await tx.busRoute.create({
-                data: busRouteData,
+                data: { ...busRouteData, schoolId },
             });
 
             if (stops.length > 0) {
@@ -98,28 +97,21 @@ class BusRouteRepository {
 
     async edit(data: {
         id: string;
-        schoolId: string;
         name: string;
         stops: RouteStopInput[];
         description: string | null
     }): Promise<BusRoute> {
-        return prisma.$transaction(async (tx) => {
-            const {id, schoolId, stops, ...busRouteData} = data;
+        return db().$transaction(async (tx) => {
+            const {id, stops, ...busRouteData} = data;
 
-            const owned = await tx.busRoute.findFirst({
-                where: {id, schoolId, deletedAt: null},
-                select: {id: true},
-            });
-            if (!owned) {
-                throw new NotFoundError("Không tìm thấy tuyến đường");
-            }
-
-            const busRoute = await tx.busRoute.update({
-                where: {
-                    id,
-                },
+            // updateMany is tenant-scoped; count 0 => not this tenant's route.
+            const { count } = await tx.busRoute.updateMany({
+                where: { id, deletedAt: null },
                 data: busRouteData,
             });
+            if (count === 0) {
+                throw new NotFoundError("Không tìm thấy tuyến đường");
+            }
 
             await tx.routeStop.deleteMany({
                 where: {
@@ -138,26 +130,18 @@ class BusRouteRepository {
                 });
             }
 
-            return busRoute;
+            return tx.busRoute.findFirstOrThrow({ where: { id } });
         });
     }
 
-    async delete(id: string, schoolId: string): Promise<void> {
-        const owned = await prisma.busRoute.findFirst({
-            where: {id, schoolId, deletedAt: null},
-            select: {id: true},
+    async delete(id: string): Promise<void> {
+        const { count } = await db().busRoute.updateMany({
+            where: { id, deletedAt: null },
+            data: { deletedAt: new Date() },
         });
-        if (!owned) {
+        if (count === 0) {
             throw new NotFoundError("Không tìm thấy tuyến đường");
         }
-        await prisma.busRoute.update({
-            where: {
-                id,
-            },
-            data: {
-                deletedAt: new Date(),
-            },
-        });
     }
 }
 

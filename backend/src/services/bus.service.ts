@@ -6,16 +6,16 @@ class BusService {
         return busRepository.getAll(params);
     }
 
-    async create(schoolId: string, data: Omit<CreateBusInput, "schoolId">): Promise<Bus> {
-        return busRepository.create({...data, schoolId});
+    async create(data: CreateBusInput): Promise<Bus> {
+        return busRepository.create(data);
     }
 
-    async update(id: string, schoolId: string, data: UpdateBusInput): Promise<Bus> {
-        return busRepository.update(id, schoolId, data);
+    async update(id: string, data: UpdateBusInput): Promise<Bus> {
+        return busRepository.update(id, data);
     }
 
-    async delete(id: string, schoolId: string) {
-        return busRepository.delete(id, schoolId);
+    async delete(id: string) {
+        return busRepository.delete(id);
     }
 }
 

@@ -18,19 +18,19 @@ class BusTripService {
         return busTripRepository.getAll(params);
     }
 
-    async create(schoolId: string, data: BusTripPayload) {
-        return busTripRepository.create(this.parsePayload(schoolId, data));
+    async create(data: BusTripPayload) {
+        return busTripRepository.create(this.parsePayload(data));
     }
 
-    async update(id: string, schoolId: string, data: BusTripPayload) {
-        return busTripRepository.update(id, this.parsePayload(schoolId, data));
+    async update(id: string, data: BusTripPayload) {
+        return busTripRepository.update(id, this.parsePayload(data));
     }
 
-    async delete(id: string, schoolId: string) {
-        return busTripRepository.delete(id, schoolId);
+    async delete(id: string) {
+        return busTripRepository.delete(id);
     }
 
-    private parsePayload(schoolId: string, data: BusTripPayload): UpsertBusTripInput {
+    private parsePayload(data: BusTripPayload): UpsertBusTripInput {
         const {routeId, busId, driverId, tripType, scheduledStartTime, scheduledEndTime, status} = data;
 
         const start = new Date(scheduledStartTime);
@@ -48,7 +48,6 @@ class BusTripService {
         }
 
         return {
-            schoolId,
             routeId,
             busId,
             driverId,

@@ -9,6 +9,7 @@ import busTripRoutes from "./routes/busTrip.routes";
 import publicRoutes from "./routes/public.routes";
 import authRoutes from "./routes/auth.routes";
 import {authenticate} from "./middlewares/auth.middleware";
+import {tenantContext} from "./middlewares/tenant.middleware";
 import {authorize} from "./middlewares/authorize.middleware";
 import {requestContext} from "./middlewares/request-context.middleware";
 import {errorHandler, notFoundHandler} from "./middlewares/error.middleware";
@@ -45,11 +46,11 @@ app.use(metricsMiddleware);
 app.use("/api/auth", authRoutes);
 app.use("/api/public", publicRoutes);
 
-app.use("/api/users", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), userRoutes);
-app.use("/api/buses", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busRoutes);
-app.use("/api/bus-routes", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busRouteRoutes);
-app.use("/api/bus-stops", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busStopRoutes);
-app.use("/api/bus-trips", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busTripRoutes);
+app.use("/api/users", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), userRoutes);
+app.use("/api/buses", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRoutes);
+app.use("/api/bus-routes", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRouteRoutes);
+app.use("/api/bus-stops", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busStopRoutes);
+app.use("/api/bus-trips", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busTripRoutes);
 
 app.get("/", (_req, res) => {
     res.send("Hello, api is on!");

@@ -1,13 +1,11 @@
-import {Response} from "express";
+import {Request, Response} from "express";
 import {GetAllBusRoutesParams} from "../repositories/busRoute.repository";
 import {busRouteService} from "../services/busRoute.service";
-import {AuthenticatedRequest} from "../middlewares/auth.middleware";
-import {requireSchoolId, tenantScope} from "../utils/tenant";
 
 class BusRouteController {
-    async getAll(req: AuthenticatedRequest, res: Response) {
+    async getAll(req: Request, res: Response) {
         const {search, page, limit, sort} = req.query;
-        const params: GetAllBusRoutesParams = {schoolId: tenantScope(req)};
+        const params: GetAllBusRoutesParams = {};
 
         if (typeof search === 'string') params.search = search;
         if (typeof page === 'string') params.page = parseInt(page, 1);
@@ -19,18 +17,18 @@ class BusRouteController {
 
     }
 
-    async create(req: AuthenticatedRequest, res: Response) {
-        const busRoute = await busRouteService.create(requireSchoolId(req), req.body);
+    async create(req: Request, res: Response) {
+        const busRoute = await busRouteService.create(req.body);
         res.status(201).json(busRoute);
     }
 
-    async edit(req: AuthenticatedRequest, res: Response) {
-        const busRoute = await busRouteService.edit(String(req.params.id), requireSchoolId(req), req.body);
+    async edit(req: Request, res: Response) {
+        const busRoute = await busRouteService.edit(String(req.params.id), req.body);
         res.status(200).json(busRoute);
     }
 
-    async delete(req: AuthenticatedRequest, res: Response) {
-        const busRoute = await busRouteService.delete(String(req.params.id), requireSchoolId(req));
+    async delete(req: Request, res: Response) {
+        const busRoute = await busRouteService.delete(String(req.params.id));
         res.status(200).json(busRoute);
     }
 }

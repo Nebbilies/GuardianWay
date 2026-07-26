@@ -5,7 +5,7 @@ class BusStopService {
     return busStopRepository.getAll(params);
   }
 
-  async create(schoolId: string, data: {
+  async create(data: {
     name: string;
     address: string;
     latitude: number;
@@ -14,7 +14,6 @@ class BusStopService {
   }) {
     const { name, address, latitude, longitude, isSchoolStop } = data;
     return busStopRepository.create({
-      schoolId,
       name,
       address,
       latitude,
@@ -23,7 +22,7 @@ class BusStopService {
     });
   }
 
-  async edit(id: string, schoolId: string, data: {
+  async edit(id: string, data: {
     name: string;
     address: string;
     latitude: number;
@@ -31,7 +30,7 @@ class BusStopService {
     isSchoolStop?: boolean;
   }) {
     const { name, address, latitude, longitude, isSchoolStop } = data;
-    return busStopRepository.edit(id, schoolId, {
+    return busStopRepository.edit(id, {
       name,
       address,
       latitude,
@@ -40,8 +39,8 @@ class BusStopService {
     })
   }
 
-  async delete(id: string, schoolId: string) {
-    return busStopRepository.delete(id, schoolId);
+  async delete(id: string) {
+    return busStopRepository.delete(id);
     }
 }
 
