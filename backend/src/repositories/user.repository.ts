@@ -1,5 +1,6 @@
 import { Role } from "@prisma/client";
 import prisma from "../config/prisma";
+import { NotFoundError } from "../errors/http-errors";
 
 export interface GetAllUsersParams {
     search?: string;
@@ -8,6 +9,8 @@ export interface GetAllUsersParams {
     sort?: string;
     role?: Role;
     deleted?: string;
+    // undefined => SUPER_ADMIN, no tenant filter.
+    schoolId?: string;
 }
 
 export interface CreateUserData {
@@ -16,6 +19,8 @@ export interface CreateUserData {
     role: Role;
     phoneNumber?: string;
     address?: string;
+    // resolved by the service from the acting user's school.
+    schoolId?: string | null;
 
     licenseNumber?: string;
 
@@ -43,7 +48,9 @@ class UserRepository {
         const sortOrder = isDesc ? "desc" : "asc";
         const deleted = params.deleted || "exclude";
 
-        const whereClause: any = {};
+        const whereClause: any = {
+            schoolId: params.schoolId,
+        };
 
         if (deleted === "exclude") {
             whereClause.deletedAt = null;
@@ -88,6 +95,7 @@ class UserRepository {
 
         const whereClause: any = {
             deletedAt: null,
+            schoolId: params.schoolId,
         };
 
         if (params.role) {
@@ -140,20 +148,21 @@ class UserRepository {
         };
     }
 
-    async getById(id: string, includeDeleted = false) {
-        return prisma.user.findUnique({
-            where: {id, deletedAt: includeDeleted ? undefined : null},
+    async getById(id: string, schoolId?: string, includeDeleted = false) {
+        return prisma.user.findFirst({
+            where: {id, schoolId, deletedAt: includeDeleted ? undefined : null},
             include: {
                 driverProfile: true,
             },
         });
     }
 
-    async getParents() {
+    async getParents(schoolId?: string) {
         return prisma.user.findMany({
             where: {
                 role: "PARENT",
                 deletedAt: null,
+                schoolId,
             },
             select: {
                 id: true,
@@ -195,10 +204,18 @@ class UserRepository {
         });
     }
 
-    async update(id: string, data: UpdateUserData) {
+    async update(id: string, schoolId: string | undefined, data: UpdateUserData) {
         const {licenseNumber, ...userData} = data;
 
         return prisma.$transaction(async (tx: any) => {
+            const owned = await tx.user.findFirst({
+                where: {id, schoolId, deletedAt: null},
+                select: {id: true},
+            });
+            if (!owned) {
+                throw new NotFoundError("Không tìm thấy người dùng");
+            }
+
             const user = await tx.user.update({
                 where: { id },
                 data: userData,
@@ -227,7 +244,14 @@ class UserRepository {
         });
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(id: string, schoolId?: string): Promise<void> {
+        const owned = await prisma.user.findFirst({
+            where: {id, schoolId, deletedAt: null},
+            select: {id: true},
+        });
+        if (!owned) {
+            throw new NotFoundError("Không tìm thấy người dùng");
+        }
         await prisma.user.update({
             where: { id },
             data: { deletedAt: new Date() },

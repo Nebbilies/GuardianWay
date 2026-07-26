@@ -23,6 +23,8 @@ export const createUserBodySchema = z
         role: roleEnum,
         phoneNumber: z.string().optional(),
         address: z.string().optional(),
+        // only honored for SUPER_ADMIN creating in a specific school.
+        schoolId: z.string().uuid().optional(),
         licenseNumber: z.string().optional(),
     })
     .strict()

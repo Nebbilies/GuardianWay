@@ -45,11 +45,11 @@ app.use(metricsMiddleware);
 app.use("/api/auth", authRoutes);
 app.use("/api/public", publicRoutes);
 
-app.use("/api/users", authenticate, authorize(["ADMIN"]), userRoutes);
-app.use("/api/buses", authenticate, authorize(["ADMIN"]), busRoutes);
-app.use("/api/bus-routes", authenticate, authorize(["ADMIN"]), busRouteRoutes);
-app.use("/api/bus-stops", authenticate, authorize(["ADMIN"]), busStopRoutes);
-app.use("/api/bus-trips", authenticate, authorize(["ADMIN"]), busTripRoutes);
+app.use("/api/users", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), userRoutes);
+app.use("/api/buses", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busRoutes);
+app.use("/api/bus-routes", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busRouteRoutes);
+app.use("/api/bus-stops", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busStopRoutes);
+app.use("/api/bus-trips", authenticate, authorize(["SUPER_ADMIN", "ADMIN"]), busTripRoutes);
 
 app.get("/", (_req, res) => {
     res.send("Hello, api is on!");

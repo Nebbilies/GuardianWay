@@ -1,13 +1,14 @@
-import {Request, Response} from "express";
+import {Response} from "express";
 import {GetAllUsersParams} from "../repositories/user.repository";
 import {Role} from "@prisma/client";
 import {userService} from "../services/user.service";
 import {AuthenticatedRequest} from "../middlewares/auth.middleware";
+import {tenantScope} from "../utils/tenant";
 
 class UserController {
-    async getAll(req: Request, res: Response) {
+    async getAll(req: AuthenticatedRequest, res: Response) {
         const {search, page, limit, sort, role, deleted} = req.query;
-        const params: GetAllUsersParams = {};
+        const params: GetAllUsersParams = {schoolId: tenantScope(req)};
 
         if (typeof search === "string") params.search = search;
         if (typeof page === "string") params.page = parseInt(page, 10);
@@ -20,9 +21,9 @@ class UserController {
         res.json(users);
     }
 
-    async exportAll(req: Request, res: Response) {
+    async exportAll(req: AuthenticatedRequest, res: Response) {
         const {search, sort, role} = req.query;
-        const params: GetAllUsersParams = {};
+        const params: GetAllUsersParams = {schoolId: tenantScope(req)};
 
         if (typeof search === "string") params.search = search;
         if (typeof sort === "string") params.sort = sort;
@@ -32,34 +33,34 @@ class UserController {
         res.json(users);
     }
 
-    async getById(req: Request, res: Response) {
-        const user = await userService.getById(String(req.params.id));
+    async getById(req: AuthenticatedRequest, res: Response) {
+        const user = await userService.getById(String(req.params.id), tenantScope(req));
         res.json(user);
     }
 
-    async getParents(req: Request, res: Response) {
-        const parents = await userService.getParents();
+    async getParents(req: AuthenticatedRequest, res: Response) {
+        const parents = await userService.getParents(tenantScope(req));
         res.json(parents);
     }
 
     async create(req: AuthenticatedRequest, res: Response) {
         const createdBy = req.user?.userId;
-        const user = await userService.create(req.body, createdBy);
+        const user = await userService.create(req.body, createdBy, tenantScope(req));
         res.status(201).json(user);
     }
 
-    async edit(req: Request, res: Response) {
-        const user = await userService.update(String(req.params.id), req.body);
+    async edit(req: AuthenticatedRequest, res: Response) {
+        const user = await userService.update(String(req.params.id), tenantScope(req), req.body);
         res.status(200).json(user);
     }
 
-    async delete(req: Request, res: Response) {
-        await userService.delete(String(req.params.id));
+    async delete(req: AuthenticatedRequest, res: Response) {
+        await userService.delete(String(req.params.id), tenantScope(req));
         res.status(200).json({message: "Xóa người dùng thành công"});
     }
 
-    async restore(req: Request, res: Response) {
-        await userService.restore(String(req.params.id));
+    async restore(req: AuthenticatedRequest, res: Response) {
+        await userService.restore(String(req.params.id), tenantScope(req));
         res.status(200).json({message: "Khôi phục người dùng thành công"});
     }
 }

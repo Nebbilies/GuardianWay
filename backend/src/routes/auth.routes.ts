@@ -23,7 +23,7 @@ router.post(
 router.post(
     "/invites",
     authenticate,
-    authorize(["ADMIN"]),
+    authorize(["SUPER_ADMIN", "ADMIN"]),
     validate({body: issueInviteBodySchema}),
     asyncHandler(authController.issueInvite),
 );
