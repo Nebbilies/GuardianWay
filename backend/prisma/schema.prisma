@@ -63,11 +63,16 @@ model StudentProfile {
   studentClass    String
   cardTokenHash   String?          @unique
   parentId        String?          @db.Uuid
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(3)
+  deletedAt       DateTime?        @db.Timestamptz(3)
   boardingRecords BoardingRecord[]
   parent          User?            @relation("ParentToStudent", fields: [parentId], references: [id])
   school          School           @relation(fields: [schoolId], references: [id])
 
-  @@unique([studentId, schoolId])
+  // studentId is unique per school only among non-deleted rows — a partial index in
+  // the migration (Prisma can't model partial-unique), so a graduated ID can be reused.
+  @@index([studentId, schoolId])
   @@index([schoolId])
   @@index([parentId])
 }
