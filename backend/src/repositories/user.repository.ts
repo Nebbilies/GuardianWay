@@ -174,7 +174,9 @@ class UserRepository {
     }
 
     async findByEmail(email: string) {
-        return prisma.user.findUnique({
+        // email is unique only among non-deleted rows (partial index), so this is
+        // findFirst, not findUnique. deletedAt: null keeps it to the active account.
+        return prisma.user.findFirst({
             where: { email, deletedAt: null },
         });
     }

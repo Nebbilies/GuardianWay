@@ -27,43 +27,45 @@ model School {
 }
 
 model User {
-  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                    String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                  String
-  schoolId        String?          @db.Uuid
-  email                 String            @unique
+  schoolId              String?           @db.Uuid
+  // Uniqueness is a PARTIAL index (WHERE "deletedAt" IS NULL) in the migration,
+  // so a soft-deleted email frees up. Not @unique — Prisma can't model partial-unique.
+  email                 String
   password              String?
   passwordSetupRequired Boolean           @default(true)
   isActive              Boolean           @default(true)
-  lastLoginAt     DateTime?        @db.Timestamptz(3)
+  lastLoginAt           DateTime?         @db.Timestamptz(3)
   role                  Role
   phoneNumber           String?
   address               String?
-  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
-  updatedAt       DateTime         @updatedAt @db.Timestamptz(3)
-  deletedAt       DateTime?        @db.Timestamptz(3)
+  createdAt             DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime          @updatedAt @db.Timestamptz(3)
+  deletedAt             DateTime?         @db.Timestamptz(3)
   driverProfile         DriverProfile?
   notifications         Notification[]
   children              StudentProfile[]  @relation("ParentToStudent")
   inviteTokens          UserInviteToken[]
   refreshTokens         RefreshToken[]
-  school          School?          @relation(fields: [schoolId], references: [id])
-  boardingRecords BoardingRecord[] @relation("BoardingRecorder")
+  school                School?           @relation(fields: [schoolId], references: [id])
+  boardingRecords       BoardingRecord[]  @relation("BoardingRecorder")
 
   @@index([schoolId])
 }
 
 model StudentProfile {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  schoolId      String   @db.Uuid
-  fullName      String
-  dateOfBirth   DateTime
-  studentId     String
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId        String           @db.Uuid
+  fullName        String
+  dateOfBirth     DateTime
+  studentId       String
   studentClass    String
-  cardTokenHash String?  @unique
-  parentId      String?  @db.Uuid
+  cardTokenHash   String?          @unique
+  parentId        String?          @db.Uuid
   boardingRecords BoardingRecord[]
   parent          User?            @relation("ParentToStudent", fields: [parentId], references: [id])
-  school        School   @relation(fields: [schoolId], references: [id])
+  school          School           @relation(fields: [schoolId], references: [id])
 
   @@unique([studentId, schoolId])
   @@index([schoolId])
@@ -71,8 +73,8 @@ model StudentProfile {
 }
 
 model DriverProfile {
-  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId String @unique @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String    @unique @db.Uuid
   licenseNumber String
   trips         BusTrip[]
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -91,51 +93,54 @@ model Bus {
   trips        BusTrip[]
   school       School    @relation(fields: [schoolId], references: [id])
 
-  @@unique([schoolId, licensePlate])
+  // Uniqueness is a PARTIAL index (WHERE "deletedAt" IS NULL) defined in the
+  // migration, so a soft-deleted plate can be reused. Prisma can't model
+  // partial-unique, hence a plain index here + the raw index in SQL.
+  @@index([schoolId])
 }
 
 model BusStop {
-  id             String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id              String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name            String
   address         String
   latitude        Float
   longitude       Float
-  location       Unsupported("geography(Point, 4326)")?
-  isSchoolStop   Boolean                                @default(false)
-  geofenceRadius Float?                                 @default(75)
-  createdAt      DateTime                               @default(now()) @db.Timestamptz(3)
-  updatedAt      DateTime                               @updatedAt @db.Timestamptz(3)
-  deletedAt      DateTime?                              @db.Timestamptz(3)
-  schoolId       String                                 @db.Uuid
+  location        Unsupported("geography(Point, 4326)")?
+  isSchoolStop    Boolean                                @default(false)
+  geofenceRadius  Float?                                 @default(75)
+  createdAt       DateTime                               @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime                               @updatedAt @db.Timestamptz(3)
+  deletedAt       DateTime?                              @db.Timestamptz(3)
+  schoolId        String                                 @db.Uuid
   boardingRecords BoardingRecord[]
   routeStops      RouteStop[]
-  tripEvents     TripEvent[]
-  school         School                                 @relation(fields: [schoolId], references: [id])
+  tripEvents      TripEvent[]
+  school          School                                 @relation(fields: [schoolId], references: [id])
 
   @@index([schoolId])
   @@index([location], type: Gist)
 }
 
 model BusRoute {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String
   description   String?
   totalDistance Float       @default(0)
-  createdAt DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
-  deletedAt DateTime? @db.Timestamptz(3)
-  schoolId  String    @db.Uuid
+  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
+  deletedAt     DateTime?   @db.Timestamptz(3)
+  schoolId      String      @db.Uuid
   trips         BusTrip[]
   routeStops    RouteStop[]
-  school    School    @relation(fields: [schoolId], references: [id])
+  school        School      @relation(fields: [schoolId], references: [id])
 
   @@index([schoolId])
 }
 
 model RouteStop {
-  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  routeId String @db.Uuid
-  stopId  String @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  routeId       String    @db.Uuid
+  stopId        String    @db.Uuid
   stopOrder     Int
   scheduledTime DateTime? @db.Time(6)
   isFinalStop   Boolean   @default(false)
@@ -191,20 +196,20 @@ model TripEvent {
 }
 
 model BoardingRecord {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   actionType BoardingAction
-  recordedBy String   @db.Uuid
-  studentId  String   @db.Uuid
-  tripId     String   @db.Uuid
-  stopId     String   @db.Uuid
-  occurredAt DateTime @default(now()) @db.Timestamptz(3)
+  recordedBy String         @db.Uuid
+  studentId  String         @db.Uuid
+  tripId     String         @db.Uuid
+  stopId     String         @db.Uuid
+  occurredAt DateTime       @default(now()) @db.Timestamptz(3)
   note       String?
   stop       BusStop        @relation(fields: [stopId], references: [id])
   student    StudentProfile @relation(fields: [studentId], references: [id])
   trip       BusTrip        @relation(fields: [tripId], references: [id])
-  recorder   User     @relation("BoardingRecorder", fields: [recordedBy], references: [id])
+  recorder   User           @relation("BoardingRecorder", fields: [recordedBy], references: [id])
 
-  @@unique([tripId, studentId, actionType, occurredAt])
+  @@unique([tripId, studentId, actionType])
   @@index([studentId])
   @@index([tripId])
   @@index([recordedBy])
