@@ -3,8 +3,9 @@
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Field, FieldLabel, FieldError } from '@/components/ui/field'
+import {Field, FieldLabel, FieldDescription} from '@/components/ui/field'
+import {PasswordInput} from '@/components/custom/password-input'
+import {AuthShell} from '@/components/custom/auth-shell'
 import { apiRequest } from '@/lib/api-client'
 
 function SetupPasswordForm() {
@@ -53,26 +54,29 @@ function SetupPasswordForm() {
     }
 
     return (
-        <div className="mx-auto mt-24 w-full max-w-md rounded-lg border border-border bg-card p-6">
-            <h1 className="mb-2 text-2xl font-semibold">Thiết lập mật khẩu</h1>
-            <p className="mb-6 text-sm text-muted-foreground">Nhập mật khẩu mới để hoàn tất kích hoạt tài khoản.</p>
-
+        <AuthShell
+            title="Thiết lập mật khẩu"
+            description="Nhập mật khẩu mới để hoàn tất kích hoạt tài khoản."
+        >
             <form onSubmit={onSubmit} className="space-y-4">
                 <Field>
-                    <FieldLabel>Mật khẩu mới</FieldLabel>
-                    <Input
-                        type="password"
+                    <FieldLabel htmlFor="password">Mật khẩu mới</FieldLabel>
+                    <PasswordInput
+                        id="password"
+                        autoComplete="new-password"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         required
                         disabled={isSubmitting}
                     />
+                    <FieldDescription>Ít nhất 8 ký tự.</FieldDescription>
                 </Field>
 
                 <Field>
-                    <FieldLabel>Xác nhận mật khẩu</FieldLabel>
-                    <Input
-                        type="password"
+                    <FieldLabel htmlFor="confirmPassword">Xác nhận mật khẩu</FieldLabel>
+                    <PasswordInput
+                        id="confirmPassword"
+                        autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(event) => setConfirmPassword(event.target.value)}
                         required
@@ -80,19 +84,24 @@ function SetupPasswordForm() {
                     />
                 </Field>
 
-                {error ? <FieldError errors={[{ message: error }]} /> : null}
+                {error ? (
+                    <div role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        {error}
+                    </div>
+                ) : null}
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? 'Đang lưu...' : 'Hoàn tất'}
                 </Button>
             </form>
-        </div>
+        </AuthShell>
     )
 }
 
 export default function SetupPasswordPage() {
     return (
-        <Suspense fallback={<div className="mx-auto mt-24 w-full max-w-md text-center">Đang tải...</div>}>
+        <Suspense fallback={<div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Đang
+            tải...</div>}>
             <SetupPasswordForm />
         </Suspense>
     )

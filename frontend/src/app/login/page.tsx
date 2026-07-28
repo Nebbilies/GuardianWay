@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Field, FieldLabel, FieldError } from '@/components/ui/field'
+import {Field, FieldLabel} from '@/components/ui/field'
+import {PasswordInput} from '@/components/custom/password-input'
+import {AuthShell} from '@/components/custom/auth-shell'
 import { apiRequest } from '@/lib/api-client'
 
 export default function LoginPage() {
@@ -35,15 +37,18 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="mx-auto mt-24 w-full max-w-md rounded-lg border border-border bg-card p-6">
-            <h1 className="mb-2 text-2xl font-semibold">Đăng nhập quản trị</h1>
-            <p className="mb-6 text-sm text-muted-foreground">Dùng tài khoản đã thiết lập mật khẩu qua liên kết mời.</p>
-
+        <AuthShell
+            title="Đăng nhập quản trị"
+            description="Dùng tài khoản đã thiết lập mật khẩu qua liên kết mời."
+        >
             <form onSubmit={onSubmit} className="space-y-4">
                 <Field>
-                    <FieldLabel>Email</FieldLabel>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
                     <Input
+                        id="email"
                         type="email"
+                        autoComplete="email"
+                        placeholder="ban@truong.edu.vn"
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                         required
@@ -52,9 +57,10 @@ export default function LoginPage() {
                 </Field>
 
                 <Field>
-                    <FieldLabel>Mật khẩu</FieldLabel>
-                    <Input
-                        type="password"
+                    <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
+                    <PasswordInput
+                        id="password"
+                        autoComplete="current-password"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         required
@@ -62,12 +68,16 @@ export default function LoginPage() {
                     />
                 </Field>
 
-                {error ? <FieldError errors={[{ message: error }]} /> : null}
+                {error ? (
+                    <div role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        {error}
+                    </div>
+                ) : null}
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
                 </Button>
             </form>
-        </div>
+        </AuthShell>
     )
 }
