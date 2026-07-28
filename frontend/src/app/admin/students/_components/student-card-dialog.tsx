@@ -1,6 +1,6 @@
 'use client'
 
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Field, FieldDescription, FieldLabel} from '@/components/ui/field'
@@ -30,12 +30,9 @@ export default function StudentCardDialog({
                                               onRemove,
                                               isSubmitting = false,
                                           }: StudentCardDialogProps) {
+    // Reset via `key` on the parent (student id) instead of an effect, so the
+    // input starts empty for each student without a synchronous setState.
     const [cardId, setCardId] = useState('')
-
-    // Reset the input whenever a different student's dialog opens.
-    useEffect(() => {
-        if (open) setCardId('')
-    }, [open, student?.id])
 
     const hasCard = !!student?.cardTokenHash
 

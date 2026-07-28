@@ -301,6 +301,7 @@ export default function StudentsPage() {
                 />
             </FormDialog>
             <StudentCardDialog
+                key={cardStudent?.id ?? 'none'}
                 student={cardStudent}
                 open={isCardDialogOpen}
                 onOpenChange={(open) => {
