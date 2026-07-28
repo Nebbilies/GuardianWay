@@ -1,8 +1,11 @@
 import {Bus, BusRoute, BusTrip, DriverProfile, RouteStop, StudentProfile, User} from './entities'
 
 export type UserWithProfiles = User & {
-    studentProfile: StudentProfile | null
     driverProfile: DriverProfile | null
+}
+
+export type StudentWithParent = StudentProfile & {
+    parent: Pick<User, 'id' | 'name' | 'email' | 'phoneNumber'> | null
 }
 
 export type BusRouteWithStops = BusRoute & {

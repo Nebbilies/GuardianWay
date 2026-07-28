@@ -1,6 +1,6 @@
 'use client'
 
-import {useEffect, useState} from 'react'
+import {useEffect} from 'react'
 import {useForm, Controller} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -9,68 +9,35 @@ import {Input} from '@/components/ui/input'
 import {Field, FieldLabel, FieldError} from '@/components/ui/field'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {UserWithProfiles} from '@/types/types'
-import useSWR from 'swr'
 
+// SUPER_ADMIN is intentionally absent — it is a null-school system account created
+// only through the (deferred) super-admin console, never from a school's admin portal.
 const ROLE_OPTIONS = [
     {value: 'ADMIN', label: 'Quản trị viên'},
-    {value: 'STAFF', label: 'Nhân viên'},
     {value: 'DRIVER', label: 'Tài xế'},
-    {value: 'STUDENT', label: 'Học sinh'},
     {value: 'PARENT', label: 'Phụ huynh'},
 ] as const
 
 const userSchema = z.object({
     name: z.string().min(1, "Vui lòng nhập họ tên"),
     email: z.string().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
-    phoneNumber: z.string().regex(/^\d{10,11}$/, "Số điện thoại không hợp lệ").optional(),
+    phoneNumber: z.string().regex(/^\d{10,11}$/, "Số điện thoại không hợp lệ").optional().or(z.literal('')),
     address: z.string().optional(),
-    role: z.enum(['ADMIN', 'STAFF', 'DRIVER', 'STUDENT', 'PARENT'], {
+    role: z.enum(['ADMIN', 'DRIVER', 'PARENT'], {
         error: () => ({message: "Vui lòng chọn vai trò"}),
     }),
-    studentId: z.string().optional(),
-    studentClass: z.string().optional(),
-    parentId: z.string().optional(),
     licenseNumber: z.string().optional(),
 }).superRefine((data, ctx) => {
-    if (data.role === 'STUDENT') {
-        if (!data.studentId || data.studentId.trim() === '') {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Vui lòng nhập mã học sinh",
-                path: ['studentId'],
-            })
-        }
-        if (!data.studentClass || data.studentClass.trim() === '') {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Vui lòng nhập lớp",
-                path: ['studentClass'],
-            })
-        }
-    }
-    if (data.role === 'DRIVER') {
-        if (!data.licenseNumber || data.licenseNumber.trim() === '') {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Vui lòng nhập số giấy phép lái xe",
-                path: ['licenseNumber'],
-            })
-        }
+    if (data.role === 'DRIVER' && !data.licenseNumber?.trim()) {
+        ctx.addIssue({
+            code: 'custom',
+            message: "Vui lòng nhập số giấy phép lái xe",
+            path: ['licenseNumber'],
+        })
     }
 })
 
 export type UserFormValues = z.infer<typeof userSchema>
-
-interface ParentOption {
-    id: string
-    name: string
-    email: string
-}
-
-const parentsFetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => {
-    if (!res.ok) throw new Error('Failed to fetch parents')
-    return res.json()
-})
 
 interface UserFormProps {
     initialData?: UserWithProfiles
@@ -94,22 +61,13 @@ export default function UserForm({
             email: initialData?.email || '',
             phoneNumber: initialData?.phoneNumber || '',
             address: initialData?.address || '',
-            role: initialData?.role || 'STUDENT',
-            studentId: initialData?.studentProfile?.studentId || '',
-            studentClass: initialData?.studentProfile?.studentClass || '',
-            parentId: initialData?.studentProfile?.parentId || '',
+            role: initialData?.role === 'SUPER_ADMIN' ? 'ADMIN' : (initialData?.role || 'PARENT'),
             licenseNumber: initialData?.driverProfile?.licenseNumber || '',
         },
         mode: 'onChange',
     })
 
     const watchedRole = form.watch('role')
-
-    // Fetch parents for student role
-    const {data: parents} = useSWR<ParentOption[]>(
-        watchedRole === 'STUDENT' ? `/users/parents` : null,
-        parentsFetcher
-    )
 
     useEffect(() => {
         if (initialData) {
@@ -118,24 +76,20 @@ export default function UserForm({
                 email: initialData.email || '',
                 phoneNumber: initialData.phoneNumber || '',
                 address: initialData.address || '',
-                role: initialData.role || 'STUDENT',
-                studentId: initialData.studentProfile?.studentId || '',
-                studentClass: initialData.studentProfile?.studentClass || '',
-                parentId: initialData.studentProfile?.parentId || '',
+                role: initialData.role === 'SUPER_ADMIN' ? 'ADMIN' : (initialData.role || 'PARENT'),
                 licenseNumber: initialData.driverProfile?.licenseNumber || '',
             })
         }
     }, [initialData, form])
 
     const handleSubmit = async (data: UserFormValues) => {
-        const cleanData = {...data}
-        if (data.role !== 'STUDENT') {
-            delete cleanData.studentId
-            delete cleanData.studentClass
-            delete cleanData.parentId
-        }
-        if (data.role !== 'DRIVER') {
-            delete cleanData.licenseNumber
+        const cleanData: UserFormValues = {
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            phoneNumber: data.phoneNumber || undefined,
+            address: data.address || undefined,
+            ...(data.role === 'DRIVER' ? {licenseNumber: data.licenseNumber} : {}),
         }
         if (initialData?.id) {
             await onSubmit({...cleanData, id: initialData.id})
@@ -263,83 +217,6 @@ export default function UserForm({
                     </Field>
                 )}
             />
-
-            {watchedRole === 'STUDENT' && (
-                <div className="space-y-4 rounded-lg border border-border p-4">
-                    <h3 className="text-sm font-semibold text-foreground">Thông tin học sinh</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Controller
-                            name="studentId"
-                            control={form.control}
-                            render={({field, fieldState}) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel htmlFor={field.name}>
-                                        Mã học sinh <span className={'text-destructive'}>*</span>
-                                    </FieldLabel>
-                                    <Input
-                                        {...field}
-                                        id={field.name}
-                                        placeholder="VD: HS001"
-                                        aria-invalid={fieldState.invalid}
-                                        disabled={isLoading}
-                                    />
-                                    {fieldState.invalid && <FieldError errors={[fieldState.error]}/>}
-                                </Field>
-                            )}
-                        />
-
-                        <Controller
-                            name="studentClass"
-                            control={form.control}
-                            render={({field, fieldState}) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel htmlFor={field.name}>
-                                        Lớp <span className={'text-destructive'}>*</span>
-                                    </FieldLabel>
-                                    <Input
-                                        {...field}
-                                        id={field.name}
-                                        placeholder="VD: 10A1"
-                                        aria-invalid={fieldState.invalid}
-                                        disabled={isLoading}
-                                    />
-                                    {fieldState.invalid && <FieldError errors={[fieldState.error]}/>}
-                                </Field>
-                            )}
-                        />
-                    </div>
-
-                    <Controller
-                        name="parentId"
-                        control={form.control}
-                        render={({field, fieldState}) => (
-                            <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel htmlFor={field.name}>
-                                    Phụ huynh
-                                </FieldLabel>
-                                <Select
-                                    value={field.value || ''}
-                                    onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
-                                    disabled={isLoading}
-                                >
-                                    <SelectTrigger aria-invalid={fieldState.invalid}>
-                                        <SelectValue placeholder="Chọn phụ huynh (không bắt buộc)"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="__none__">Không chọn</SelectItem>
-                                        {parents?.map((parent) => (
-                                            <SelectItem key={parent.id} value={parent.id}>
-                                                {parent.name} ({parent.email})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {fieldState.invalid && <FieldError errors={[fieldState.error]}/>}
-                            </Field>
-                        )}
-                    />
-                </div>
-            )}
 
             {watchedRole === 'DRIVER' && (
                 <div className="space-y-4 rounded-lg border border-border p-4">

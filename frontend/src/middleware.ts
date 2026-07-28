@@ -27,7 +27,7 @@ export function middleware(req: NextRequest) {
         }
 
         const payload = decodeJwtPayload(accessToken)
-        const allowedRoles = new Set(['ADMIN', 'STAFF'])
+        const allowedRoles = new Set(['SUPER_ADMIN', 'ADMIN'])
 
         if (!payload?.role || !allowedRoles.has(payload.role)) {
             const loginUrl = new URL('/login', req.url)

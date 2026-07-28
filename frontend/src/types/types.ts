@@ -10,9 +10,11 @@ export type {
     Role,
     BusStatus,
     BusTripStatus,
+    TripType,
     PaginatedResponse,
     PaginationMetadata,
     UserWithProfiles,
+    StudentWithParent,
     BusRouteWithStops,
     BusTripWithDetails,
 } from '@gw/shared'

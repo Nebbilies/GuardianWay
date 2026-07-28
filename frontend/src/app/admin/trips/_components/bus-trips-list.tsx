@@ -15,7 +15,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import {BusTripStatus, BusTripWithDetails, PaginatedResponse} from '@/types/types'
+import {BusTripStatus, BusTripWithDetails, PaginatedResponse, TripType} from '@/types/types'
 
 interface BusTripsListProps {
     busTrips: PaginatedResponse<BusTripWithDetails>
@@ -34,13 +34,19 @@ const statusLabelMap: Record<BusTripStatus, string> = {
     CANCELLED: 'Đã hủy',
 }
 
-const formatDate = (value: Date | string) => {
-    return new Date(value).toLocaleDateString('vi-VN')
+const tripTypeLabelMap: Record<TripType, string> = {
+    PICKUP: 'Đón',
+    DROPOFF: 'Trả',
 }
 
-const formatTime = (value: Date | string | null | undefined) => {
-    if (!value) return '—'
-    return new Date(value).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})
+const formatDateTime = (value: string) => {
+    return new Date(value).toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    })
 }
 
 export default function BusTripsList({
@@ -75,15 +81,12 @@ export default function BusTripsList({
                     <th className="px-6 py-3 text-left text-sm">Tuyến đường</th>
                     <th className="px-6 py-3 text-left text-sm">Xe buýt</th>
                     <th className="px-6 py-3 text-left text-sm">Tài xế</th>
+                    <th className="px-6 py-3 text-left text-sm">Loại</th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Ngày chạy" sortKeyValue="date" sortBy={sortBy} sortOrder={sortOrder}
-                                    onSortChange={onSortChange}/>
+                        <SortHeader label="Bắt đầu" sortKeyValue="scheduledStartTime" sortBy={sortBy}
+                                    sortOrder={sortOrder} onSortChange={onSortChange}/>
                     </th>
-                    <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Giờ bắt đầu" sortKeyValue="startTime" sortBy={sortBy} sortOrder={sortOrder}
-                                    onSortChange={onSortChange}/>
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm">Giờ kết thúc</th>
+                    <th className="px-6 py-3 text-left text-sm">Kết thúc</th>
                     <th className="px-6 py-3 text-left text-sm">
                         <SortHeader label="Trạng thái" sortKeyValue="status" sortBy={sortBy} sortOrder={sortOrder}
                                     onSortChange={onSortChange}/>
@@ -104,9 +107,9 @@ export default function BusTripsList({
                         <td className="px-6 py-4 text-sm text-foreground">{trip.route.name}</td>
                         <td className="px-6 py-4 text-sm text-foreground">{trip.bus.licensePlate}</td>
                         <td className="px-6 py-4 text-sm text-foreground">{trip.driver.user.name}</td>
-                        <td className="px-6 py-4 text-sm text-foreground">{formatDate(trip.date)}</td>
-                        <td className="px-6 py-4 text-sm text-foreground">{formatTime(trip.startTime)}</td>
-                        <td className="px-6 py-4 text-sm text-foreground">{formatTime(trip.endTime)}</td>
+                        <td className="px-6 py-4 text-sm text-foreground">{tripTypeLabelMap[trip.tripType]}</td>
+                        <td className="px-6 py-4 text-sm text-foreground">{formatDateTime(trip.scheduledStartTime)}</td>
+                        <td className="px-6 py-4 text-sm text-foreground">{formatDateTime(trip.scheduledEndTime)}</td>
                         <td className="px-6 py-4 text-sm text-foreground">{statusLabelMap[trip.status]}</td>
                         <td className="px-6 py-4 text-sm text-foreground">{new Date(trip.createdAt).toLocaleString('vi-VN')}</td>
                         <td className="px-6 py-4 text-sm text-right">

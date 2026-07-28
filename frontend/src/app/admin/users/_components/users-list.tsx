@@ -18,10 +18,9 @@ import {
 import {UserWithProfiles, PaginatedResponse} from '@/types/types'
 
 const ROLE_LABELS: Record<string, string> = {
+    SUPER_ADMIN: 'Quản trị hệ thống',
     ADMIN: 'Quản trị viên',
-    STAFF: 'Nhân viên',
     DRIVER: 'Tài xế',
-    STUDENT: 'Học sinh',
     PARENT: 'Phụ huynh',
 }
 

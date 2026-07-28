@@ -7,34 +7,26 @@ import * as z from 'zod'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Field, FieldError, FieldLabel} from '@/components/ui/field'
-import {Bus, BusRouteWithStops, BusTripStatus, BusTripWithDetails, UserWithProfiles} from '@/types/types'
+import {Bus, BusRouteWithStops, BusTripStatus, BusTripWithDetails, TripType, UserWithProfiles} from '@/types/types'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
+import {toDatetimeLocalValue, toIsoWithOffset} from '@/lib/datetime'
 
 const busTripSchema = z.object({
     routeId: z.string().min(1, 'Vui lòng chọn tuyến đường'),
     busId: z.string().min(1, 'Vui lòng chọn xe buýt'),
     driverId: z.string().min(1, 'Vui lòng chọn tài xế'),
-    date: z.string().min(1, 'Vui lòng chọn ngày chạy'),
-    startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Giờ bắt đầu không hợp lệ'),
-    endTime: z.string().optional(),
+    tripType: z.enum(['PICKUP', 'DROPOFF'], {error: () => ({message: 'Vui lòng chọn loại chuyến'})}),
+    scheduledStartTime: z.string().min(1, 'Vui lòng chọn giờ bắt đầu'),
+    scheduledEndTime: z.string().min(1, 'Vui lòng chọn giờ kết thúc'),
     status: z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'], {
         error: () => ({message: 'Trạng thái không hợp lệ'})
     }),
 }).superRefine((data, ctx) => {
-    if (!data.endTime) {
-        return
-    }
-
-    const [startHour, startMinute] = data.startTime.split(':').map(Number)
-    const [endHour, endMinute] = data.endTime.split(':').map(Number)
-    const start = startHour * 60 + startMinute
-    const end = endHour * 60 + endMinute
-
-    if (end <= start) {
+    if (new Date(data.scheduledEndTime).getTime() <= new Date(data.scheduledStartTime).getTime()) {
         ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: 'Giờ kết thúc phải sau giờ bắt đầu',
-            path: ['endTime'],
+            path: ['scheduledEndTime'],
         })
     }
 })
@@ -58,15 +50,10 @@ const statusOptions: { value: BusTripStatus; label: string }[] = [
     {value: 'CANCELLED', label: 'Đã hủy'},
 ]
 
-const toDateInputValue = (value: Date | string) => {
-    const date = new Date(value)
-    return date.toISOString().split('T')[0]
-}
-
-const toTimeInputValue = (value: Date | string | null | undefined) => {
-    if (!value) return ''
-    return new Date(value).toISOString().substring(11, 16)
-}
+const tripTypeOptions: { value: TripType; label: string }[] = [
+    {value: 'PICKUP', label: 'Đón'},
+    {value: 'DROPOFF', label: 'Trả'},
+]
 
 const toDriverLabel = (driver: UserWithProfiles) => {
     const license = driver.driverProfile?.licenseNumber
@@ -104,9 +91,9 @@ export default function BusTripForm({
             routeId: initialData?.routeId || '',
             busId: initialData?.busId || '',
             driverId: initialData?.driverId || '',
-            date: initialData?.date ? toDateInputValue(initialData.date) : '',
-            startTime: initialData?.startTime ? toTimeInputValue(initialData.startTime) : '',
-            endTime: initialData?.endTime ? toTimeInputValue(initialData.endTime) : '',
+            tripType: initialData?.tripType || 'PICKUP',
+            scheduledStartTime: initialData ? toDatetimeLocalValue(initialData.scheduledStartTime) : '',
+            scheduledEndTime: initialData ? toDatetimeLocalValue(initialData.scheduledEndTime) : '',
             status: initialData?.status || 'SCHEDULED',
         },
         mode: 'onChange',
@@ -118,9 +105,9 @@ export default function BusTripForm({
                 routeId: '',
                 busId: '',
                 driverId: '',
-                date: '',
-                startTime: '',
-                endTime: '',
+                tripType: 'PICKUP',
+                scheduledStartTime: '',
+                scheduledEndTime: '',
                 status: 'SCHEDULED',
             })
             return
@@ -130,17 +117,22 @@ export default function BusTripForm({
             routeId: initialData.routeId,
             busId: initialData.busId,
             driverId: initialData.driverId,
-            date: toDateInputValue(initialData.date),
-            startTime: toTimeInputValue(initialData.startTime),
-            endTime: toTimeInputValue(initialData.endTime),
+            tripType: initialData.tripType,
+            scheduledStartTime: toDatetimeLocalValue(initialData.scheduledStartTime),
+            scheduledEndTime: toDatetimeLocalValue(initialData.scheduledEndTime),
             status: initialData.status,
         })
     }, [initialData, form])
 
     const handleSubmit = async (data: BusTripFormValues) => {
         const payload = {
-            ...data,
-            endTime: data.endTime?.trim() ? data.endTime : undefined,
+            routeId: data.routeId,
+            busId: data.busId,
+            driverId: data.driverId,
+            tripType: data.tripType,
+            scheduledStartTime: toIsoWithOffset(data.scheduledStartTime),
+            scheduledEndTime: toIsoWithOffset(data.scheduledEndTime),
+            status: data.status,
         }
 
         if (initialData?.id) {
@@ -177,18 +169,22 @@ export default function BusTripForm({
                     />
 
                     <Controller
-                        name="date"
+                        name="tripType"
                         control={form.control}
                         render={({field, fieldState}) => (
                             <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel htmlFor={field.name}>Ngày chạy <span className={'text-destructive'}>*</span></FieldLabel>
-                                <Input
-                                    {...field}
-                                    id={field.name}
-                                    type={'date'}
-                                    aria-invalid={fieldState.invalid}
-                                    disabled={isLoading}
-                                />
+                                <FieldLabel>Loại chuyến <span className={'text-destructive'}>*</span></FieldLabel>
+                                <Select value={field.value} onValueChange={field.onChange} disabled={isLoading}>
+                                    <SelectTrigger aria-invalid={fieldState.invalid}>
+                                        <SelectValue placeholder={'Chọn loại chuyến'}/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tripTypeOptions.map((option) => (
+                                            <SelectItem key={option.value}
+                                                        value={option.value}>{option.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 {fieldState.invalid && <FieldError errors={[fieldState.error]}/>}
                             </Field>
                         )}
@@ -272,7 +268,7 @@ export default function BusTripForm({
                 <h3 className={'text-base font-semibold'}>Thời gian</h3>
                 <div className={'grid grid-cols-1 gap-4 md:grid-cols-2'}>
                     <Controller
-                        name="startTime"
+                        name="scheduledStartTime"
                         control={form.control}
                         render={({field, fieldState}) => (
                             <Field data-invalid={fieldState.invalid}>
@@ -281,7 +277,7 @@ export default function BusTripForm({
                                 <Input
                                     {...field}
                                     id={field.name}
-                                    type={'time'}
+                                    type={'datetime-local'}
                                     aria-invalid={fieldState.invalid}
                                     disabled={isLoading}
                                 />
@@ -291,15 +287,16 @@ export default function BusTripForm({
                     />
 
                     <Controller
-                        name="endTime"
+                        name="scheduledEndTime"
                         control={form.control}
                         render={({field, fieldState}) => (
                             <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel htmlFor={field.name}>Giờ kết thúc</FieldLabel>
+                                <FieldLabel htmlFor={field.name}>Giờ kết thúc <span
+                                    className={'text-destructive'}>*</span></FieldLabel>
                                 <Input
                                     {...field}
                                     id={field.name}
-                                    type={'time'}
+                                    type={'datetime-local'}
                                     aria-invalid={fieldState.invalid}
                                     disabled={isLoading}
                                 />

@@ -24,9 +24,6 @@ interface ExportUser {
     role: string;
     phoneNumber: string | null;
     address: string | null;
-    studentId: string | null;
-    studentClass: string | null;
-    parentId: string | null;
     licenseNumber: string | null;
     createdAt: string;
     updatedAt: string;
@@ -222,9 +219,6 @@ export default function UsersPage() {
                     role: sanitizeExcelValue(user.role),
                     phoneNumber: sanitizeExcelValue(user.phoneNumber),
                     address: sanitizeExcelValue(user.address),
-                    studentId: sanitizeExcelValue(user.studentId),
-                    studentClass: sanitizeExcelValue(user.studentClass),
-                    parentId: sanitizeExcelValue(user.parentId),
                     licenseNumber: sanitizeExcelValue(user.licenseNumber),
                     createdAt: new Date(user.createdAt),
                     updatedAt: new Date(user.updatedAt),
@@ -242,9 +236,6 @@ export default function UsersPage() {
                         {column: 'Vai trò', type: String, value: (row) => row.role},
                         {column: 'Số điện thoại', type: String, value: (row) => row.phoneNumber},
                         {column: 'Địa chỉ', width: 25, type: String, value: (row) => row.address},
-                        {column: 'Mã học sinh', type: String, value: (row) => row.studentId},
-                        {column: 'Lớp', type: String, value: (row) => row.studentClass},
-                        {column: 'ID phụ huynh', type: String, value: (row) => row.parentId},
                         {column: 'Số GPLX', type: String, value: (row) => row.licenseNumber},
                         {column: 'Ngày tạo', type: Date, format: 'dd/mm/yyyy', value: (row) => row.createdAt},
                         {column: 'Ngày cập nhật', type: Date, format: 'dd/mm/yyyy', value: (row) => row.updatedAt},
@@ -282,9 +273,7 @@ export default function UsersPage() {
                         <SelectContent>
                             <SelectItem value={'ALL'}>Tất cả</SelectItem>
                             <SelectItem value={'ADMIN'}>Quản trị viên</SelectItem>
-                            <SelectItem value={'STAFF'}>Nhân viên</SelectItem>
                             <SelectItem value={'DRIVER'}>Tài xế</SelectItem>
-                            <SelectItem value={'STUDENT'}>Học sinh</SelectItem>
                             <SelectItem value={'PARENT'}>Phụ huynh</SelectItem>
                         </SelectContent>
                     </Select>
