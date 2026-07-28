@@ -14,6 +14,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import BusesList from "@/app/admin/buses/_components/buses-list";
 
 import { apiRequest } from "@/lib/api-client";
+import TableSkeleton from "@/components/custom/table-skeleton";
 
 const fetcher = <T,>(url: string) => apiRequest<T>(url);
 
@@ -78,7 +79,7 @@ export default function StopsPage() {
     } = useSWR<PaginatedResponse<Bus>>(`/buses?${params.toString()}`, fetcher);
 
     if (error) {
-        return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
+        return <div className={'p-8 bg-background'}>Lỗi khi tải dữ liệu: {error.message}</div>
     }
 
     const handleCloseDialog = () => {
@@ -135,7 +136,7 @@ export default function StopsPage() {
     }
 
     return (
-        <div className={'p-8 bg-white'}>
+        <div className={'p-8 bg-background'}>
             <div className={'flex justify-between mb-8 items-center'}>
                 <div>
                     <h1 className={'text-4xl font-bold text-foreground'}>Danh sách xe buýt</h1>
@@ -168,9 +169,7 @@ export default function StopsPage() {
                 </div>
             </div>
             {isLoading || !buses ? (
-                <div className="bg-card border border-border rounded-lg p-8 text-center">
-                    <p className="text-muted-foreground">Đang tải dữ liệu</p>
-                </div>
+                <TableSkeleton columns={6}/>
             ) : (
                 <>
                     <BusesList

@@ -5,5 +5,8 @@
     "frontend",
     "backend",
     "shared"
-  ]
+  ],
+  "devDependencies": {
+    "shadcn": "^4.16.0"
+  }
 }

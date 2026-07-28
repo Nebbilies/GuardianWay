@@ -16,6 +16,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import {Bus, PaginatedResponse} from '@/types/types'
+import {BusStatusBadge} from '@/components/custom/status-badge'
 
 interface BusesListProps {
     buses: PaginatedResponse<Bus>
@@ -96,7 +97,7 @@ export default function BusesList({
                             {bus.capacity}
                         </td>
                         <td className="px-6 py-4 text-sm text-foreground">
-                            {bus.status}
+                            <BusStatusBadge status={bus.status}/>
                         </td>
                         <td className="px-6 py-4 text-sm text-foreground">
                             {new Date(bus.createdAt).toLocaleString()}

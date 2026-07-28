@@ -1,18 +1,32 @@
+'use client'
+
+import {usePathname} from "next/navigation";
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarMenu,
-    SidebarHeader, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuItem, SidebarMenuButton,
-    SidebarMenuSubButton
+    SidebarHeader,
+    SidebarMenuItem,
+    SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import {Bus, ChevronDown, MapPin, Route, Users} from "lucide-react";
+import {Bus, GraduationCap, MapPin, Navigation, Route, Users} from "lucide-react";
 import Link from "next/link";
 import {Separator} from "@/components/ui/separator";
-import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
 import LogoutButton from "./logout-button";
 
+const NAV_ITEMS = [
+    {href: '/admin/stops', label: 'Điểm dừng', icon: MapPin},
+    {href: '/admin/routes', label: 'Tuyến đường', icon: Route},
+    {href: '/admin/buses', label: 'Xe buýt', icon: Bus},
+    {href: '/admin/trips', label: 'Chuyến đi', icon: Navigation},
+    {href: '/admin/students', label: 'Học sinh', icon: GraduationCap},
+    {href: '/admin/users', label: 'Người dùng', icon: Users},
+] as const
+
 export default function AdminSidebar() {
+    const pathname = usePathname()
+
     return (
         <Sidebar>
             <SidebarHeader className={'flex flex-col items-center py-4'}>
@@ -30,108 +44,20 @@ export default function AdminSidebar() {
             </SidebarHeader>
             <Separator/>
             <SidebarContent className={'pt-4'}>
-                <SidebarMenu>
-                    <Collapsible defaultOpen className="group/collapsible">
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton>
-                                    <MapPin className={'h-8 w-8'}/>
-                                    <span className={'font-semibold'}>Quản lý điểm dừng</span>
-                                    <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                <SidebarMenu className={'gap-1 px-2'}>
+                    {NAV_ITEMS.map((item) => {
+                        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                        return (
+                            <SidebarMenuItem key={item.href}>
+                                <SidebarMenuButton asChild isActive={isActive}>
+                                    <Link href={item.href}>
+                                        <item.icon className={'h-5 w-5'}/>
+                                        <span className={'font-medium'}>{item.label}</span>
+                                    </Link>
                                 </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton href={'/admin/stops'}>
-                                            Danh sách điểm dừng
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
-                    <Collapsible className="group/collapsible">
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton>
-                                    <Route className={'h-8 w-8'}/>
-                                    <span className={'font-semibold'}>Quản lý tuyến đường</span>
-                                    <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton href={'/admin/routes'}>
-                                            Danh sách tuyến đường
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
-                    <Collapsible className="group/collapsible">
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton>
-                                    <Bus     className={'h-8 w-8'}/>
-                                    <span className={'font-semibold'}>Quản lý xe buýt</span>
-                                    <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton href={'/admin/buses'}>
-                                            Danh sách xe buýt
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
-                    <Collapsible className="group/collapsible">
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton>
-                                    <Route className={'h-8 w-8'}/>
-                                    <span className={'font-semibold'}>Quản lý chuyến đi</span>
-                                    <ChevronDown
-                                        className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180"/>
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton href={'/admin/trips'}>
-                                            Danh sách chuyến đi
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
-                    <Collapsible className="group/collapsible">
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton>
-                                    <Users className={'h-8 w-8'}/>
-                                    <span className={'font-semibold'}>Quản lý người dùng</span>
-                                    <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton href={'/admin/users'}>
-                                            Danh sách người dùng
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
+                            </SidebarMenuItem>
+                        )
+                    })}
                 </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
@@ -140,6 +66,5 @@ export default function AdminSidebar() {
                 </SidebarMenu>
             </SidebarFooter>
         </Sidebar>
-
     )
 }

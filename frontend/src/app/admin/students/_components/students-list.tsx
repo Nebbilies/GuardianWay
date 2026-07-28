@@ -1,7 +1,7 @@
 'use client'
 
 import {useState} from 'react'
-import {Edit2, Trash2, RotateCcw} from 'lucide-react'
+import {CreditCard, Edit2, RotateCcw, Trash2} from 'lucide-react'
 import {Button} from '@/components/ui/button'
 import {SortHeader} from '@/components/custom/sort-header'
 import {Empty, EmptyDescription, EmptyTitle} from '@/components/ui/empty'
@@ -15,14 +15,15 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import {UserWithProfiles, PaginatedResponse} from '@/types/types'
-import {RoleBadge} from '@/components/custom/status-badge'
+import {PaginatedResponse, StudentWithParent} from '@/types/types'
+import {CardStatusBadge} from '@/components/custom/status-badge'
 
-interface UsersListProps {
-    users: PaginatedResponse<UserWithProfiles>
-    onEdit: (user: UserWithProfiles) => void
+interface StudentsListProps {
+    students: PaginatedResponse<StudentWithParent>
+    onEdit: (student: StudentWithParent) => void
     onDelete: (id: string) => Promise<void>
     onRestore: (id: string) => Promise<void>
+    onManageCard: (student: StudentWithParent) => void
     onSortChange: (sortBy: string) => void
     sortBy: string
     sortOrder: 'asc' | 'desc'
@@ -31,29 +32,32 @@ interface UsersListProps {
     isDeletedMode: boolean
 }
 
-export default function UsersList({
-                                      users,
-                                      onEdit,
-                                      onDelete,
-                                      onRestore,
-                                      onSortChange,
-                                      sortBy,
-                                      sortOrder,
-                                      isDeleting,
-                                      isRestoring,
-                                      isDeletedMode,
-                                  }: UsersListProps) {
-    const [deletingUserId, setDeletingUserId] = useState<string | null>(null)
-    const [restoringUserId, setRestoringUserId] = useState<string | null>(null)
+const formatDate = (value: string) => new Date(value).toLocaleDateString('vi-VN')
 
-    if (!users?.data || users.data.length === 0) {
+export default function StudentsList({
+                                         students,
+                                         onEdit,
+                                         onDelete,
+                                         onRestore,
+                                         onManageCard,
+                                         onSortChange,
+                                         sortBy,
+                                         sortOrder,
+                                         isDeleting,
+                                         isRestoring,
+                                         isDeletedMode,
+                                     }: StudentsListProps) {
+    const [deletingStudentId, setDeletingStudentId] = useState<string | null>(null)
+    const [restoringStudentId, setRestoringStudentId] = useState<string | null>(null)
+
+    if (!students?.data || students.data.length === 0) {
         return (
             <Empty>
                 <EmptyTitle>
-                    Không có người dùng nào.
+                    Không có học sinh nào.
                 </EmptyTitle>
                 <EmptyDescription>
-                    {isDeletedMode ? 'Không có tài khoản đã xóa.' : 'Hãy thêm một người dùng mới.'}
+                    {isDeletedMode ? 'Không có học sinh đã xóa.' : 'Hãy thêm một học sinh mới.'}
                 </EmptyDescription>
             </Empty>
         )
@@ -65,63 +69,55 @@ export default function UsersList({
                 <thead>
                 <tr className="border-b border-border bg-muted">
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Họ tên" sortKeyValue="name" sortBy={sortBy} sortOrder={sortOrder}
+                        <SortHeader label="Họ tên" sortKeyValue="fullName" sortBy={sortBy} sortOrder={sortOrder}
                                     onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Email" sortKeyValue="email" sortBy={sortBy} sortOrder={sortOrder}
+                        <SortHeader label="Mã học sinh" sortKeyValue="studentId" sortBy={sortBy} sortOrder={sortOrder}
                                     onSortChange={onSortChange}/>
                     </th>
                     <th className="px-6 py-3 text-left text-sm">
-                        <SortHeader label="Vai trò" sortKeyValue="role" sortBy={sortBy} sortOrder={sortOrder}
+                        <SortHeader label="Lớp" sortKeyValue="studentClass" sortBy={sortBy} sortOrder={sortOrder}
                                     onSortChange={onSortChange}/>
                     </th>
-                    <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">
-                        Số điện thoại
-                    </th>
+                    <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">Ngày sinh</th>
+                    <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">Phụ huynh</th>
+                    <th className="px-6 py-3 text-left text-sm text-foreground font-semibold">Thẻ</th>
                     <th className="px-6 py-3 text-left text-sm">
                         <SortHeader label="Ngày tạo" sortKeyValue="createdAt" sortBy={sortBy} sortOrder={sortOrder}
                                     onSortChange={onSortChange}/>
                     </th>
-                    <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
-                        Hành động
-                    </th>
+                    <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">Hành động</th>
                 </tr>
                 </thead>
                 <tbody>
-                {users.data.map((user) => (
+                {students.data.map((student) => (
                     <tr
-                        key={user.id}
+                        key={student.id}
                         className="border-b border-border hover:bg-muted/50 transition-colors"
                     >
-                        <td className="px-6 py-4 text-sm font-medium text-foreground">
-                            {user.name}
-                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-foreground">{student.fullName}</td>
+                        <td className="px-6 py-4 text-sm text-foreground">{student.studentId}</td>
+                        <td className="px-6 py-4 text-sm text-foreground">{student.studentClass}</td>
+                        <td className="px-6 py-4 text-sm text-foreground">{formatDate(student.dateOfBirth)}</td>
+                        <td className="px-6 py-4 text-sm text-foreground">{student.parent?.name ?? '—'}</td>
                         <td className="px-6 py-4 text-sm text-foreground">
-                            {user.email}
+                            <CardStatusBadge assigned={!!student.cardTokenHash}/>
                         </td>
-                        <td className="px-6 py-4 text-sm text-foreground">
-                            <RoleBadge role={user.role}/>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-foreground">
-                            {user.phoneNumber || '—'}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-foreground">
-                            {new Date(user.createdAt).toLocaleString()}
-                        </td>
+                        <td className="px-6 py-4 text-sm text-foreground">{formatDate(student.createdAt)}</td>
                         <td className="px-6 py-4 text-sm text-right">
                             <div className="flex justify-end gap-2">
                                 {isDeletedMode ? (
                                     <AlertDialog
-                                        open={restoringUserId === user.id}
-                                        onOpenChange={(open) => !open && setRestoringUserId(null)}
+                                        open={restoringStudentId === student.id}
+                                        onOpenChange={(open) => !open && setRestoringStudentId(null)}
                                     >
                                         <AlertDialogTrigger asChild>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 disabled={isRestoring}
-                                                onClick={() => setRestoringUserId(user.id)}
+                                                onClick={() => setRestoringStudentId(student.id)}
                                                 className="text-primary hover:text-primary"
                                             >
                                                 <RotateCcw className="w-4 h-4"/>
@@ -131,8 +127,9 @@ export default function UsersList({
                                             <AlertDialogHeader>
                                                 <AlertDialogTitle>Bạn có chắc chắn muốn khôi phục?</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    Người dùng <strong>{user.name}</strong> ({user.email}) sẽ được khôi
-                                                    phục về trạng thái hoạt động.
+                                                    Học sinh <strong>{student.fullName}</strong> ({student.studentId})
+                                                    sẽ
+                                                    được khôi phục về trạng thái hoạt động.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
@@ -142,14 +139,14 @@ export default function UsersList({
                                                     onClick={async (e) => {
                                                         e.preventDefault()
                                                         try {
-                                                            await onRestore(user.id)
-                                                            setRestoringUserId(null)
+                                                            await onRestore(student.id)
+                                                            setRestoringStudentId(null)
                                                         } catch (error) {
                                                             console.error(error)
                                                         }
                                                     }}
                                                 >
-                                                    {isRestoring ? "Đang khôi phục..." : "Khôi phục"}
+                                                    {isRestoring ? 'Đang khôi phục...' : 'Khôi phục'}
                                                 </Button>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
@@ -159,19 +156,28 @@ export default function UsersList({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => onEdit(user)}
+                                            onClick={() => onManageCard(student)}
+                                            className="text-foreground hover:text-foreground"
+                                            title="Quản lý thẻ"
+                                        >
+                                            <CreditCard className="w-4 h-4"/>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => onEdit(student)}
                                             className="text-primary hover:text-primary"
                                         >
                                             <Edit2 className="w-4 h-4"/>
                                         </Button>
-                                        <AlertDialog open={deletingUserId === user.id}
-                                                     onOpenChange={(open) => !open && setDeletingUserId(null)}>
+                                        <AlertDialog open={deletingStudentId === student.id}
+                                                     onOpenChange={(open) => !open && setDeletingStudentId(null)}>
                                             <AlertDialogTrigger asChild>
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     disabled={isDeleting}
-                                                    onClick={() => setDeletingUserId(user.id)}
+                                                    onClick={() => setDeletingStudentId(student.id)}
                                                     className="text-destructive hover:text-destructive"
                                                 >
                                                     <Trash2 className="w-4 h-4"/>
@@ -181,9 +187,9 @@ export default function UsersList({
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        Người dùng <strong>{user.name}</strong> ({user.email}) sẽ bị xóa
-                                                        khỏi hệ
-                                                        thống.
+                                                        Học
+                                                        sinh <strong>{student.fullName}</strong> ({student.studentId})
+                                                        sẽ bị xóa khỏi hệ thống.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
@@ -194,14 +200,14 @@ export default function UsersList({
                                                         onClick={async (e) => {
                                                             e.preventDefault()
                                                             try {
-                                                                await onDelete(user.id)
-                                                                setDeletingUserId(null)
+                                                                await onDelete(student.id)
+                                                                setDeletingStudentId(null)
                                                             } catch (error) {
                                                                 console.error(error)
                                                             }
                                                         }}
                                                     >
-                                                        {isDeleting ? "Đang xóa..." : "Xóa"}
+                                                        {isDeleting ? 'Đang xóa...' : 'Xóa'}
                                                     </Button>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>

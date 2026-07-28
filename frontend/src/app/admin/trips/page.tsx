@@ -14,6 +14,7 @@ import BusTripsList from '@/app/admin/trips/_components/bus-trips-list'
 import BusTripForm, {BusTripFormValues} from '@/app/admin/trips/_components/bus-trips-form'
 
 import { apiRequest } from "@/lib/api-client";
+import TableSkeleton from "@/components/custom/table-skeleton";
 
 const fetcher = <T,>(url: string) => apiRequest<T>(url);
 
@@ -77,7 +78,7 @@ export default function TripsPage() {
     const {data: drivers} = useSWR<PaginatedResponse<UserWithProfiles>>(`/users?role=DRIVER&limit=1000`, fetcher)
 
     if (error) {
-        return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
+        return <div className={'p-8 bg-background'}>Lỗi khi tải dữ liệu: {error.message}</div>
     }
 
     const handleCloseDialog = () => {
@@ -134,7 +135,7 @@ export default function TripsPage() {
     }
 
     return (
-        <div className={'p-8 bg-white'}>
+        <div className={'p-8 bg-background'}>
             <div className={'flex justify-between mb-8 items-center'}>
                 <div>
                     <h1 className={'text-4xl font-bold text-foreground'}>Danh sách chuyến đi</h1>
@@ -171,9 +172,7 @@ export default function TripsPage() {
                 </div>
             </div>
             {isLoading || !busTrips ? (
-                <div className="bg-card border border-border rounded-lg p-8 text-center">
-                    <p className="text-muted-foreground">Đang tải dữ liệu</p>
-                </div>
+                <TableSkeleton columns={9}/>
             ) : (
                 <>
                     <BusTripsList

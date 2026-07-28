@@ -15,7 +15,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import {BusTripStatus, BusTripWithDetails, PaginatedResponse, TripType} from '@/types/types'
+import {BusTripWithDetails, PaginatedResponse} from '@/types/types'
+import {TripStatusBadge, TripTypeBadge} from '@/components/custom/status-badge'
 
 interface BusTripsListProps {
     busTrips: PaginatedResponse<BusTripWithDetails>
@@ -25,18 +26,6 @@ interface BusTripsListProps {
     sortBy: string
     sortOrder: 'asc' | 'desc'
     isDeleting: boolean
-}
-
-const statusLabelMap: Record<BusTripStatus, string> = {
-    SCHEDULED: 'Đã lên lịch',
-    IN_PROGRESS: 'Đang chạy',
-    COMPLETED: 'Hoàn thành',
-    CANCELLED: 'Đã hủy',
-}
-
-const tripTypeLabelMap: Record<TripType, string> = {
-    PICKUP: 'Đón',
-    DROPOFF: 'Trả',
 }
 
 const formatDateTime = (value: string) => {
@@ -107,10 +96,10 @@ export default function BusTripsList({
                         <td className="px-6 py-4 text-sm text-foreground">{trip.route.name}</td>
                         <td className="px-6 py-4 text-sm text-foreground">{trip.bus.licensePlate}</td>
                         <td className="px-6 py-4 text-sm text-foreground">{trip.driver.user.name}</td>
-                        <td className="px-6 py-4 text-sm text-foreground">{tripTypeLabelMap[trip.tripType]}</td>
+                        <td className="px-6 py-4 text-sm text-foreground"><TripTypeBadge type={trip.tripType}/></td>
                         <td className="px-6 py-4 text-sm text-foreground">{formatDateTime(trip.scheduledStartTime)}</td>
                         <td className="px-6 py-4 text-sm text-foreground">{formatDateTime(trip.scheduledEndTime)}</td>
-                        <td className="px-6 py-4 text-sm text-foreground">{statusLabelMap[trip.status]}</td>
+                        <td className="px-6 py-4 text-sm text-foreground"><TripStatusBadge status={trip.status}/></td>
                         <td className="px-6 py-4 text-sm text-foreground">{new Date(trip.createdAt).toLocaleString('vi-VN')}</td>
                         <td className="px-6 py-4 text-sm text-right">
                             <div className="flex justify-end gap-2">

@@ -13,6 +13,7 @@ import BusRoutesList from "@/app/admin/routes/_components/bus-routes-list";
 import BusRouteForm, { BusRouteFormValues } from "@/app/admin/routes/_components/bus-routes-form";
 
 import { apiRequest } from "@/lib/api-client";
+import TableSkeleton from "@/components/custom/table-skeleton";
 
 const fetcher = <T,>(url: string) => apiRequest<T>(url);
 
@@ -77,7 +78,7 @@ export default function RoutesPage() {
     const { data: busStops } = useSWR<PaginatedResponse<BusStop>>(`/bus-stops?limit=1000`, fetcher);
 
     if (error) {
-        return <div className={'p-8 bg-white'}>Lỗi khi tải dữ liệu: {error.message}</div>
+        return <div className={'p-8 bg-background'}>Lỗi khi tải dữ liệu: {error.message}</div>
     }
 
     const handleCloseDialog = () => {
@@ -134,7 +135,7 @@ export default function RoutesPage() {
     }
 
     return (
-        <div className={'p-8 bg-white'}>
+        <div className={'p-8 bg-background'}>
             <div className={'flex justify-between mb-8 items-center'}>
                 <div>
                     <h1 className={'text-4xl font-bold text-foreground'}>Danh sách tuyến đường</h1>
@@ -156,9 +157,7 @@ export default function RoutesPage() {
                 </div>
             </div>
             {isLoading || !busRoutes ? (
-                <div className="bg-card border border-border rounded-lg p-8 text-center">
-                    <p className="text-muted-foreground">Đang tải dữ liệu</p>
-                </div>
+                <TableSkeleton columns={5}/>
             ) : (
                 <>
                     <BusRoutesList
