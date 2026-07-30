@@ -24,6 +24,10 @@ class AuthRepository {
                 deletedAt: null,
                 isActive: true,
             },
+            // login must read the hash to compare it; override the global omit.
+            omit: {
+                password: false,
+            },
         });
     }
 

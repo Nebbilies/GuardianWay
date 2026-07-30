@@ -9,7 +9,16 @@ loadEnv({ path: path.resolve(process.cwd(), "backend/.env") });
 loadEnv({ path: path.resolve(process.cwd(), ".env") });
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({adapter})
+const prisma = new PrismaClient({
+    adapter,
+    // Never return the password hash by default. Re-include explicitly
+    // (omit: { password: false }) only on the auth lookup that must compare it.
+    omit: {
+        user: {
+            password: true,
+        },
+    },
+})
     .$extends({
         query: {
             $allModels: {

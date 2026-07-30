@@ -22,7 +22,9 @@ const TRIP_INCLUDE = {
     bus: true,
     driver: {
         include: {
-            user: true,
+            user: {
+                omit: { password: true },
+            },
         },
     },
 } satisfies Prisma.BusTripInclude;
