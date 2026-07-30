@@ -17,4 +17,7 @@ export type {
     StudentWithParent,
     BusRouteWithStops,
     BusTripWithDetails,
+    School,
+    SchoolAdmin,
+    OnboardAdminResponse,
 } from '@gw/shared'

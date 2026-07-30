@@ -20,3 +20,14 @@ export type BusTripWithDetails = BusTrip & {
         user: Pick<User, 'id' | 'name' | 'email'>
     }
 }
+
+export type SchoolAdmin = Pick<User, 'id' | 'name' | 'email'> & {
+    isActive: boolean
+    passwordSetupRequired: boolean
+    createdAt: string
+}
+
+export type OnboardAdminResponse = {
+    user: Pick<User, 'id' | 'name' | 'email' | 'role' | 'schoolId'>
+    inviteLink: string
+}

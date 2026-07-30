@@ -19,6 +19,7 @@ COPY backend/tsconfig.json ./backend/tsconfig.json
 COPY backend/src ./backend/src
 COPY shared/index.ts ./shared/index.ts
 COPY shared/types ./shared/types
+COPY shared/utils ./shared/utils
 RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
 RUN npm run build --workspace backend
 

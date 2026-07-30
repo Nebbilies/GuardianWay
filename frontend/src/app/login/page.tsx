@@ -22,12 +22,12 @@ export default function LoginPage() {
         setIsSubmitting(true)
 
         try {
-            await apiRequest('/auth/login', {
+            const { user } = await apiRequest<{ user: { role: string } }>('/auth/login', {
                 method: 'POST',
                 body: JSON.stringify({ email, password }),
             })
 
-            router.push('/admin/users')
+            router.push(user?.role === 'SUPER_ADMIN' ? '/platform/schools' : '/admin/users')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Đăng nhập thất bại')

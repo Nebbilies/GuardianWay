@@ -96,3 +96,14 @@ export interface BusTrip {
     updatedAt: string
     deletedAt: string | null
 }
+
+export interface School {
+    id: string
+    name: string
+    address: string
+    slug: string
+    isActive: boolean
+    createdAt: string
+    updatedAt: string
+    deletedAt: string | null
+}

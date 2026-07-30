@@ -5,6 +5,7 @@ import busStopRoutes from "./routes/busStop.routes";
 import busRouteRoutes from "./routes/busRoute.routes";
 import busRoutes from "./routes/bus.routes";
 import userRoutes from "./routes/user.routes";
+import schoolRoutes from "./routes/school.routes";
 import busTripRoutes from "./routes/busTrip.routes";
 import studentRoutes from "./routes/student.routes";
 import publicRoutes from "./routes/public.routes";
@@ -48,6 +49,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/public", publicRoutes);
 
 app.use("/api/users", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), userRoutes);
+app.use("/api/schools", authenticate, authorize(["SUPER_ADMIN"]), schoolRoutes);
 app.use("/api/buses", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRoutes);
 app.use("/api/bus-routes", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRouteRoutes);
 app.use("/api/bus-stops", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busStopRoutes);

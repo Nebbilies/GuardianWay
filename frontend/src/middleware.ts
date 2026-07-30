@@ -4,6 +4,9 @@ type AuthTokenPayload = {
     role?: string
 }
 
+const PLATFORM_HOME = '/platform/schools'
+const ADMIN_HOME = '/admin/users'
+
 function decodeJwtPayload(token: string): AuthTokenPayload | null {
     const parts = token.split('.')
     if (parts.length !== 3 || !parts[1]) return null
@@ -18,26 +21,34 @@ function decodeJwtPayload(token: string): AuthTokenPayload | null {
 }
 
 export function middleware(req: NextRequest) {
-    if (req.nextUrl.pathname.startsWith('/admin')) {
-        const accessToken = req.cookies.get('gw_access_token')?.value
+    const { pathname } = req.nextUrl
+    const isAdmin = pathname.startsWith('/admin')
+    const isPlatform = pathname.startsWith('/platform')
+    if (!isAdmin && !isPlatform) return NextResponse.next()
 
-        if (!accessToken) {
-            const loginUrl = new URL('/login', req.url)
-            return NextResponse.redirect(loginUrl)
-        }
+    const accessToken = req.cookies.get('gw_access_token')?.value
+    if (!accessToken) {
+        return NextResponse.redirect(new URL('/login', req.url))
+    }
 
-        const payload = decodeJwtPayload(accessToken)
-        const allowedRoles = new Set(['SUPER_ADMIN', 'ADMIN'])
+    const role = decodeJwtPayload(accessToken)?.role
+    if (!role) {
+        return NextResponse.redirect(new URL('/login', req.url))
+    }
 
-        if (!payload?.role || !allowedRoles.has(payload.role)) {
-            const loginUrl = new URL('/login', req.url)
-            return NextResponse.redirect(loginUrl)
-        }
+    if (isPlatform && role !== 'SUPER_ADMIN') {
+        const dest = role === 'ADMIN' ? ADMIN_HOME : '/login'
+        return NextResponse.redirect(new URL(dest, req.url))
+    }
+
+    if (isAdmin && role !== 'ADMIN') {
+        const dest = role === 'SUPER_ADMIN' ? PLATFORM_HOME : '/login'
+        return NextResponse.redirect(new URL(dest, req.url))
     }
 
     return NextResponse.next()
 }
 
 export const config = {
-    matcher: ['/admin/:path*'],
+    matcher: ['/admin/:path*', '/platform/:path*'],
 }

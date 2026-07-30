@@ -70,3 +70,10 @@ export function CardStatusBadge({assigned}: { assigned: boolean }) {
         ? <ToneBadge tone="success">Đã gán</ToneBadge>
         : <Badge variant="outline" className="text-muted-foreground">Chưa gán</Badge>
 }
+
+export function SchoolStatusBadge({ isActive, deleted }: { isActive: boolean; deleted?: boolean }) {
+    if (deleted) return <ToneBadge tone="danger">Đã xóa</ToneBadge>
+    return isActive
+        ? <ToneBadge tone="success">Đang hoạt động</ToneBadge>
+        : <ToneBadge tone="neutral">Tạm ngưng</ToneBadge>
+}
