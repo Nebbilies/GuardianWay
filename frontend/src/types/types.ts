@@ -20,4 +20,5 @@ export type {
     School,
     SchoolAdmin,
     OnboardAdminResponse,
+    AuditLog,
 } from '@gw/shared'

@@ -107,3 +107,19 @@ export interface School {
     updatedAt: string
     deletedAt: string | null
 }
+
+export interface AuditLog {
+    id: string
+    action: string
+    actorId: string | null
+    actorEmail: string | null
+    actorRole: string | null
+    schoolId: string | null
+    targetType: string | null
+    targetId: string | null
+    metadata: Record<string, unknown> | null
+    traceId: string | null
+    ip: string | null
+    userAgent: string | null
+    createdAt: string
+}

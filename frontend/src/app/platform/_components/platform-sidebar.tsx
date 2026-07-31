@@ -10,13 +10,14 @@ import {
     SidebarMenuItem,
     SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Building2, ShieldCheck } from "lucide-react";
+import { Building2, ScrollText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import LogoutButton from "@/app/admin/_components/logout-button";
 
 const NAV_ITEMS = [
     { href: '/platform/schools', label: 'Trường học', icon: Building2 },
+    { href: '/platform/audit', label: 'Nhật ký', icon: ScrollText },
 ] as const
 
 export default function PlatformSidebar() {

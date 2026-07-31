@@ -10,7 +10,7 @@ import {
     SidebarMenuItem,
     SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import {Bus, GraduationCap, MapPin, Navigation, Route, Users} from "lucide-react";
+import {Bus, GraduationCap, MapPin, Navigation, Route, ScrollText, Users} from "lucide-react";
 import Link from "next/link";
 import {Separator} from "@/components/ui/separator";
 import LogoutButton from "./logout-button";
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
     {href: '/admin/trips', label: 'Chuyến đi', icon: Navigation},
     {href: '/admin/students', label: 'Học sinh', icon: GraduationCap},
     {href: '/admin/users', label: 'Người dùng', icon: Users},
+    {href: '/admin/audit', label: 'Nhật ký', icon: ScrollText},
 ] as const
 
 export default function AdminSidebar() {
