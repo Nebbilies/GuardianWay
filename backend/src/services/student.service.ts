@@ -5,6 +5,7 @@ import {
     GetAllStudentsParams,
 } from "../repositories/student.repository";
 import {db, currentSchoolId} from "../config/tenant-db";
+import {auditService} from "./audit.service";
 import {NotFoundError, ValidationError} from "../errors/http-errors";
 
 interface CreateStudentPayload {
@@ -38,30 +39,36 @@ class StudentService {
 
     async create(payload: CreateStudentPayload) {
         await this.assertParentValid(payload.parentId);
-        return studentRepository.create({
+        const student = await studentRepository.create({
             fullName: payload.fullName,
             studentId: payload.studentId,
             studentClass: payload.studentClass,
             dateOfBirth: this.parseDob(payload.dateOfBirth),
             parentId: payload.parentId ?? null,
         });
+        await auditService.record({ action: "student.created", targetType: "StudentProfile", targetId: student.id });
+        return student;
     }
 
     async update(id: string, payload: UpdateStudentPayload) {
         if (payload.parentId !== undefined) {
             await this.assertParentValid(payload.parentId);
         }
-        return studentRepository.update(id, {
+        const student = await studentRepository.update(id, {
             fullName: payload.fullName,
             studentId: payload.studentId,
             studentClass: payload.studentClass,
             parentId: payload.parentId,
             ...(payload.dateOfBirth ? { dateOfBirth: this.parseDob(payload.dateOfBirth) } : {}),
         });
+        await auditService.record({ action: "student.updated", targetType: "StudentProfile", targetId: id, metadata: { fields: Object.keys(payload) } });
+        return student;
     }
 
     async delete(id: string) {
-        return studentRepository.delete(id);
+        const result = await studentRepository.delete(id);
+        await auditService.record({ action: "student.deleted", targetType: "StudentProfile", targetId: id });
+        return result;
     }
 
     async restore(id: string) {
@@ -69,7 +76,10 @@ class StudentService {
     }
 
     async assignCard(id: string, rawCardId: string) {
-        return studentRepository.setCardHash(id, hashCard(rawCardId));
+        const result = await studentRepository.setCardHash(id, hashCard(rawCardId));
+        // Never record the raw card id or its hash.
+        await auditService.record({ action: "student.card_assigned", targetType: "StudentProfile", targetId: id });
+        return result;
     }
 
     async removeCard(id: string) {

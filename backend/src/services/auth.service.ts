@@ -6,6 +6,7 @@ import {authRepository} from "../repositories/auth.repository";
 import {AuthTokenPayload} from "../types/auth";
 import {AuthenticationError, InternalError, NotFoundError, ValidationError} from "../errors/http-errors";
 import transporter from "../utils/mailer";
+import {auditService} from "./audit.service";
 
 const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
 const REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
@@ -122,6 +123,13 @@ class AuthService {
 
         const inviteLink = `${this.getWebBaseUrl()}/setup-password?token=${inviteToken}`;
 
+        // createdBy is the acting user; under ALS the school/trace fill in, and on
+        // the auth route (no ALS) the actor email is looked up from actorId.
+        await auditService.record(
+            { action: "invite.issued", targetType: "User", targetId: userId },
+            { actorId: createdBy },
+        );
+
         return {
             inviteToken,
             inviteLink,
@@ -142,21 +150,58 @@ class AuthService {
         await authRepository.setPasswordAndActivate(invite.userId, hashedPassword);
         await authRepository.consumeInviteToken(invite.id);
 
+        await auditService.record(
+            { action: "password.setup", targetType: "User", targetId: invite.userId },
+            { actorId: invite.userId },
+        );
+
         return { success: true };
     }
 
     async login(email: string, password: string, context: RequestContext = {}): Promise<LoginResult> {
         const user = await authRepository.findActiveUserByEmail(email);
         if (!user || !user.password) {
+            await auditService.record(
+                { action: "auth.login_failed", metadata: { email, reason: "not_found" } },
+                {
+                    actorId: user?.id ?? null,
+                    actorEmail: email,
+                    schoolId: user?.schoolId ?? null,
+                    ip: context.ipAddress ?? null,
+                    userAgent: context.userAgent ?? null,
+                },
+            );
             throw new AuthenticationError("Email hoặc mật khẩu không đúng");
         }
 
         if (user.passwordSetupRequired) {
+            await auditService.record(
+                { action: "auth.login_failed", metadata: { email, reason: "setup_required" } },
+                {
+                    actorId: user.id,
+                    actorEmail: user.email,
+                    actorRole: user.role,
+                    schoolId: user.schoolId,
+                    ip: context.ipAddress ?? null,
+                    userAgent: context.userAgent ?? null,
+                },
+            );
             throw new AuthenticationError("Tài khoản chưa hoàn tất thiết lập mật khẩu");
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
+            await auditService.record(
+                { action: "auth.login_failed", metadata: { email, reason: "bad_password" } },
+                {
+                    actorId: user.id,
+                    actorEmail: user.email,
+                    actorRole: user.role,
+                    schoolId: user.schoolId,
+                    ip: context.ipAddress ?? null,
+                    userAgent: context.userAgent ?? null,
+                },
+            );
             throw new AuthenticationError("Email hoặc mật khẩu không đúng");
         }
 
@@ -178,6 +223,18 @@ class AuthService {
         });
 
         await authRepository.updateLastLogin(user.id);
+
+        await auditService.record(
+            { action: "auth.login", targetType: "User", targetId: user.id },
+            {
+                actorId: user.id,
+                actorEmail: user.email,
+                actorRole: user.role,
+                schoolId: user.schoolId,
+                ip: context.ipAddress ?? null,
+                userAgent: context.userAgent ?? null,
+            },
+        );
 
         return {
             accessToken,

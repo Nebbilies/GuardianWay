@@ -6,6 +6,7 @@ import {
 } from "../repositories/school.repository";
 import { userRepository } from "../repositories/user.repository";
 import { authService } from "./auth.service";
+import { auditService } from "./audit.service";
 import { NotFoundError, ValidationError } from "../errors/http-errors";
 
 class SchoolService {
@@ -18,7 +19,12 @@ class SchoolService {
         if (!slug) {
             throw new ValidationError("Không thể tạo slug từ tên trường");
         }
-        return schoolRepository.create({ name: data.name, address: data.address, slug });
+        const created = await schoolRepository.create({ name: data.name, address: data.address, slug });
+        await auditService.record(
+            { action: "school.created", targetType: "School", targetId: created.id, metadata: { name: created.name, slug: created.slug } },
+            { schoolId: created.id },
+        );
+        return created;
     }
 
     async update(id: string, data: { name: string; address: string; slug: string; isActive: boolean }) {
@@ -26,20 +32,35 @@ class SchoolService {
         if (!slug) {
             throw new ValidationError("Không thể tạo slug từ tên trường");
         }
-        return schoolRepository.update(id, {
+        const updated = await schoolRepository.update(id, {
             name: data.name,
             address: data.address,
             slug,
             isActive: data.isActive,
         });
+        await auditService.record(
+            { action: "school.updated", targetType: "School", targetId: id, metadata: { name: data.name, isActive: data.isActive } },
+            { schoolId: id },
+        );
+        return updated;
     }
 
     async delete(id: string) {
-        return schoolRepository.softDelete(id);
+        const result = await schoolRepository.softDelete(id);
+        await auditService.record(
+            { action: "school.deleted", targetType: "School", targetId: id, metadata: { name: result.name } },
+            { schoolId: id },
+        );
+        return result;
     }
 
     async restore(id: string) {
-        return schoolRepository.restore(id);
+        const result = await schoolRepository.restore(id);
+        await auditService.record(
+            { action: "school.restored", targetType: "School", targetId: id },
+            { schoolId: id },
+        );
+        return result;
     }
 
     async getAdmins(id: string) {
@@ -80,6 +101,11 @@ class SchoolService {
             // Best-effort: the super-admin still gets the invite link to share manually.
             console.error("Không thể gửi email mời quản trị viên:", emailError);
         }
+
+        await auditService.record(
+            { action: "admin.onboarded", targetType: "User", targetId: user.id, metadata: { email: data.email, name: data.name } },
+            { schoolId },
+        );
 
         return { user, inviteLink: invite.inviteLink };
     }

@@ -7,6 +7,7 @@ import {
     UpdateUserData,
 } from "../repositories/user.repository";
 import { authService } from "./auth.service";
+import { auditService } from "./audit.service";
 import {AuthorizationError, NotFoundError, ValidationError} from "../errors/http-errors";
 
 const SALT_ROUNDS = 10;
@@ -68,6 +69,11 @@ class UserService {
 
         await authService.sendInviteEmail(data.email, invite.inviteLink);
 
+        await auditService.record(
+            { action: "user.created", targetType: "User", targetId: user.id, metadata: { email: data.email, role: data.role } },
+            { schoolId: targetSchoolId },
+        );
+
         return {
             ...user,
         };
@@ -95,11 +101,21 @@ class UserService {
             delete data.password;
         }
 
-        return userRepository.update(id, schoolId, data);
+        const updated = await userRepository.update(id, schoolId, data);
+        await auditService.record(
+            { action: "user.updated", targetType: "User", targetId: id, metadata: { fields: Object.keys(data) } },
+            { schoolId: existingUser.schoolId },
+        );
+        return updated;
     }
 
     async delete(id: string, schoolId?: string) {
-        return userRepository.delete(id, schoolId);
+        const result = await userRepository.delete(id, schoolId);
+        await auditService.record(
+            { action: "user.deactivated", targetType: "User", targetId: id },
+            { schoolId: schoolId ?? null },
+        );
+        return result;
     }
 
     async restore(id: string, schoolId?: string) {
@@ -110,6 +126,10 @@ class UserService {
         if (!existingUser.deletedAt) {
             throw new ValidationError("Người dùng chưa bị xóa");
         }
+        await auditService.record(
+            { action: "user.restored", targetType: "User", targetId: id },
+            { schoolId: existingUser.schoolId },
+        );
         return userRepository.restore(id);
     }
 }

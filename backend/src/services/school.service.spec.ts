@@ -12,6 +12,10 @@ vi.mock("../repositories/user.repository", () => ({
 vi.mock("./auth.service", () => ({
     authService: { issueInvite: vi.fn(), sendInviteEmail: vi.fn() },
 }));
+// Audit is a best-effort side effect; stub it so the unit test never touches the DB.
+vi.mock("./audit.service", () => ({
+    auditService: { record: vi.fn() },
+}));
 
 import { schoolService } from "./school.service";
 import { schoolRepository } from "../repositories/school.repository";

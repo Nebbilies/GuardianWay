@@ -1,4 +1,5 @@
 import { busStopRepository, GetAllBusStopsParams } from "../repositories/busStop.repository";
+import { auditService } from "./audit.service";
 
 class BusStopService {
   async getAll(params: GetAllBusStopsParams = {}) {
@@ -13,13 +14,15 @@ class BusStopService {
     isSchoolStop?: boolean;
   }) {
     const { name, address, latitude, longitude, isSchoolStop } = data;
-    return busStopRepository.create({
+    const stop = await busStopRepository.create({
       name,
       address,
       latitude,
       longitude,
       isSchoolStop: !!isSchoolStop,
     });
+    await auditService.record({ action: "busStop.created", targetType: "BusStop", targetId: stop.id });
+    return stop;
   }
 
   async edit(id: string, data: {
@@ -30,17 +33,21 @@ class BusStopService {
     isSchoolStop?: boolean;
   }) {
     const { name, address, latitude, longitude, isSchoolStop } = data;
-    return busStopRepository.edit(id, {
+    const stop = await busStopRepository.edit(id, {
       name,
       address,
       latitude,
       longitude,
       isSchoolStop: !!isSchoolStop,
-    })
+    });
+    await auditService.record({ action: "busStop.updated", targetType: "BusStop", targetId: id, metadata: { fields: Object.keys(data) } });
+    return stop;
   }
 
   async delete(id: string) {
-    return busStopRepository.delete(id);
+    const result = await busStopRepository.delete(id);
+    await auditService.record({ action: "busStop.deleted", targetType: "BusStop", targetId: id });
+    return result;
     }
 }
 

@@ -1,4 +1,5 @@
 import {busRouteRepository, GetAllBusRoutesParams, RouteStopInput} from "../repositories/busRoute.repository";
+import {auditService} from "./audit.service";
 
 class BusRouteService {
     async getAll(params: GetAllBusRoutesParams = {}) {
@@ -11,11 +12,13 @@ class BusRouteService {
         stops: RouteStopInput[];
     }) {
         const {name, description, stops} = data;
-        return busRouteRepository.create({
+        const route = await busRouteRepository.create({
             name,
             stops,
             description: description || null,
         });
+        await auditService.record({ action: "busRoute.created", targetType: "BusRoute", targetId: route.id });
+        return route;
     }
 
     async edit(id: string, data: {
@@ -24,16 +27,20 @@ class BusRouteService {
         stops: RouteStopInput[];
     }) {
         const {name, description, stops} = data;
-        return busRouteRepository.edit({
+        const route = await busRouteRepository.edit({
             id,
             name,
             stops,
             description: description || null,
-        })
+        });
+        await auditService.record({ action: "busRoute.updated", targetType: "BusRoute", targetId: id, metadata: { fields: Object.keys(data) } });
+        return route;
     }
 
     async delete(id: string) {
-        return busRouteRepository.delete(id);
+        const result = await busRouteRepository.delete(id);
+        await auditService.record({ action: "busRoute.deleted", targetType: "BusRoute", targetId: id });
+        return result;
     }
 }
 
