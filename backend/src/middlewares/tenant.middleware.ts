@@ -11,6 +11,9 @@ export function tenantContext(req: AuthenticatedRequest, _res: Response, next: N
             schoolId: req.user?.schoolId ?? null,
             userId: req.user?.userId,
             role: req.user?.role,
+            traceId: req.traceId,
+            ip: req.ip,
+            userAgent: req.headers["user-agent"],
         },
         () => next(),
     );

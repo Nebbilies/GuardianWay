@@ -25,6 +25,7 @@ const SCOPED_MODELS = new Set<string>([
     "BusTrip",
     "TripEvent",
     "TrackingLog",
+    "AuditLog",
 ]);
 
 // Operations whose `where` accepts arbitrary (non-unique) fields — safe to filter.
@@ -91,6 +92,9 @@ export interface TenantContext {
     schoolId: string | null;
     userId?: string;
     role?: string;
+    traceId?: string;
+    ip?: string;
+    userAgent?: string;
     prisma: Db;
 }
 
@@ -99,7 +103,14 @@ const tenantStore = new AsyncLocalStorage<TenantContext>();
 // Enter a tenant context for the duration of `fn` (and everything it awaits).
 // schoolId=null (SUPER_ADMIN / background jobs) uses the unscoped base client.
 export function runWithTenant<T>(
-    ctx: { schoolId: string | null; userId?: string; role?: string },
+    ctx: {
+        schoolId: string | null;
+        userId?: string;
+        role?: string;
+        traceId?: string;
+        ip?: string;
+        userAgent?: string;
+    },
     fn: () => T,
 ): T {
     const prisma = ctx.schoolId
@@ -116,6 +127,12 @@ export function db(): Db {
 
 export function currentSchoolId(): string | null {
     return tenantStore.getStore()?.schoolId ?? null;
+}
+
+// The current request's tenant context (actor, school, trace) for cross-cutting
+// concerns like audit logging. Undefined outside any request.
+export function currentContext(): TenantContext | undefined {
+    return tenantStore.getStore();
 }
 
 // For creating tenant-owned rows: the acting user must belong to a school.

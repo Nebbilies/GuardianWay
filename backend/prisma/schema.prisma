@@ -284,6 +284,27 @@ model RefreshToken {
   @@index([expiresAt])
 }
 
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  action     String
+  actorId    String?  @db.Uuid
+  actorEmail String?
+  actorRole  String?
+  schoolId   String?  @db.Uuid
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  traceId    String?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([schoolId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action])
+  @@index([targetType, targetId])
+}
+
 enum Role {
   SUPER_ADMIN
   ADMIN

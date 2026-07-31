@@ -8,6 +8,7 @@ import userRoutes from "./routes/user.routes";
 import schoolRoutes from "./routes/school.routes";
 import busTripRoutes from "./routes/busTrip.routes";
 import studentRoutes from "./routes/student.routes";
+import auditRoutes from "./routes/audit.routes";
 import publicRoutes from "./routes/public.routes";
 import authRoutes from "./routes/auth.routes";
 import {authenticate} from "./middlewares/auth.middleware";
@@ -55,6 +56,7 @@ app.use("/api/bus-routes", authenticate, tenantContext, authorize(["SUPER_ADMIN"
 app.use("/api/bus-stops", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busStopRoutes);
 app.use("/api/bus-trips", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busTripRoutes);
 app.use("/api/students", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), studentRoutes);
+app.use("/api/audit-logs", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), auditRoutes);
 
 app.get("/", (_req, res) => {
     res.send("Hello, api is on!");
