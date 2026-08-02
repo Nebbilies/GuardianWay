@@ -9,6 +9,25 @@ real defect being caught by the control that now exists.
 docker compose up -d --build
 docker compose ps          # backend, frontend, postgres, redis show "healthy";
                             # nginx has no healthcheck defined, so it just shows "Up"
+
+# REQUIRED, not optional — run this immediately before presenting, every time,
+# even if you don't remember tripping the limiter recently. If you rehearsed
+# Demo 2 at any point in the last 15 minutes (or ran any of the curl loops in
+# this document, or the integration suite, against this stack), the demo
+# account is still locked and you will not get a second chance to notice
+# before walking into the room.
+#
+# Symptom if you skip this: Demo 2's very first curl in the loop already
+# returns 429 — you see `429 429 429 429 429 429` instead of
+# `401 401 401 401 401 429`, with no 401s at all. That is not the demo
+# working, it is the demo starting from an already-tripped limiter. If you see
+# that mid-defense, run the command below and re-run Demo 2's loop; don't
+# improvise an explanation.
+#
+# Safe to run any time: this Redis instance holds nothing but rate-limit
+# counters (checked across the whole codebase — no sessions, no cache, no
+# queues live here today). Flushing it cannot affect any other demo.
+docker compose exec redis redis-cli FLUSHDB
 ```
 
 Seeded credentials (all with password `Password123!`):
@@ -25,9 +44,11 @@ Seeded credentials (all with password `Password123!`):
    `admin@nguyendu.edu.vn`. Demo 3 deliberately uses the *other* admin account
    (`admin@lequydon.edu.vn`) so it isn't affected by that lock and the demos can
    run straight through in order. If you rehearse Demo 2 more than once inside
-   15 minutes, clear the counters first: `docker compose exec redis redis-cli
-   FLUSHDB`. Do this before every rehearsal run for the same reason — it is the
-   same problem you're about to walk into live otherwise.
+   15 minutes, clear the counters again before the next attempt — same command
+   as the mandatory setup step above: `docker compose exec redis redis-cli
+   FLUSHDB`. Rehearsing is exactly how you end up needing the mandatory step,
+   so get in the habit of running it after every rehearsal, not just before
+   the real thing.
 2. **The integration suite starts real Postgres and Redis containers**
    (Testcontainers), on top of the ones already running for the app. A warm run
    (images already pulled) takes **roughly 60–65 seconds**. Budget for that, or
