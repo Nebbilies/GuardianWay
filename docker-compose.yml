@@ -5,6 +5,8 @@ services:
       dockerfile: backend/Dockerfile
     env_file:
       - ./backend/.env
+    environment:
+      TRUST_PROXY_HOPS: "1"
     ports:
       - "8000:8000"
     expose:

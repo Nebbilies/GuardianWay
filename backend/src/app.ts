@@ -20,9 +20,12 @@ import pinoHttp from "pino-http";
 import {baseLogger} from "./utils/logger";
 import {register} from "./utils/metrics";
 import {metricsMiddleware} from "./middlewares/metrics.middleware";
+import {resolveTrustProxyHops} from "./config/trust-proxy";
 
 const app = express();
 const allowedOrigin = process.env.WEB_BASE_URL || "http://localhost:3000";
+
+app.set("trust proxy", resolveTrustProxyHops(process.env.TRUST_PROXY_HOPS));
 
 app.use(cors({
     origin: allowedOrigin,
