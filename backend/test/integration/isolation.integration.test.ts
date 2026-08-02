@@ -53,7 +53,9 @@ describe("tenant isolation", () => {
             it(`${endpoint} scopes to school B for admin B`, async () => {
                 const res = await request(app).get(endpoint).set("Cookie", cookiesB);
                 expect(res.status).toBe(200);
-                for (const row of rowsOf(res.body)) {
+                const rows = rowsOf(res.body);
+                expect(rows.length).toBeGreaterThan(0);
+                for (const row of rows) {
                     expect(row.schoolId).toBe(fx.schoolB.id);
                 }
             });
@@ -63,7 +65,9 @@ describe("tenant isolation", () => {
     it("audit logs are scoped to the caller's school", async () => {
         const res = await request(app).get("/api/audit-logs").set("Cookie", cookiesA);
         expect(res.status).toBe(200);
-        for (const row of rowsOf(res.body)) {
+        const rows = rowsOf(res.body);
+        expect(rows.length).toBeGreaterThan(0);
+        for (const row of rows) {
             expect(row.schoolId).toBe(fx.schoolA.id);
         }
     });
@@ -97,7 +101,9 @@ describe("tenant isolation", () => {
             .set("Cookie", cookiesA);
 
         expect(res.status).toBe(200);
-        for (const row of rowsOf(res.body)) {
+        const rows = rowsOf(res.body);
+        expect(rows.length).toBeGreaterThan(0);
+        for (const row of rows) {
             expect(row.schoolId).toBe(fx.schoolA.id);
         }
     });
@@ -108,7 +114,9 @@ describe("tenant isolation", () => {
             .set("Cookie", cookiesA);
 
         expect(res.status).toBe(200);
-        for (const row of rowsOf(res.body)) {
+        const rows = rowsOf(res.body);
+        expect(rows.length).toBeGreaterThan(0);
+        for (const row of rows) {
             expect(row.schoolId).toBe(fx.schoolA.id);
         }
     });
