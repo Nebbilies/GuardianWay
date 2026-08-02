@@ -50,7 +50,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/public", publicRoutes);
 
 app.use("/api/users", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), userRoutes);
-app.use("/api/schools", authenticate, authorize(["SUPER_ADMIN"]), schoolRoutes);
+// SUPER_ADMIN has schoolId=null, so tenantContext resolves to the unscoped base
+// client here — it is mounted purely so the audit trail knows who acted.
+app.use("/api/schools", authenticate, tenantContext, authorize(["SUPER_ADMIN"]), schoolRoutes);
 app.use("/api/buses", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRoutes);
 app.use("/api/bus-routes", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRouteRoutes);
 app.use("/api/bus-stops", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busStopRoutes);

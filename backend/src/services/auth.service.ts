@@ -36,6 +36,9 @@ export interface IssueInviteResult {
 interface RequestContext {
     userAgent?: string;
     ipAddress?: string;
+    // Auth routes run before tenantContext, so there is no ALS to read the
+    // per-request trace id from — the controller has to hand it over.
+    traceId?: string;
 }
 
 class AuthService {
@@ -107,7 +110,7 @@ class AuthService {
         return REFRESH_COOKIE_NAME;
     }
 
-    async issueInvite(userId: string, createdBy: string): Promise<IssueInviteResult> {
+    async issueInvite(userId: string, createdBy: string, context: RequestContext = {}): Promise<IssueInviteResult> {
         await authRepository.invalidateActiveInviteTokensForUser(userId);
 
         const inviteToken = crypto.randomBytes(32).toString("hex");
@@ -123,11 +126,11 @@ class AuthService {
 
         const inviteLink = `${this.getWebBaseUrl()}/setup-password?token=${inviteToken}`;
 
-        // createdBy is the acting user; under ALS the school/trace fill in, and on
-        // the auth route (no ALS) the actor email is looked up from actorId.
+        // createdBy is the acting user; the actor email is looked up from actorId
+        // because this route has no ALS to read it from.
         await auditService.record(
             { action: "invite.issued", targetType: "User", targetId: userId },
-            { actorId: createdBy },
+            { actorId: createdBy, traceId: context.traceId ?? null },
         );
 
         return {
@@ -137,7 +140,7 @@ class AuthService {
         };
     }
 
-    async setupPassword(token: string, newPassword: string) {
+    async setupPassword(token: string, newPassword: string, context: RequestContext = {}) {
         const tokenHash = this.hashToken(token);
         const invite = await authRepository.getActiveInviteTokenByHash(tokenHash);
 
@@ -152,7 +155,7 @@ class AuthService {
 
         await auditService.record(
             { action: "password.setup", targetType: "User", targetId: invite.userId },
-            { actorId: invite.userId },
+            { actorId: invite.userId, traceId: context.traceId ?? null },
         );
 
         return { success: true };
@@ -169,6 +172,7 @@ class AuthService {
                     schoolId: user?.schoolId ?? null,
                     ip: context.ipAddress ?? null,
                     userAgent: context.userAgent ?? null,
+                    traceId: context.traceId ?? null,
                 },
             );
             throw new AuthenticationError("Email hoặc mật khẩu không đúng");
@@ -184,6 +188,7 @@ class AuthService {
                     schoolId: user.schoolId,
                     ip: context.ipAddress ?? null,
                     userAgent: context.userAgent ?? null,
+                    traceId: context.traceId ?? null,
                 },
             );
             throw new AuthenticationError("Tài khoản chưa hoàn tất thiết lập mật khẩu");
@@ -200,6 +205,7 @@ class AuthService {
                     schoolId: user.schoolId,
                     ip: context.ipAddress ?? null,
                     userAgent: context.userAgent ?? null,
+                    traceId: context.traceId ?? null,
                 },
             );
             throw new AuthenticationError("Email hoặc mật khẩu không đúng");
@@ -233,6 +239,7 @@ class AuthService {
                 schoolId: user.schoolId,
                 ip: context.ipAddress ?? null,
                 userAgent: context.userAgent ?? null,
+                traceId: context.traceId ?? null,
             },
         );
 
@@ -332,13 +339,13 @@ class AuthService {
 
     // resend / recovery path: re-issue an invite for an existing account and send
     // it. issueInvite invalidates any previous active token first
-    async issueInviteByEmail(email: string, createdBy: string) {
+    async issueInviteByEmail(email: string, createdBy: string, context: RequestContext = {}) {
         const user = await authRepository.findActiveUserByEmail(email);
         if (!user) {
             throw new NotFoundError("Không tìm thấy người dùng");
         }
 
-        const invite = await this.issueInvite(user.id, createdBy);
+        const invite = await this.issueInvite(user.id, createdBy, context);
         await this.sendInviteEmail(email, invite.inviteLink);
 
         return {success: true};

@@ -9,6 +9,7 @@ class AuthController {
         const result = await authService.login(email, password, {
             userAgent: req.headers["user-agent"],
             ipAddress: req.ip,
+            traceId: req.traceId,
         });
 
         res.cookie(
@@ -32,6 +33,7 @@ class AuthController {
         const result = await authService.refresh(refreshToken, {
             userAgent: req.headers["user-agent"],
             ipAddress: req.ip,
+            traceId: req.traceId,
         });
 
         res.cookie(
@@ -60,7 +62,7 @@ class AuthController {
 
     async setupPassword(req: Request, res: Response) {
         const {token, password} = req.body;
-        await authService.setupPassword(token, password);
+        await authService.setupPassword(token, password, { traceId: req.traceId });
         res.status(200).json({message: "Thiết lập mật khẩu thành công"});
     }
 
@@ -76,7 +78,7 @@ class AuthController {
             throw new AuthenticationError("Chưa xác thực người dùng");
         }
 
-        const invite = await authService.issueInviteByEmail(email, createdBy);
+        const invite = await authService.issueInviteByEmail(email, createdBy, { traceId: req.traceId });
         res.status(200).json(invite);
     }
 }
