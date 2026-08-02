@@ -3,6 +3,7 @@ import request from "supertest";
 import type { Express } from "express";
 import { resetAndSeed, type Fixture } from "./fixtures";
 import { loadApp, loginAs } from "./helpers/login";
+import redisClient from "../../src/config/redis";
 
 type Actor = "anonymous" | "parent" | "driver" | "admin" | "superAdmin";
 
@@ -38,6 +39,11 @@ describe("RBAC matrix", () => {
 
     beforeEach(async () => {
         fx = await resetAndSeed();
+        // Login rate-limit counters live in Redis and outlive a test; this file logs
+        // in four accounts per case, so leaving them uncleared trips the per-IP
+        // budget partway through the matrix. Clear them the same way the rate-limit
+        // suite does.
+        await redisClient.flushDb();
         cookies.parent = await loginAs(app, fx.parentA.email);
         cookies.driver = await loginAs(app, fx.driverA.email);
         cookies.admin = await loginAs(app, fx.adminA.email);
@@ -95,6 +101,11 @@ describe("RBAC matrix: POST /api/auth/invites (route-level guard)", () => {
 
     beforeEach(async () => {
         fx = await resetAndSeed();
+        // Login rate-limit counters live in Redis and outlive a test; this file logs
+        // in four accounts per case, so leaving them uncleared trips the per-IP
+        // budget partway through the matrix. Clear them the same way the rate-limit
+        // suite does.
+        await redisClient.flushDb();
         cookies.parent = await loginAs(app, fx.parentA.email);
         cookies.driver = await loginAs(app, fx.driverA.email);
         cookies.admin = await loginAs(app, fx.adminA.email);

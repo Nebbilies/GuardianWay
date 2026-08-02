@@ -3,6 +3,7 @@
 export const AUDIT_ACTIONS = [
     "auth.login",
     "auth.login_failed",
+    "auth.rate_limited",
     "invite.issued",
     "password.setup",
     "school.created",

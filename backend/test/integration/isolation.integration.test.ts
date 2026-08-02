@@ -4,6 +4,7 @@ import type { Express } from "express";
 import prisma from "../../src/config/prisma";
 import { resetAndSeed, type Fixture } from "./fixtures";
 import { loadApp, loginAs } from "./helpers/login";
+import redisClient from "../../src/config/redis";
 
 const LIST_ENDPOINTS = [
     "/api/buses",
@@ -33,6 +34,10 @@ describe("tenant isolation", () => {
 
     beforeEach(async () => {
         fx = await resetAndSeed();
+        // Login rate-limit counters live in Redis and outlive a test; this file logs
+        // in three accounts per case, so leaving them uncleared trips the per-IP
+        // budget partway through. Clear them the same way the rate-limit suite does.
+        await redisClient.flushDb();
         cookiesA = await loginAs(app, fx.adminA.email);
         cookiesB = await loginAs(app, fx.adminB.email);
         cookiesSuper = await loginAs(app, fx.superAdmin.email);

@@ -78,3 +78,25 @@ export class InternalError extends AppError {
         });
     }
 }
+
+export class TooManyRequestsError extends AppError {
+    constructor(detail = "Quá nhiều yêu cầu, vui lòng thử lại sau") {
+        super({
+            code: "TOO_MANY_REQUESTS",
+            status: 429,
+            title: "Too many requests",
+            detail,
+        });
+    }
+}
+
+export class ServiceUnavailableError extends AppError {
+    constructor(detail = "Dịch vụ tạm thời không khả dụng, vui lòng thử lại sau") {
+        super({
+            code: "SERVICE_UNAVAILABLE",
+            status: 503,
+            title: "Service unavailable",
+            detail,
+        });
+    }
+}
