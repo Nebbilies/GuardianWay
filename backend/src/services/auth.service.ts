@@ -77,8 +77,12 @@ class AuthService {
     }
 
     private createRefreshToken(payload: AuthTokenPayload) {
+        // jwtid makes each refresh token unique even when the same user logs in twice
+        // within the same second (same payload + iat would otherwise sign to the same
+        // bytes, colliding on RefreshToken.tokenHash's unique constraint).
         return jwt.sign(payload, this.getRefreshSecret(), {
             expiresIn: REFRESH_TOKEN_TTL_SECONDS,
+            jwtid: crypto.randomUUID(),
         });
     }
 
