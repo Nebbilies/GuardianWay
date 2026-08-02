@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
   reactCompiler: true,
+  // Don't advertise the framework in every response.
+  poweredByHeader: false,
   // Security headers for HTML and static responses. Emitted here (rather than
   // by a reverse proxy) so they apply the same way regardless of what, if
   // anything, sits in front of this app.
