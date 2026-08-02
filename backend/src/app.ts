@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import busStopRoutes from "./routes/busStop.routes";
 import busRouteRoutes from "./routes/busRoute.routes";
@@ -30,6 +31,15 @@ app.set("trust proxy", resolveTrustProxyHops(process.env.TRUST_PROXY_HOPS));
 app.use(cors({
     origin: allowedOrigin,
     credentials: true,
+}));
+app.use(helmet({
+    // No TLS terminates in front of this service, so asserting HSTS would be a
+    // claim the deployment cannot honour.
+    strictTransportSecurity: false,
+    // The API serves JSON only; CSP belongs on the HTML responses, which nginx
+    // handles for the Next.js upstream.
+    contentSecurityPolicy: false,
+    frameguard: { action: "deny" },
 }));
 app.use(cookieParser());
 app.use(express.json());

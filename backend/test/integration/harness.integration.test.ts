@@ -34,4 +34,22 @@ describe("integration harness", () => {
         const res = await request(app).get("/api/buses");
         expect(res.status).toBe(401);
     });
+
+    describe("security headers", () => {
+        it("sets nosniff and denies framing on API responses", async () => {
+            const res = await request(app).get("/");
+            expect(res.headers["x-content-type-options"]).toBe("nosniff");
+            expect(res.headers["x-frame-options"]).toBe("DENY");
+        });
+
+        it("does not assert HSTS, because there is no TLS in this topology", async () => {
+            const res = await request(app).get("/");
+            expect(res.headers["strict-transport-security"]).toBeUndefined();
+        });
+
+        it("removes the x-powered-by banner", async () => {
+            const res = await request(app).get("/");
+            expect(res.headers["x-powered-by"]).toBeUndefined();
+        });
+    });
 });
