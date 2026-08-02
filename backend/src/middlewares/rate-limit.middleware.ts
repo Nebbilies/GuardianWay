@@ -34,23 +34,64 @@ function hashEmail(email: string): string {
     return crypto.createHash("sha256").update(email.trim().toLowerCase()).digest("hex");
 }
 
+// Gates the audit write to at most once per limiter key per window. The first
+// block for a key claims the flag (SET NX) and writes the row; every later
+// block on the same key inside the same window sees the flag already set and
+// skips — otherwise a sustained flood turns into one unthrottled INSERT per
+// rejected request. Redis already holds the limiter's own per-window state, so
+// the flag lives there too rather than in a separate mechanism.
+// A Redis failure here fails OPEN to writing the row: the flag is only a dedup
+// on top of the block, never a gate on it, so "can't tell if we already wrote
+// it" must default to writing rather than silently dropping the audit trail.
+async function claimAuditWrite(flagKey: string): Promise<boolean> {
+    try {
+        const result = await redisClient.set(flagKey, "1", {
+            condition: "NX",
+            expiration: { type: "PX", value: WINDOW_MS },
+        });
+        return result !== null;
+    } catch {
+        return true;
+    }
+}
+
 // The limiter runs before the controller, so there is no ALS to read the actor
 // from — actor fields are passed explicitly, matching the /api/auth convention.
-function onBlocked(reason: "ip" | "account") {
-    return (req: Request, _res: Response, next: NextFunction) => {
+function onBlocked(reason: "ip" | "account", auditFlagPrefix: string) {
+    return (req: Request, res: Response, next: NextFunction, optionsUsed: Options) => {
+        // Neither standardHeaders nor legacyHeaders is enabled below (an
+        // unauthenticated caller must not learn the remaining budget), so
+        // Retry-After has to be set by hand — it is the one signal a legitimate
+        // client still needs out of a 429.
+        res.setHeader("Retry-After", String(Math.ceil(WINDOW_MS / 1000)));
+
         const email = typeof req.body?.email === "string" ? req.body.email : null;
 
-        void auditService.record(
-            { action: "auth.rate_limited", metadata: { reason } },
-            {
-                actorId: null,
-                actorEmail: email,
-                schoolId: null,
-                ip: req.ip ?? null,
-                userAgent: req.headers["user-agent"] ?? null,
-                traceId: req.traceId ?? null,
-            },
-        );
+        // Fire-and-forget by design: auditService.record already swallows its own
+        // errors, and awaiting a DB write here would put it on the response path
+        // of the very request being rejected. next() below runs immediately.
+        void (async () => {
+            const key = await optionsUsed.keyGenerator(req, res);
+            // "audit:" prefix keeps this flag out of the RedisStore's own key
+            // namespace — the store already owns a key at exactly
+            // `${auditFlagPrefix}${key}` for its hit counter, and reusing that
+            // namespace here would make SET NX see the counter itself as the
+            // flag and never write.
+            const shouldWrite = await claimAuditWrite(`audit:${auditFlagPrefix}${key}`);
+            if (!shouldWrite) return;
+
+            await auditService.record(
+                { action: "auth.rate_limited", metadata: { reason } },
+                {
+                    actorId: null,
+                    actorEmail: email,
+                    schoolId: null,
+                    ip: req.ip ?? null,
+                    userAgent: req.headers["user-agent"] ?? null,
+                    traceId: req.traceId ?? null,
+                },
+            );
+        })();
 
         next(new TooManyRequestsError("Bạn đã thử quá nhiều lần, vui lòng thử lại sau ít phút"));
     };
@@ -95,10 +136,16 @@ function build(opts: Pick<Options, "limit" | "keyGenerator"> & Partial<Pick<Opti
         limit: opts.limit,
         keyGenerator: opts.keyGenerator,
         skipSuccessfulRequests: opts.skipSuccessfulRequests ?? false,
-        standardHeaders: true,
+        // Publishing RateLimit-* here would hand an unauthenticated caller the
+        // exact remaining budget for any account they named, and the per-IP and
+        // per-account limiters share one header namespace, so whichever runs
+        // last would silently overwrite the other's headers. The 429 body plus
+        // an explicit Retry-After (set in onBlocked) is the only signal a
+        // legitimate client needs.
+        standardHeaders: false,
         legacyHeaders: false,
         store: store(opts.prefix),
-        handler: onBlocked(opts.reason),
+        handler: onBlocked(opts.reason, opts.prefix),
     }));
 }
 
