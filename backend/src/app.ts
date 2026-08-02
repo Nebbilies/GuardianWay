@@ -36,10 +36,14 @@ app.use(helmet({
     // No TLS terminates in front of this service, so asserting HSTS would be a
     // claim the deployment cannot honour.
     strictTransportSecurity: false,
-    // The API serves JSON only; CSP belongs on the HTML responses, which nginx
-    // handles for the Next.js upstream.
+    // The API serves JSON only; CSP belongs on the HTML responses, which the
+    // frontend app emits for itself.
     contentSecurityPolicy: false,
     frameguard: { action: "deny" },
+    // JSON API responses never need to leak a referrer, so this is the strictest
+    // setting. The portal's HTML uses "strict-origin-when-cross-origin" instead,
+    // because ordinary same-origin navigation there depends on the referrer.
+    referrerPolicy: { policy: "no-referrer" },
 }));
 app.use(cookieParser());
 app.use(express.json());
