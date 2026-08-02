@@ -92,9 +92,19 @@ jobs:
           kind load docker-image "$MIGRATE_IMAGE" --name guardianway
 
       - name: Apply base resources (namespace, secret, datastores)
+        env:
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         run: |
+          # Fail loudly rather than substituting an empty string: a Secret with a
+          # blank mailer password deploys fine and then silently breaks every
+          # password-setup invite at runtime.
+          if [ -z "$EMAIL_PASSWORD" ]; then
+            echo "::error::EMAIL_PASSWORD repository secret is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
           kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/secret.yaml
+          envsubst < k8s/secret.yaml | kubectl apply -f -
           kubectl apply -f k8s/postgres.yaml
           kubectl apply -f k8s/redis.yaml
           kubectl -n guardianway rollout status deploy/postgres --timeout=120s

@@ -126,6 +126,15 @@ inside kind.
 needed inside the cluster. Manifests set `imagePullPolicy: IfNotPresent` so pods use the loaded image instead of trying
 to pull from the internet.
 
+**Required repository secret.** `k8s/secret.yaml` is rendered through `envsubst` before it is applied, so
+`EMAIL_PASSWORD` must exist under *Settings → Secrets and variables → Actions*. The deploy job checks it first and
+fails with an explicit error if it is missing — a Secret carrying a blank mailer password would deploy cleanly and
+then break every password-setup invite at runtime, which is far harder to diagnose than a failed step.
+
+Every other value in that file is a throwaway CI credential and is committed deliberately. `EMAIL_PASSWORD` is not:
+it is a Gmail app password, which bypasses 2FA and grants both send-as and mailbox access on the account that sends
+invite links.
+
 **Apply order enforces the dependency chain** (each `►` waits before the next):
 
 ```
@@ -195,8 +204,9 @@ This pipeline is intentionally self-contained. In a production setting you would
 
 - **A managed cluster** (EKS / GKE / AKS) instead of ephemeral kind, so deploys are long-lived.
 - **Persistent volumes** for Postgres (the demo DB resets every run by design).
-- **A real secret manager** (sealed-secrets, Vault, cloud secret stores) instead of plaintext demo values in
-  `k8s/secret.yaml`.
+- **A real secret manager** (sealed-secrets, Vault, cloud secret stores) for the rest of `k8s/secret.yaml`. The one
+  genuine credential in it, `EMAIL_PASSWORD`, is already injected from a repository secret at deploy time; the values
+  still committed there are throwaway CI ones, which is fine for an ephemeral cluster and would not be in production.
 - **Multiple environments** (staging → production) with the same `:<sha>` image promoted between them.
 - **Rollout strategies** (canary, blue/green) and automated rollback on failed health checks.
 - **An Ingress + TLS** instead of an in-cluster smoke test, to expose the app to real users.
