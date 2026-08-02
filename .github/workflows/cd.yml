@@ -116,7 +116,7 @@ jobs:
         run: |
           kubectl -n guardianway run smoke-backend --image=curlimages/curl:latest \
             --restart=Never --rm -i --quiet -- \
-            curl -sf http://backend:8000/
+            curl -sf http://backend:8000/readyz
           kubectl -n guardianway run smoke-frontend --image=curlimages/curl:latest \
             --restart=Never --rm -i --quiet -- \
             curl -sf http://frontend:3000/
