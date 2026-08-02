@@ -52,4 +52,18 @@ describe("integration harness", () => {
             expect(res.headers["x-powered-by"]).toBeUndefined();
         });
     });
+
+    describe("health endpoints", () => {
+        it("healthz answers without touching dependencies", async () => {
+            const res = await request(app).get("/healthz");
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual({ status: "ok" });
+        });
+
+        it("readyz reports both dependencies healthy", async () => {
+            const res = await request(app).get("/readyz");
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual({ status: "ok", checks: { db: "ok", redis: "ok" } });
+        });
+    });
 });

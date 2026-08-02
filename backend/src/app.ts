@@ -12,6 +12,7 @@ import studentRoutes from "./routes/student.routes";
 import auditRoutes from "./routes/audit.routes";
 import publicRoutes from "./routes/public.routes";
 import authRoutes from "./routes/auth.routes";
+import healthRoutes from "./routes/health.routes";
 import {authenticate} from "./middlewares/auth.middleware";
 import {tenantContext} from "./middlewares/tenant.middleware";
 import {authorize} from "./middlewares/authorize.middleware";
@@ -55,6 +56,11 @@ app.get("/metrics", async (_req, res) => {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
 });
+
+// Liveness/readiness probes — registered before pinoHttp/metricsMiddleware for
+// the same reason as /metrics: probe traffic fires every few seconds and must
+// not flood the request logs or skew the Prometheus request metrics.
+app.use(healthRoutes);
 
 app.use(pinoHttp({
     logger: baseLogger,
