@@ -3,6 +3,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import rateLimit, { ipKeyGenerator, Options } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
 import redisClient, { isRedisReady } from "../config/redis";
+import { AppError } from "../errors/app-error";
 import { ServiceUnavailableError, TooManyRequestsError } from "../errors/http-errors";
 import { auditService } from "../services/audit.service";
 
@@ -55,11 +56,40 @@ function onBlocked(reason: "ip" | "account") {
     };
 }
 
+// requireRateLimitBackend only catches Redis being unready BEFORE the limiter
+// runs. If Redis drops mid-request, after that check but before the store's
+// increment() resolves, express-rate-limit (with passOnStoreError left at its
+// default false) rethrows the raw store error through next(err). That error
+// is not an AppError, so error.middleware.ts would normalise it to a generic
+// 500 with English text instead of the same 503 the readiness guard produces.
+// The security property (fail closed) already holds either way; this wrapper
+// only fixes the response contract by converting anything that reaches next()
+// and isn't already one of our AppError subclasses (the limit-exceeded path
+// below calls next() with a TooManyRequestsError, which must pass through
+// untouched).
+export function failClosed(limiter: RequestHandler): RequestHandler {
+    return (req, res, next) => {
+        limiter(req, res, (err?: unknown) => {
+            if (!err) {
+                next();
+                return;
+            }
+            if (!(err instanceof AppError)) {
+                next(new ServiceUnavailableError("Không thể xác thực lúc này, vui lòng thử lại sau"));
+                return;
+            }
+            // Already one of ours (e.g. TooManyRequestsError from onBlocked below) —
+            // pass it through untouched rather than relabelling it as a store failure.
+            next(err);
+        });
+    };
+}
+
 function build(opts: Pick<Options, "limit" | "keyGenerator"> & Partial<Pick<Options, "skipSuccessfulRequests">> & {
     prefix: string;
     reason: "ip" | "account";
 }): RequestHandler {
-    return rateLimit({
+    return failClosed(rateLimit({
         windowMs: WINDOW_MS,
         // `limit` is the canonical option in v8; `max` is a deprecated alias.
         limit: opts.limit,
@@ -69,7 +99,7 @@ function build(opts: Pick<Options, "limit" | "keyGenerator"> & Partial<Pick<Opti
         legacyHeaders: false,
         store: store(opts.prefix),
         handler: onBlocked(opts.reason),
-    });
+    }));
 }
 
 // Fails CLOSED on auth routes. If Redis is unavailable the limiter cannot count,
