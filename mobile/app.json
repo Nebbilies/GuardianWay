@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "GuardianWay",
+    "slug": "guardian-way",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand/app-icon.png",
+    "scheme": "guardianway",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#EEF1F2",
+    "primaryColor": "#18242F",
+    "ios": {
+      "icon": "./assets/brand/app-icon.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#EEF1F2",
+        "foregroundImage": "./assets/brand/adaptive-foreground.png",
+        "monochromeImage": "./assets/brand/adaptive-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/brand/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#EEF1F2",
+          "image": "./assets/brand/splash-icon.png",
+          "imageWidth": 128,
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
