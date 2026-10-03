@@ -9,7 +9,8 @@
       "@/assets/*": [
         "./assets/*"
       ]
-    }
+    },
+    "moduleSuffixes": [".native", ".web", ""]
   },
   "include": [
     "**/*.ts",
