@@ -11,6 +11,12 @@ npx expo start
 
 Ứng dụng ưu tiên Android và iOS. Bản web được giữ để smoke-test nhanh component.
 
+## Đăng nhập mobile
+
+Sao chép `.env.example` thành `.env`, rồi đặt `EXPO_PUBLIC_API_URL` thành địa chỉ backend mà thiết bị hoặc emulator truy cập được. Backend local mặc định lắng nghe cổng `8000`; không dùng `localhost` trên thiết bị vật lý nếu backend chạy trên máy phát triển.
+
+Đăng nhập hỗ trợ tài khoản `DRIVER` và `PARENT`. Refresh token được lưu qua SecureStore trên iOS/Android; access token chỉ giữ trong memory. Bản web chỉ dùng để kiểm tra giao diện và build, không lưu session bền vững.
+
 ## Quy tắc UI
 
 - Nguồn thiết kế: [`../DESIGN.md`](../DESIGN.md).

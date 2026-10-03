@@ -5,15 +5,20 @@ import {
   NotoSans_700Bold,
 } from '@expo-google-fonts/noto-sans';
 import { useFonts } from 'expo-font';
-import { ThemeProvider, type Theme } from 'expo-router';
+import { Stack, ThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { ActivityIndicator, StyleSheet } from 'react-native';
 
 import '@/global.css';
 
-import AppTabs from '@/components/app-tabs';
+import { AppText } from '@/components/app-text';
+import { Button } from '@/components/ui';
+import { Screen } from '@/components/screen';
+import { Stack as LayoutStack } from '@/components/stack';
 import { colors } from '@/constants/theme';
+import { useAuthStore } from '@/auth/auth-store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,6 +47,12 @@ export default function RootLayout() {
     NotoSans_600SemiBold,
     NotoSans_700Bold,
   });
+  const status = useAuthStore((state) => state.status);
+  const restoreSession = useAuthStore((state) => state.restoreSession);
+
+  useEffect(() => {
+    void restoreSession();
+  }, [restoreSession]);
 
   useEffect(() => {
     if (fontError && __DEV__) {
@@ -60,7 +71,43 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={navigationTheme}>
       <StatusBar style="dark" />
-      <AppTabs />
+      {status === 'restoring' ? (
+        <Screen contentContainerStyle={styles.statusScreen}>
+          <LayoutStack gap="lg" align="center">
+            <ActivityIndicator color={colors.primary} />
+            <AppText tone="muted">Đang khôi phục phiên đăng nhập…</AppText>
+          </LayoutStack>
+        </Screen>
+      ) : status === 'unavailable' ? (
+        <Screen contentContainerStyle={styles.statusScreen}>
+          <LayoutStack gap="lg" align="center">
+            <AppText variant="sectionTitle">Chưa thể kết nối</AppText>
+            <AppText tone="muted" style={styles.centered}>
+              Kiểm tra kết nối mạng rồi thử khôi phục phiên lần nữa.
+            </AppText>
+            <Button onPress={() => void restoreSession()}>Thử lại</Button>
+          </LayoutStack>
+        </Screen>
+      ) : (
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={status === 'signedOut'}>
+            <Stack.Screen name="sign-in" />
+          </Stack.Protected>
+          <Stack.Protected guard={status === 'signedIn'}>
+            <Stack.Screen name="(app)" />
+          </Stack.Protected>
+        </Stack>
+      )}
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  statusScreen: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centered: {
+    textAlign: 'center',
+  },
+});

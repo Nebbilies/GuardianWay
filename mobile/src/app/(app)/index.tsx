@@ -8,9 +8,12 @@ import { Stack } from '@/components/stack';
 import { Button, Card, StatusBadge } from '@/components/ui';
 import { spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useAuthStore } from '@/auth/auth-store';
 
 export default function HomeScreen() {
   const { colors, radius, spacing } = useTheme();
+  const role = useAuthStore((state) => state.user?.role);
+  const signOut = useAuthStore((state) => state.signOut);
 
   return (
     <Screen contentContainerStyle={styles.content}>
@@ -38,12 +41,18 @@ export default function HomeScreen() {
               Nền tảng vận hành giao thông học đường an toàn, rõ ràng và có trách nhiệm.
             </AppText>
           </Stack>
-          <StatusBadge status="success" label="UI foundation sẵn sàng" />
+          <StatusBadge
+            status="success"
+            label={role === 'DRIVER' ? 'Đã đăng nhập · Tài xế' : 'Đã đăng nhập · Phụ huynh'}
+          />
           {__DEV__ ? (
             <Button fullWidth onPress={() => router.push('/design-system')}>
               Mở thư viện thành phần
             </Button>
           ) : null}
+          <Button fullWidth onPress={() => void signOut()} variant="secondary">
+            Đăng xuất
+          </Button>
         </Stack>
       </Card>
       <AppText variant="label" tone="muted" style={{ marginTop: spacing.lg }}>
