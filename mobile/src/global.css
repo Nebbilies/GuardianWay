@@ -1,0 +1,11 @@
+:root {
+  color-scheme: light;
+  background: #eef1f2;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background: #eef1f2;
+}

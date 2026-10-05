@@ -15,16 +15,21 @@ class AuthController {
         res.cookie(
             authService.getAccessCookieName(),
             result.accessToken,
-            authService.getCookieOptions(15 * 60 * 1000),
+            authService.getCookieOptions(result.accessTokenExpiresIn * 1000),
         );
         res.cookie(
             authService.getRefreshCookieName(),
             result.refreshToken,
-            authService.getCookieOptions(7 * 24 * 60 * 60 * 1000),
+            authService.getCookieOptions(result.refreshTokenExpiresIn * 1000),
         );
 
         res.status(200).json({
-            user: result.user,
+            user: {
+                id: result.user.id,
+                name: result.user.name,
+                email: result.user.email,
+                role: result.user.role,
+            },
         });
     }
 
@@ -39,15 +44,22 @@ class AuthController {
         res.cookie(
             authService.getAccessCookieName(),
             result.accessToken,
-            authService.getCookieOptions(15 * 60 * 1000),
+            authService.getCookieOptions(result.accessTokenExpiresIn * 1000),
         );
         res.cookie(
             authService.getRefreshCookieName(),
             result.refreshToken,
-            authService.getCookieOptions(7 * 24 * 60 * 60 * 1000),
+            authService.getCookieOptions(result.refreshTokenExpiresIn * 1000),
         );
 
-        res.status(200).json({user: result.user});
+        res.status(200).json({
+            user: {
+                id: result.user.id,
+                name: result.user.name,
+                email: result.user.email,
+                role: result.user.role,
+            },
+        });
     }
 
     async logout(req: Request, res: Response) {

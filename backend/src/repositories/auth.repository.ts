@@ -128,6 +128,17 @@ class AuthRepository {
         });
     }
 
+    async consumeRefreshToken(id: string) {
+        return prisma.refreshToken.updateMany({
+            where: {
+                id,
+                revokedAt: null,
+                expiresAt: { gt: new Date() },
+            },
+            data: { revokedAt: new Date() },
+        });
+    }
+
     async revokeAllUserRefreshTokens(userId: string) {
         await prisma.refreshToken.updateMany({
             where: {
@@ -152,6 +163,7 @@ class AuthRepository {
                 role: true,
                 email: true,
                 name: true,
+                schoolId: true,
                 passwordSetupRequired: true,
             },
         });

@@ -16,15 +16,20 @@ const PASSWORD_SALT_ROUNDS = 10;
 const ACCESS_COOKIE_NAME = "gw_access_token";
 const REFRESH_COOKIE_NAME = "gw_refresh_token";
 
-export interface LoginResult {
+export interface AuthUser {
+    id: string;
+    name: string;
+    email: string;
+    role: Role;
+    schoolId: string | null;
+}
+
+export interface AuthSessionResult {
     accessToken: string;
     refreshToken: string;
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        role: Role;
-    };
+    accessTokenExpiresIn: number;
+    refreshTokenExpiresIn: number;
+    user: AuthUser;
 }
 
 export interface IssueInviteResult {
@@ -165,7 +170,7 @@ class AuthService {
         return { success: true };
     }
 
-    async login(email: string, password: string, context: RequestContext = {}): Promise<LoginResult> {
+    async login(email: string, password: string, context: RequestContext = {}): Promise<AuthSessionResult> {
         const user = await authRepository.findActiveUserByEmail(email);
         if (!user || !user.password) {
             await auditService.record(
@@ -250,17 +255,19 @@ class AuthService {
         return {
             accessToken,
             refreshToken,
+            accessTokenExpiresIn: ACCESS_TOKEN_TTL_SECONDS,
+            refreshTokenExpiresIn: REFRESH_TOKEN_TTL_SECONDS,
             user: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                schoolId: user.schoolId,
             },
         };
     }
 
-    // revoke old -> create new access + refresh -> save new refresh, return new tokens
-    async refresh(refreshToken: string, context: RequestContext = {}): Promise<LoginResult> {
+    async refresh(refreshToken: string, context: RequestContext = {}): Promise<AuthSessionResult> {
         if (!refreshToken) {
             throw new AuthenticationError("Phiên đăng nhập không hợp lệ");
         }
@@ -279,9 +286,17 @@ class AuthService {
             throw new AuthenticationError("Phiên đăng nhập không hợp lệ");
         }
 
-        await authRepository.revokeRefreshToken(tokenRecord.id);
-
         const user = tokenRecord.user;
+        const consumed = await authRepository.consumeRefreshToken(tokenRecord.id);
+        if (consumed.count !== 1) {
+            throw new AuthenticationError("Phiên đăng nhập không hợp lệ");
+        }
+
+        if (!user.isActive || user.deletedAt || user.passwordSetupRequired) {
+            await authRepository.revokeAllUserRefreshTokens(user.id);
+            throw new AuthenticationError("Tài khoản không còn hoạt động");
+        }
+
         const newPayload: AuthTokenPayload = {
             userId: user.id,
             role: user.role,
@@ -302,12 +317,30 @@ class AuthService {
         return {
             accessToken,
             refreshToken: newRefreshToken,
+            accessTokenExpiresIn: ACCESS_TOKEN_TTL_SECONDS,
+            refreshTokenExpiresIn: REFRESH_TOKEN_TTL_SECONDS,
             user: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                schoolId: user.schoolId,
             },
+        };
+    }
+
+    async getCurrentUser(userId: string): Promise<AuthUser> {
+        const user = await authRepository.getUserByIdForAuth(userId);
+        if (!user || user.passwordSetupRequired) {
+            throw new AuthenticationError("Phiên đăng nhập không hợp lệ");
+        }
+
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            schoolId: user.schoolId,
         };
     }
 
