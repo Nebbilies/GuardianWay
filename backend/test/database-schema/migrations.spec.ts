@@ -33,6 +33,12 @@ describe("independent migration history", () => {
         expect(output).toContain("No pending migrations");
     });
 
+    it("rejects an application database configured as shadow before running Prisma", () => {
+        const shadow = new URL(inject("schemaDatabaseUrl"));
+        shadow.pathname = "/guardianway";
+        expect(() => cli(["validate"], inject("schemaDatabaseUrl"), shadow.toString())).toThrow();
+    });
+
     it("rebuilds the same constraints in a second empty database", async () => {
         await db.query("CREATE DATABASE guardianway_schema_demo");
         const second = new URL(inject("schemaDatabaseUrl"));

@@ -24,6 +24,8 @@ npm run test:database-schema --workspace backend
 
 Validate/generate use the illustrative URL without connecting to a database. Tests create their own TimescaleDB/PostGIS container with random host ports, plus test/demo/shadow databases inside that container. They do not use the persistent development database or application volumes. Docker must be running. Migration, generated geography, unique/FK/CHECK behavior, ORM date/time/JSONB, seed repeatability and drift are tested.
 
+Primary and shadow URLs must not contain query strings. An explicitly configured `SCHEMA_SHADOW_DATABASE_URL` must use the dedicated local `guardianway_schema_shadow` database and must not resolve to the primary database. Credentials, loopback aliases and default-port spelling do not make a database distinct. No shadow URL means Prisma retains its normal automatic temporary-shadow behavior.
+
 The new CI job only generates this separate client. Existing application CI jobs continue to generate backend/prisma/schema.prisma as before.
 
 ## Optional persistent development instance
