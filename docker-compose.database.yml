@@ -1,0 +1,23 @@
+name: guardianway-schema
+
+services:
+  postgres:
+    image: timescale/timescaledb-ha:pg17
+    container_name: guardianway-postgres-schema
+    env_file:
+      - ./database/.env
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - schema_pgdata:/home/postgres/pgdata/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gw -d guardianway_dev"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  schema_pgdata:
+    name: guardianway_schema_pgdata
