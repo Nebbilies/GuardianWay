@@ -2,7 +2,7 @@
 
 import { ErrorNotice } from "@/components/error-notice";
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { navigateAfterSessionChange } from "@/lib/session-navigation";
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {Field, FieldLabel} from '@/components/ui/field'
@@ -11,7 +11,6 @@ import {AuthShell} from '@/components/custom/auth-shell'
 import { loginWeb } from '@/modules/system/auth/contracts'
 
 export default function LoginPage() {
-    const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<unknown>(null)
@@ -25,8 +24,7 @@ export default function LoginPage() {
         try {
             const { user } = await loginWeb(email, password)
 
-            router.push(user?.role === 'SUPER_ADMIN' ? '/platform/schools' : '/admin/users')
-            router.refresh()
+            navigateAfterSessionChange(user?.role === 'SUPER_ADMIN' ? '/platform/schools' : '/admin/users')
         } catch (err) {
             setError(err)
         } finally {

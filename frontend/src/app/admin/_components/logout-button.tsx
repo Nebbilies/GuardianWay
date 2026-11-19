@@ -1,7 +1,7 @@
 "use client";
 
 import {LogOut} from "lucide-react";
-import {useRouter} from "next/navigation";
+import { navigateAfterSessionChange } from "@/lib/session-navigation";
 import {useState} from "react";
 import {SidebarMenuButton} from "@/components/ui/sidebar";
 import {logoutWeb} from "@/modules/system/auth/contracts";
@@ -9,7 +9,6 @@ import {toast} from "sonner";
 import {getErrorMessage} from "@/lib/i18n";
 
 export default function LogoutButton() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     async function handleLogout() {
@@ -17,8 +16,7 @@ export default function LogoutButton() {
         setLoading(true);
         try {
             await logoutWeb();
-            router.push("/login");
-            router.refresh();
+            navigateAfterSessionChange("/login");
         } catch (error) {
             toast.error(getErrorMessage(error));
         } finally {

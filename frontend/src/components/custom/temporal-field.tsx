@@ -41,6 +41,12 @@ export function TemporalField({
   const [localTime, setTime] = useState(
     type === "time" ? initial : (initial.split("T")[1] ?? ""),
   );
+  const [lastValue, setLastValue] = useState(value);
+  if (value !== lastValue) {
+    setLastValue(value);
+    setDate(type === "time" ? "" : value?.split("T")[0] ?? "");
+    setTime(type === "time" ? value ?? "" : value?.split("T")[1] ?? "");
+  }
   const date =
     value !== undefined && type === "date" ? value : (localDate ?? "");
   const time = value !== undefined && type === "time" ? value : localTime;
@@ -81,6 +87,8 @@ export function TemporalField({
                 type="button"
                 variant="outline"
                 disabled={disabled}
+                aria-invalid={invalid || undefined}
+                aria-describedby={invalid ? id + "-error" : undefined}
                 aria-label={label}
                 className="min-w-36 grow justify-start bg-card font-normal"
               >

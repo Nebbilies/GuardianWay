@@ -56,7 +56,7 @@ export function PlanForm({
   onSubmit: (input: unknown) => Promise<void>;
   onCancel: () => void;
 }) {
-  const { data: policies, error } = useSWR("policy-versions", policyApi.list);
+  const { data: policies, error, mutate } = useSWR("policy-versions", policyApi.list);
   const [direction, setDirection] = useState(
       initialData?.direction ?? "PICKUP",
     ),
@@ -130,7 +130,6 @@ export function PlanForm({
       })),
     });
   }
-  if (error) return <ErrorNotice error={error} />;
   return (
     <FormLayout
       onSubmit={submit}
@@ -146,13 +145,14 @@ export function PlanForm({
           </Button>
           <Button
             type="submit"
-            disabled={busy || routes.some((route) => route.stops.length < 2)}
+            disabled={busy || Boolean(error) || !policies?.length || !policyId || routes.some((route) => route.stops.length < 2)}
           >
             Lưu bản nháp
           </Button>
         </>
       }
     >
+      {error && <div><ErrorNotice error={error} /><Button type="button" variant="outline" onClick={() => void mutate()}>Thử lại</Button></div>}
       <fieldset disabled={busy} className="space-y-5">
         <div className="grid gap-3 sm:grid-cols-2">
           <TemporalField

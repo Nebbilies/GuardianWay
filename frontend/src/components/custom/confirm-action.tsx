@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
@@ -19,14 +19,19 @@ interface Confirmation {
 }
 export function useConfirmAction() {
   const { t } = useTranslation();
-  const [request, confirm] = useState<Confirmation>();
+  const [request, setRequest] = useState<Confirmation>();
   const [pending, setPending] = useState(false);
+  const trigger = useRef<HTMLElement | null>(null);
+  function confirm(next: Confirmation) {
+    trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setRequest(next);
+  }
   async function submit() {
     if (!request || pending) return;
     setPending(true);
     try {
       await request.run();
-      confirm(undefined);
+      setRequest(undefined);
     } finally {
       setPending(false);
     }
@@ -35,10 +40,12 @@ export function useConfirmAction() {
     <AlertDialog
       open={Boolean(request)}
       onOpenChange={(open) => {
-        if (!open && !pending) confirm(undefined);
+        if (!open && !pending) setRequest(undefined);
       }}
     >
-      <AlertDialogContent className="overflow-hidden p-0">
+      <AlertDialogContent onCloseAutoFocus={(event) => {
+        if (trigger.current?.isConnected) { event.preventDefault(); trigger.current.focus(); }
+      }} className="overflow-hidden p-0">
         <div className="gw-dialog-heading">
           <AlertDialogTitle className="text-2xl font-bold">
             {request?.title}

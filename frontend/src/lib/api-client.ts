@@ -39,6 +39,7 @@ function shouldSkipRefresh(path: string) {
     return (
         normalizedPath === "/auth/login" ||
         normalizedPath === "/auth/refresh" ||
+        normalizedPath === "/auth/logout" ||
         normalizedPath === "/auth/setup-password"
     );
 }
@@ -49,15 +50,28 @@ async function responseError(response: Response) {
     return new ApiError(problem.code ?? "UNKNOWN_ERROR", response.status, problem);
 }
 
+let sessionQueue: Promise<unknown> = Promise.resolve();
+
 async function requestOnce(url: string, init: RequestInit = {}) {
-    try { return await fetch(url, {
+    const send = () => fetch(url, {
         ...init,
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
             ...(init.headers || {}),
         },
-    }); } catch (error) {
+    });
+    try {
+        if (/\/auth\/(login|refresh|logout)$/.test(url)) {
+            if (typeof navigator !== "undefined" && navigator.locks) {
+                return await navigator.locks.request("guardianway-web-session", send);
+            }
+            const pending = sessionQueue.then(send, send);
+            sessionQueue = pending.catch(() => undefined);
+            return await pending;
+        }
+        return await send();
+    } catch (error) {
         if (error instanceof Error && error.name === "AbortError") throw new ApiError("REQUEST_ABORTED", 0);
         throw new ApiError("NETWORK_ERROR", 0);
     }

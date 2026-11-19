@@ -192,7 +192,7 @@ export function DataTable<Row extends { id: string }>({
                   })
                 : t("controls.total", { count: pagination.totalCount })}
           </span>
-          {pagination.pageCount > 1 && onPage && (
+          {(pagination.pageCount > 1 || pagination.currentPage > 1) && onPage && (
             <nav
               aria-label={t("controls.pages")}
               className="flex items-center gap-2"

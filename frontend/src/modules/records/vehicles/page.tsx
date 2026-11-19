@@ -1,11 +1,12 @@
 "use client";
+import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { ListPage } from "@/components/custom/list-page";
 import { useConfirmAction } from "@/components/custom/confirm-action";
 import { RecordStatus } from "@/components/custom/record-status";
 import { DataTable } from "@/components/custom/data-table";
 import { ChoiceField, Choice } from "@/components/custom/choice-field";
 import { useState } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import { FormDialog } from "@/components/custom/form-dialog";
 import { vehicleApi, type Vehicle } from "./contracts";
 import { VehicleForm } from "./form";
 export function VehiclePage() {
+  const { mutate: mutateLists } = useSWRConfig();
+  const [status, setStatus] = useState("");
   const { confirm, dialog } = useConfirmAction();
   const [search, setSearch] = useState(""),
     [page, setPage] = useState(1),
@@ -23,16 +26,17 @@ export function VehiclePage() {
   const [editing, setEditing] = useState<Vehicle>(),
     [open, setOpen] = useState(false),
     [busy, setBusy] = useState(false);
+  const query = useDebouncedValue(search);
   const { data, error, isValidating, mutate } = useSWR(
-    ["vehicle", search, page, deleted, sort],
-    () => vehicleApi.list({ search, page, deleted, sort }),
+    ["vehicle", query, page, deleted, sort, status],
+    () => vehicleApi.list({ search: query, page, deleted, sort, status }),
   );
   async function submit(input: unknown) {
     setBusy(true);
     try {
       if (editing) await vehicleApi.update(editing.id, input);
       else await vehicleApi.create(input);
-      await mutate();
+      await mutateLists((key) => Array.isArray(key) && key[0] === "vehicle", undefined);
       setOpen(false);
       toast.success("Đã lưu dữ liệu.");
     } catch (error) {
@@ -46,7 +50,7 @@ export function VehiclePage() {
     try {
       if (row.deletedAt) await vehicleApi.restore(row.id);
       else await vehicleApi.remove(row.id);
-      await mutate();
+      await mutateLists((key) => Array.isArray(key) && key[0] === "vehicle", undefined);
       toast.success("Đã cập nhật hồ sơ.");
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -84,6 +88,11 @@ export function VehiclePage() {
             setPage(1);
           }}
         />
+        <ChoiceField aria-label="Trạng thái xe" value={status || "all"} onValueChange={(value) => { setStatus(value === "all" ? "" : value); setPage(1); }}>
+          <Choice value="all">Mọi trạng thái</Choice>
+          <Choice value="AVAILABLE">Sẵn sàng</Choice>
+          <Choice value="UNAVAILABLE">Tạm ngừng</Choice>
+        </ChoiceField>
         <ChoiceField
           aria-label="Hồ sơ đã xóa"
           value={deleted}
@@ -109,9 +118,10 @@ export function VehiclePage() {
         sort={sort}
         onSort={changeSort}
         clearFilters={
-          search || deleted === "only"
+          search || status || deleted === "only"
             ? () => {
                 setSearch("");
+                setStatus("");
                 setDeleted("exclude");
                 setPage(1);
               }

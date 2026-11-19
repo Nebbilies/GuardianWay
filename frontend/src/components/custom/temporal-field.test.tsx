@@ -49,3 +49,14 @@ it("keeps a school date, midnight with seconds, and an unset optional time disti
     end: "",
   });
 });
+
+it("serializes external datetime replacements and resets", () => {
+  const field = (value: string) => <form aria-label="trip">
+    <TemporalField label="Giờ" type="datetime-local" name="end" value={value} />
+  </form>;
+  const { rerender } = render(field("2026-09-03T07:00"));
+  for (const value of ["2026-09-04T09:30", ""]) {
+    rerender(field(value));
+    expect(new FormData(screen.getByRole("form") as HTMLFormElement).get("end")).toBe(value);
+  }
+});

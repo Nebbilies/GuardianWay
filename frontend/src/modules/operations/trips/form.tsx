@@ -1,4 +1,5 @@
 "use client";
+import { ErrorNotice } from "@/components/error-notice";
 import { FormLayout } from "@/components/custom/form-layout";
 import { TemporalField } from "@/components/custom/temporal-field";
 import { useState, type FormEvent } from "react";
@@ -24,7 +25,7 @@ export function TripForm({
   const [scheduleId, setScheduleId] = useState(initialData?.scheduleId ?? ""),
     [vehicleId, setVehicleId] = useState(initialData?.initialVehicleId ?? ""),
     [driverId, setDriverId] = useState(initialData?.initialDriverId ?? "");
-  const { data: school } = useSWR("school-context", getSchoolContext);
+  const { data: school, error, mutate } = useSWR("school-context", getSchoolContext);
   const startTime =
     initialData && school
       ? new Intl.DateTimeFormat("en-GB", {
@@ -39,8 +40,8 @@ export function TripForm({
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const resources = {
-      ...(vehicleId ? { vehicleId } : {}),
-      ...(driverId ? { driverId } : {}),
+      ...(vehicleId && vehicleId !== initialData?.initialVehicleId ? { vehicleId } : {}),
+      ...(driverId && driverId !== initialData?.initialDriverId ? { driverId } : {}),
     };
     await onSubmit(
       initialData
@@ -75,6 +76,7 @@ export function TripForm({
         </>
       }
     >
+      {error && <div><ErrorNotice error={error} /><Button type="button" variant="outline" onClick={() => void mutate()}>Thử lại</Button></div>}
       <fieldset disabled={busy || !school} className="space-y-4">
         {!initialData ? (
           <>
@@ -125,6 +127,7 @@ export function TripForm({
         <PagedLookup
           cacheKey="trip-vehicles"
           label={initialData ? "Xe dự kiến" : "Ghi đè xe mặc định (tùy chọn)"}
+          required={Boolean(initialData?.initialVehicleId)}
           value={vehicleId}
           selectedLabel={initialData?.vehicleLabel ?? undefined}
           onChange={setVehicleId}
@@ -136,6 +139,7 @@ export function TripForm({
           label={
             initialData ? "Tài xế dự kiến" : "Ghi đè tài xế mặc định (tùy chọn)"
           }
+          required={Boolean(initialData?.initialDriverId)}
           value={driverId}
           selectedLabel={initialData?.driverLabel ?? undefined}
           onChange={setDriverId}

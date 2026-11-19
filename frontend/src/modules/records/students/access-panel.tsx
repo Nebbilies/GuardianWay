@@ -21,7 +21,7 @@ import {
   cardSchema,
 } from "./contracts";
 
-export function StudentAccessPanel({ studentId }: { studentId: string }) {
+export function StudentAccessPanel({ studentId, busy, setBusy }: { studentId: string; busy: boolean; setBusy: (value: boolean) => void }) {
   const { data, error, mutate, isValidating } = useSWR(
     ["student-access", studentId],
     () => studentApi.get(studentId),
@@ -32,9 +32,9 @@ export function StudentAccessPanel({ studentId }: { studentId: string }) {
     [canRequest, setCanRequest] = useState(true);
   const [cardUid, setCardUid] = useState(""),
     [technology, setTechnology] = useState("NFC");
-  const [reason, setReason] = useState(""),
-    [busy, setBusy] = useState(false);
+  const [reason, setReason] = useState("");
   async function perform(action: () => Promise<unknown>) {
+    if (busy || error) return;
     setBusy(true);
     try {
       await action();
@@ -98,6 +98,7 @@ export function StudentAccessPanel({ studentId }: { studentId: string }) {
   if (!data) return <p>Đang tải…</p>;
   return (
     <div className="space-y-6">
+      <p role="status" className={busy ? "text-sm text-muted-foreground" : "sr-only"}>{busy ? "Đang cập nhật liên kết…" : ""}</p>
       <p className="font-medium">
         {data.fullName}{" "}
         <span className="text-muted-foreground">({data.studentCode})</span>
@@ -112,7 +113,7 @@ export function StudentAccessPanel({ studentId }: { studentId: string }) {
       </label>
       <form onSubmit={link} className="space-y-3 border-t pt-4">
         <h3 className="font-semibold">Liên kết phụ huynh</h3>
-        <fieldset disabled={busy} className="space-y-3">
+        <fieldset disabled={Boolean(error) || busy} className="space-y-3">
           <PagedLookup
             cacheKey="parent-accounts"
             label="Phụ huynh"
@@ -200,7 +201,7 @@ export function StudentAccessPanel({ studentId }: { studentId: string }) {
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={busy || !reason.trim()}
+                  disabled={Boolean(error) || busy || !reason.trim()}
                   onClick={() => void perform(() => close("guardians", r.id))}
                 >
                   Đóng quyền
@@ -214,7 +215,7 @@ export function StudentAccessPanel({ studentId }: { studentId: string }) {
         <p className="text-xs text-muted-foreground">
           Giữ nguyên các số 0 ở đầu UID.
         </p>
-        <fieldset disabled={busy} className="flex flex-wrap items-end gap-3">
+        <fieldset disabled={Boolean(error) || busy} className="flex flex-wrap items-end gap-3">
           <label className="grid gap-1 text-sm">
             UID thẻ
             <Input
@@ -242,6 +243,7 @@ export function StudentAccessPanel({ studentId }: { studentId: string }) {
       <DataTable
         label="Thẻ học sinh"
         rows={data.cards}
+        error={error}
         retry={() => void mutate()}
         refreshing={isValidating}
         empty="Chưa gán thẻ cho học sinh."
@@ -271,7 +273,7 @@ export function StudentAccessPanel({ studentId }: { studentId: string }) {
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={busy || !reason.trim()}
+                  disabled={Boolean(error) || busy || !reason.trim()}
                   onClick={() => void perform(() => close("cards", r.id))}
                 >
                   Thu hồi

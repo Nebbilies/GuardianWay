@@ -9,6 +9,7 @@ import useSWR from "swr";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ApiError } from "@/lib/api-client";
 import { ErrorNotice } from "@/components/error-notice";
 import { FormDialog } from "@/components/custom/form-dialog";
 import { getErrorMessage } from "@/lib/i18n";
@@ -100,6 +101,9 @@ export function TripsPage() {
       setOpen(false);
       toast.success("Đã lưu chuyến chuẩn bị.");
     } catch (error) {
+      if (error instanceof ApiError && error.code === "TRIP_VERSION_CONFLICT") {
+        setOpen(false); setEditing(undefined); setCancel(undefined);
+      }
       toast.error(getErrorMessage(error));
       await mutate();
     } finally {
@@ -122,6 +126,9 @@ export function TripsPage() {
       setCancel(undefined);
       toast.success("Đã hủy chuyến.");
     } catch (error) {
+      if (error instanceof ApiError && error.code === "TRIP_VERSION_CONFLICT") {
+        setOpen(false); setEditing(undefined); setCancel(undefined);
+      }
       toast.error(getErrorMessage(error));
       await mutate();
     } finally {

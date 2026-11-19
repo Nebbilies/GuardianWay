@@ -1,4 +1,5 @@
 "use client";
+import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { ListPage } from "@/components/custom/list-page";
 import { useConfirmAction } from "@/components/custom/confirm-action";
 import { RecordStatus } from "@/components/custom/record-status";
@@ -26,9 +27,10 @@ export function StudentPage() {
     [open, setOpen] = useState(false),
     [busy, setBusy] = useState(false);
   const [accessId, setAccessId] = useState<string>();
+  const query = useDebouncedValue(search);
   const { data, error, isValidating, mutate } = useSWR(
-    ["student", search, page, deleted, sort],
-    () => studentApi.list({ search, page, deleted, sort }),
+    ["student", query, page, deleted, sort],
+    () => studentApi.list({ search: query, page, deleted, sort }),
   );
   async function submit(input: unknown) {
     setBusy(true);
@@ -221,12 +223,13 @@ export function StudentPage() {
       </FormDialog>
       {accessId ? (
         <FormDialog
+          busy={busy}
           size="lg"
           isOpen
           onClose={() => setAccessId(undefined)}
           title="Phụ huynh và thẻ học sinh"
         >
-          <StudentAccessPanel studentId={accessId} />
+          <StudentAccessPanel studentId={accessId} busy={busy} setBusy={setBusy} />
         </FormDialog>
       ) : null}
       {dialog}
