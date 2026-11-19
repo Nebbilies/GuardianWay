@@ -16,12 +16,12 @@ interface RouteCase {
 }
 
 const ROUTES: RouteCase[] = [
-    { method: "get", path: "/api/users", allowed: ["admin", "superAdmin"] },
-    { method: "get", path: "/api/buses", allowed: ["admin", "superAdmin"] },
-    { method: "get", path: "/api/bus-routes", allowed: ["admin", "superAdmin"] },
-    { method: "get", path: "/api/bus-stops", allowed: ["admin", "superAdmin"] },
-    { method: "get", path: "/api/bus-trips", allowed: ["admin", "superAdmin"] },
-    { method: "get", path: "/api/students", allowed: ["admin", "superAdmin"] },
+    { method: "get", path: "/api/users", allowed: ["admin"] },
+    { method: "get", path: "/api/buses", allowed: ["admin"] },
+    { method: "get", path: "/api/route-plans", allowed: ["admin"] },
+    { method: "get", path: "/api/bus-stops", allowed: ["admin"] },
+    { method: "get", path: "/api/bus-trips", allowed: ["admin"] },
+    { method: "get", path: "/api/students", allowed: ["admin"] },
     { method: "get", path: "/api/audit-logs", allowed: ["admin", "superAdmin"] },
     { method: "get", path: "/api/schools", allowed: ["superAdmin"] },
 ];

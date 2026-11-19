@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { list, get, create, change } from "./stop.controller";
+export const stopRouter = Router();
+stopRouter.get("/", list);
+stopRouter.get("/export", list);
+stopRouter.get("/:id", get);
+stopRouter.post("/", create);
+stopRouter.patch("/:id", change("update"));
+stopRouter.delete("/:id", change("delete"));
+stopRouter.post("/:id/restore", change("restore"));

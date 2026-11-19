@@ -1,11 +1,11 @@
 import crypto from "crypto";
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import rateLimit, { ipKeyGenerator, Options } from "express-rate-limit";
+import rateLimit, { ipKeyGenerator, MemoryStore, Options } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
-import redisClient, { isRedisReady } from "../config/redis";
+import redisClient, { isRedisReady, redisEnabled } from "../config/redis";
 import { AppError } from "../errors/app-error";
 import { ServiceUnavailableError, TooManyRequestsError } from "../errors/http-errors";
-import { auditService } from "../services/audit.service";
+import { recordAuthAudit } from "../modules/system/audit";
 
 const WINDOW_MS = 15 * 60 * 1000;
 const IP_LOGIN_LIMIT = 20;
@@ -21,9 +21,10 @@ function ipKey(req: Request): string {
     return ipKeyGenerator(req.ip ?? "unknown");
 }
 
-// Counters live in Redis rather than in memory so they survive a restart and
-// stay correct if the deployment ever runs more than one replica.
+// Redis counters are shared across replicas. Explicit local mode uses the
+// library's MemoryStore; its counters reset when the process restarts.
 function store(prefix: string) {
+    if (!redisEnabled) return new MemoryStore();
     return new RedisStore({
         prefix,
         sendCommand: (...args: string[]) => redisClient.sendCommand(args),
@@ -43,7 +44,14 @@ function hashEmail(email: string): string {
 // A Redis failure here fails OPEN to writing the row: the flag is only a dedup
 // on top of the block, never a gate on it, so "can't tell if we already wrote
 // it" must default to writing rather than silently dropping the audit trail.
+const localAuditFlags = new Set<string>();
 async function claimAuditWrite(flagKey: string): Promise<boolean> {
+    if (!redisEnabled) {
+        if (localAuditFlags.has(flagKey)) return false;
+        localAuditFlags.add(flagKey);
+        setTimeout(() => localAuditFlags.delete(flagKey), WINDOW_MS).unref();
+        return true;
+    }
     try {
         const result = await redisClient.set(flagKey, "1", {
             condition: "NX",
@@ -67,7 +75,7 @@ function onBlocked(reason: "ip" | "account", auditFlagPrefix: string) {
 
         const email = typeof req.body?.email === "string" ? req.body.email : null;
 
-        // Fire-and-forget by design: auditService.record already swallows its own
+        // Fire-and-forget by design: recordAuthAudit already swallows its own
         // errors, and awaiting a DB write here would put it on the response path
         // of the very request being rejected. next() below runs immediately.
         void (async () => {
@@ -80,20 +88,13 @@ function onBlocked(reason: "ip" | "account", auditFlagPrefix: string) {
             const shouldWrite = await claimAuditWrite(`audit:${auditFlagPrefix}${key}`);
             if (!shouldWrite) return;
 
-            await auditService.record(
-                { action: "auth.rate_limited", metadata: { reason } },
-                {
-                    actorId: null,
-                    actorEmail: email,
-                    schoolId: null,
-                    ip: req.ip ?? null,
-                    userAgent: req.headers["user-agent"] ?? null,
-                    traceId: req.traceId ?? null,
-                },
-            );
+            await recordAuthAudit(null, {
+                action: "auth.rate_limited", subjectKind: "AUTH_ATTEMPT",
+                subjectReference: email ? hashEmail(email) : "anonymous", after: { reason },
+            }, { ipAddress: req.ip, userAgent: req.headers["user-agent"], traceId: req.traceId });
         })();
 
-        next(new TooManyRequestsError("Bạn đã thử quá nhiều lần, vui lòng thử lại sau ít phút"));
+        next(new TooManyRequestsError("Too many attempts. Please try again later"));
     };
 }
 
@@ -116,7 +117,7 @@ export function failClosed(limiter: RequestHandler): RequestHandler {
                 return;
             }
             if (!(err instanceof AppError)) {
-                next(new ServiceUnavailableError("Không thể xác thực lúc này, vui lòng thử lại sau"));
+                next(new ServiceUnavailableError("Authentication is temporarily unavailable. Please try again later"));
                 return;
             }
             // Already one of ours (e.g. TooManyRequestsError from onBlocked below) —
@@ -154,8 +155,8 @@ function build(opts: Pick<Options, "limit" | "keyGenerator"> & Partial<Pick<Opti
 // when it cannot be observed. /readyz already reports the replica NotReady in
 // this state, so it is out of rotation anyway.
 export const requireRateLimitBackend: RequestHandler = (_req, _res, next) => {
-    if (!isRedisReady()) {
-        next(new ServiceUnavailableError("Không thể xác thực lúc này, vui lòng thử lại sau"));
+    if (redisEnabled && !isRedisReady()) {
+        next(new ServiceUnavailableError("Authentication is temporarily unavailable. Please try again later"));
         return;
     }
     next();

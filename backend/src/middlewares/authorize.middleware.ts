@@ -1,15 +1,16 @@
 import { NextFunction, Response } from "express";
-import { Role } from "@prisma/client";
+import type { CanonicalRole } from "../http/principal";
 import { AuthenticatedRequest } from "./auth.middleware";
+import { AuthenticationError, AuthorizationError } from "../errors/http-errors";
 
-export function authorize(allowedRoles: Role[]) {
-    return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export function authorize(allowedRoles: readonly CanonicalRole[]) {
+    return (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
         if (!req.user) {
-            return res.status(401).json({ message: "Chưa xác thực người dùng" });
+            return next(new AuthenticationError());
         }
 
         if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ message: "Bạn không có quyền truy cập" });
+            return next(new AuthorizationError());
         }
 
         return next();

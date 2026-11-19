@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { checkReadiness } from "./health.service";
 
 const ok = () => Promise.resolve(1);
@@ -6,6 +6,12 @@ const boom = () => Promise.reject(new Error("down"));
 const hang = () => new Promise(() => {});
 
 describe("checkReadiness", () => {
+    it("skips Redis when explicitly disabled while still checking PostgreSQL", async () => {
+        const pingRedis = vi.fn(boom);
+        expect(await checkReadiness({ pingDb: ok, pingRedis, redisEnabled: false })).toEqual({ status: "ok", checks: { db: "ok", redis: "disabled" } });
+        expect(await checkReadiness({ pingDb: boom, pingRedis, redisEnabled: false })).toEqual({ status: "fail", checks: { db: "fail", redis: "disabled" } });
+        expect(pingRedis).not.toHaveBeenCalled();
+    });
     it("reports ok when both dependencies answer", async () => {
         const report = await checkReadiness({ pingDb: ok, pingRedis: ok });
         expect(report).toEqual({ status: "ok", checks: { db: "ok", redis: "ok" } });
