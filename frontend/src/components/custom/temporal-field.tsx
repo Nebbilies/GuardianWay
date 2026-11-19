@@ -59,15 +59,15 @@ export function TemporalField({
     setInvalid(false);
     setDate(nextDate);
     setTime(nextTime);
-    onValueChange?.(
-      type === "date"
+    const nextValue = type === "date"
         ? nextDate
         : type === "time"
           ? nextTime
           : nextDate && nextTime
             ? nextDate + "T" + nextTime
-            : "",
-    );
+            : "";
+    if (value !== undefined) setLastValue(nextValue);
+    onValueChange?.(nextValue);
   }
   return (
     <div
@@ -89,7 +89,7 @@ export function TemporalField({
                 disabled={disabled}
                 aria-invalid={invalid || undefined}
                 aria-describedby={invalid ? id + "-error" : undefined}
-                aria-label={label}
+                aria-label={selected ? label + " — " + selected.toLocaleDateString(i18n.language) : label}
                 className="min-w-36 grow justify-start bg-card font-normal"
               >
                 <CalendarDays />

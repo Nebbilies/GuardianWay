@@ -5,7 +5,7 @@ import { DataTable } from "@/components/custom/data-table";
 import { TemporalField } from "@/components/custom/temporal-field";
 import { ChoiceField, Choice } from "@/components/custom/choice-field";
 import { useState, type FormEvent } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +71,8 @@ function TripDetails({ id }: { id: string }) {
   );
 }
 export function TripsPage() {
+  const { mutate: mutateCache } = useSWRConfig();
+  const refreshLists = () => mutateCache(key => Array.isArray(key) && key[0] === "trips", undefined);
   const [page, setPage] = useState(1),
     [status, setStatus] = useState(""),
     [date, setDate] = useState(""),
@@ -97,7 +99,7 @@ export function TripsPage() {
     try {
       if (editing) await tripApi.update(editing.id, input);
       else await tripApi.create(input);
-      await mutate();
+      await refreshLists();
       setOpen(false);
       toast.success("Đã lưu chuyến chuẩn bị.");
     } catch (error) {
@@ -122,7 +124,7 @@ export function TripsPage() {
         expectedDataVersion: cancel.dataVersion,
         reason,
       });
-      await mutate();
+      await refreshLists();
       setCancel(undefined);
       toast.success("Đã hủy chuyến.");
     } catch (error) {

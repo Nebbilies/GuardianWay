@@ -37,7 +37,7 @@ export function StudentPage() {
     try {
       if (editing) await studentApi.update(editing.id, input);
       else await studentApi.create(input);
-      await mutate();
+      await mutateCache(key => Array.isArray(key) && key[0] === "student", undefined);
       setOpen(false);
       toast.success("Đã lưu dữ liệu.");
     } catch (error) {
