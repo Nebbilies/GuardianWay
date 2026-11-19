@@ -4,3 +4,4 @@
 node_modules
 dist
 .claude!/docs/superpowers/
+/backend/generated/database-client/

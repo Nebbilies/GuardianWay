@@ -5,6 +5,7 @@ import type { Request, RequestHandler, Response } from "express";
 // (which pulls in Prisma) purely for module-level side effects unrelated to
 // failClosed itself. Stub both so this spec stays container-free and fast.
 vi.mock("../config/redis", () => ({
+    redisEnabled: true,
     // Building the real limiters at module load (loginByIp, loginByAccount, ...)
     // makes RedisStore run its script-load init step immediately. A resolved
     // string keeps that init step quiet instead of logging a spurious
@@ -12,9 +13,7 @@ vi.mock("../config/redis", () => ({
     default: { sendCommand: vi.fn().mockResolvedValue("0".repeat(40)) },
     isRedisReady: vi.fn(() => true),
 }));
-vi.mock("../services/audit.service", () => ({
-    auditService: { record: vi.fn().mockResolvedValue(undefined) },
-}));
+vi.mock("../modules/system/audit", () => ({ recordAuthAudit: vi.fn().mockResolvedValue(undefined) }));
 
 import {
     failClosed,
@@ -39,7 +38,7 @@ describe("failClosed", () => {
         const err = next.mock.calls[0][0];
         expect(err).toBeInstanceOf(ServiceUnavailableError);
         expect(err.status).toBe(503);
-        expect(err.detail).toBe("Không thể xác thực lúc này, vui lòng thử lại sau");
+        expect(err.detail).toBe("Authentication is temporarily unavailable. Please try again later");
     });
 
     it("passes a TooManyRequestsError through unchanged, not relabelled as 503", () => {

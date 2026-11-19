@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { GenericContainer, StartedTestContainer } from "testcontainers";
 import type { GlobalSetupContext } from "vitest/node";
@@ -31,9 +31,9 @@ export async function setup({ provide }: GlobalSetupContext) {
     const databaseUrl = postgres.getConnectionUri();
     const redisUrl = `redis://${redis.getHost()}:${redis.getMappedPort(6379)}`;
 
-    execSync("npx prisma migrate deploy --schema prisma/schema.prisma", {
+    execFileSync(process.execPath, [require.resolve("prisma/build/index.js"), "migrate", "deploy", "--config", "prisma.config.ts"], {
         cwd: process.cwd(),
-        env: { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl },
+        env: { ...process.env, SCHEMA_SHADOW_DATABASE_URL: undefined, SCHEMA_DATABASE_URL: databaseUrl, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl },
         stdio: "inherit",
     });
 

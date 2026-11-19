@@ -26,6 +26,10 @@ describe("mapPrismaError", () => {
     it("maps P2025 to NotFoundError", () => {
         expect(mapPrismaError(knownError("P2025"))).toBeInstanceOf(NotFoundError);
     });
+    it("maps the PostgreSQL adapter constraint metadata to a stable email error code", () => {
+        const error = knownError("P2002", { modelName: "UserAccount", driverAdapterError: { cause: { constraint: { fields: ["email"] } } } });
+        expect(mapPrismaError(error)).toMatchObject({ code: "ACCOUNT_EMAIL_EXISTS", status: 409 });
+    });
 
     it("maps P2000 to ValidationError", () => {
         expect(mapPrismaError(knownError("P2000"))).toBeInstanceOf(ValidationError);
