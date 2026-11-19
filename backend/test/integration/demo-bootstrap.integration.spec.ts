@@ -21,3 +21,9 @@ it("bootstraps usable demo logins and preserves existing passwords on repeat", a
     expect(same.body.user.id).toBe(first.body.user.id);
     expect((await request(app).post("/api/auth/token/login").send({ email: environment.DEMO_ADMIN_EMAIL, password: "DifferentPassword123!" })).status).toBe(401);
 });
+
+it("refuses a second platform identity during Compose provisioning", async () => {
+    await expect(seedDemo(prisma, { BOOTSTRAP_PLATFORM_EMAIL: "second@gw.test", BOOTSTRAP_PLATFORM_PASSWORD: TEST_PASSWORD }, { firstPlatformOnly: true }))
+        .rejects.toThrow("A platform administrator already exists");
+    expect(await prisma.userAccount.count({ where: { email: "second@gw.test" } })).toBe(0);
+});

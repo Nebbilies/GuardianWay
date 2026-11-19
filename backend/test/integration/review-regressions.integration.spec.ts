@@ -1,6 +1,7 @@
 import { beforeAll, beforeEach, expect, it } from "vitest";
 import request from "supertest";
 import type { Express } from "express";
+import prisma from "../../src/config/prisma";
 import redisClient from "../../src/config/redis";
 import { resetAndSeed, type Fixture } from "./fixtures";
 import { loadApp, loginAs } from "./helpers/login";
@@ -37,4 +38,14 @@ it("rejects restoring a driver whose retained account has changed role", async (
 it("rejects zero-length recurring validity before it reaches the SQL interval constraint", async () => {
     const response = await request(app).post("/api/recurring-schedules").set("Cookie", cookies).send({ routeId: fixture.routeA.id, effectiveFrom: "2026-09-01", effectiveTo: "2026-09-01", weekdays: [2], plannedStartTime: "06:45" });
     expect(response.status).toBe(400);
+});
+
+it("keeps the current policy open when a replacement would exclude a running trip", async () => {
+    const trip = await prisma.trip.update({ where: { id: fixture.tripA.id }, data: { status: "OPEN" } });
+    const result = await request(app).post("/api/school-policies").set("Cookie", cookies).send({
+        effectiveFrom: trip.plannedStartAt.toISOString(), pickupArrivalTime: "08:00", approvalBasis: "Updated hours",
+    });
+    expect(result.status).toBe(409);
+    const policy = await prisma.schoolPolicyVersion.findUniqueOrThrow({ where: { id: trip.operatingPolicyId! } });
+    expect(policy.effectiveTo).toBeNull();
 });

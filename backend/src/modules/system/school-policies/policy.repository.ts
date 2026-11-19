@@ -9,7 +9,7 @@ export const policyRepository = {
         else await database.$queryRaw`SELECT id FROM school_policy_version WHERE school_id = ${schoolId}::uuid AND id = ${id}::uuid FOR SHARE`;
     },
     affectedTrips(database: Database, schoolId: string, operatingPolicyId: string, from: Date) {
-        return database.trip.count({ where: { schoolId, operatingPolicyId, status: "PLANNED", plannedStartAt: { gte: from } } });
+        return database.trip.count({ where: { schoolId, operatingPolicyId, status: { not: "CANCELLED" }, plannedStartAt: { gte: from } } });
     },
     latest(database: Database, schoolId: string) { return database.schoolPolicyVersion.findFirst({ where: { schoolId }, orderBy: { versionNo: "desc" } }); },
     create(database: Database, data: Prisma.SchoolPolicyVersionUncheckedCreateInput) { return database.schoolPolicyVersion.create({ data }); },
