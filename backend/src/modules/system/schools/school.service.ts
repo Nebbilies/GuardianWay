@@ -6,7 +6,8 @@ import { recordAudit, type RequestMetadata } from "../audit";
 import { schoolRepository } from "./school.repository";
 import { schoolBody, schoolPatch } from "./school.contracts";
 
-export async function readSchool(id: string, database?: Database) {
+export async function readSchool(id: string, database?: Database, lockTimezone = false) {
+    if (database && lockTimezone) await schoolRepository.lock(database, id, false);
     return schoolRepository.find(id, database);
 }
 
@@ -30,10 +31,14 @@ export const schoolService = {
         requirePlatform(actor);
         const patch = operation === "update" ? schoolPatch.parse(input) : {};
         return transaction(async database => {
+            await schoolRepository.lock(database, id, true);
             const before = await schoolRepository.find(id, database);
             if (!before || (operation === "restore" ? !before.deletedAt : before.deletedAt)) throw new NotFoundError("School not found");
             if ((operation === "delete" || patch.status === "INACTIVE") && await schoolRepository.runningTrips(database, id)) {
                 throw new ConflictError("Resolve running trips before deactivating the school", "SCHOOL_HAS_OPEN_TRIPS");
+            }
+            if (patch.timezone && before.timezone !== patch.timezone && await schoolRepository.preparedTrips(database, id)) {
+                throw new ConflictError("Resolve prepared trips before changing the school timezone");
             }
             const after = await schoolRepository.update(database, id, {
                 ...patch, ...(operation === "delete" ? { deletedAt: new Date() } : operation === "restore" ? { deletedAt: null } : {}),

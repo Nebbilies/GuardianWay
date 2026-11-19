@@ -27,6 +27,23 @@ describe("account, school and stateless auth boundaries", () => {
         expect(duplicate.status).toBe(409);
         expect(duplicate.body.code).toBe("ACCOUNT_EMAIL_EXISTS");
     });
+    it("revokes pending invitations when the recipient email changes", async () => {
+        const cookies = await loginAs(app, fx.adminA.email);
+        const created = await request(app).post("/api/users").set("Cookie", cookies).send({ displayName: "Parent", email: "previous@gw.test", role: "PARENT" });
+        expect(created.status).toBe(201);
+        const update = await request(app).patch("/api/users/" + created.body.account.id).set("Cookie", cookies).send({ email: "current@gw.test" });
+        expect(update.status).toBe(200);
+        const token = new URL(created.body.inviteLink).searchParams.get("token");
+        expect((await request(app).post("/api/auth/setup-password").send({ token, password: TEST_PASSWORD })).status).toBeGreaterThanOrEqual(400);
+    });
+    it("revokes the rotated refresh session when logout uses its previous token", async () => {
+        const login = await request(app).post("/api/auth/token/login").send({ email: fx.adminA.email, password: TEST_PASSWORD });
+        const refreshToken = login.body.session.refreshToken;
+        const rotated = await request(app).post("/api/auth/token/refresh").send({ refreshToken });
+        expect(rotated.status).toBe(200);
+        expect((await request(app).post("/api/auth/token/logout").send({ refreshToken })).status).toBe(200);
+        expect((await request(app).post("/api/auth/token/refresh").send({ refreshToken: rotated.body.session.refreshToken })).status).toBe(401);
+    });
     it("keeps access stateless while refresh uses the current account state", async () => {
         const login = await request(app).post("/api/auth/token/login").send({ email: fx.adminA.email, password: TEST_PASSWORD });
         await prisma.userAccount.update({ where: { id: fx.adminA.id }, data: { status: "LOCKED" } });

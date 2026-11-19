@@ -19,6 +19,10 @@ export const accountRepository = {
     find(schoolId: string, id: string, database: Database = prisma) {
         return database.userAccount.findFirst({ where: { id, schoolId }, select });
     },
+    async lockAndFind(database: Database, schoolId: string, id: string) {
+        await database.$queryRaw`SELECT id FROM user_account WHERE school_id = ${schoolId}::uuid AND id = ${id}::uuid FOR UPDATE`;
+        return accountRepository.find(schoolId, id, database);
+    },
     emailTarget(email: string, schoolId?: string) {
         return prisma.userAccount.findFirst({
             where: { email, deletedAt: null, schoolId: schoolId ?? { not: null }, ...(schoolId ? {} : { role: "SCHOOL_ADMIN" }) }, select,
@@ -27,6 +31,7 @@ export const accountRepository = {
     async list(schoolId: string, query: ListQuery & { role?: WireRole }, schoolAdminsOnly = false, exportAll = false) {
         const where: Prisma.UserAccountWhereInput = {
             schoolId, deletedAt: deletedFilter(query),
+            ...(schoolAdminsOnly && query.role && query.role !== "ADMIN" ? { id: { in: [] } } : {}),
             role: schoolAdminsOnly ? "SCHOOL_ADMIN" : query.role ? fromWireRole(query.role) : undefined,
             ...(query.search ? { OR: [{ displayName: { contains: query.search, mode: "insensitive" } }, { email: { contains: query.search, mode: "insensitive" } }] } : {}),
         };
@@ -35,7 +40,7 @@ export const accountRepository = {
             prisma.userAccount.findMany({ where, select, ...options, ...(exportAll ? { skip: undefined, take: undefined } : {}) }),
             prisma.userAccount.count({ where }),
         ]);
-        return pageResult(rows, count, query);
+        return exportAll ? pageResult(rows, rows.length, { page: 1, limit: Math.max(1, rows.length) }) : pageResult(rows, count, query);
     },
     create(database: Database, data: Prisma.UserAccountUncheckedCreateInput) {
         return database.userAccount.create({ data, select });

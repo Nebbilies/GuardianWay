@@ -5,7 +5,8 @@ import type { ListQuery } from "../../../http/contracts/pagination";
 import { recordAudit, type RequestMetadata } from "../../system/audit";
 import { vehicleRepository } from "./vehicle.repository";
 import { vehicleBody, vehiclePatch } from "./vehicle.contracts";
-export async function requireVehicle(schoolId: string, id: string, database?: Database) {
+export async function requireVehicle(schoolId: string, id: string, database?: Database, lock = false) {
+    if (database && lock) await vehicleRepository.lockForRead(database, schoolId, id);
     const row = await vehicleRepository.find(schoolId, id, database);
     if (!row || row.deletedAt || row.status !== "AVAILABLE") throw new ValidationError("Vehicle is unavailable or does not belong to this school");
     return row;

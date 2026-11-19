@@ -6,7 +6,7 @@ export const loginBody = z.object({ email: emailAddress, password: z.string().mi
 export const refreshBody = z.object({ refreshToken: z.string().min(1).max(8192) }).strict();
 export const logoutBody = z.object({ refreshToken: z.string().min(1).max(8192).optional() }).strict().optional();
 export const tokenClaims = claimsSchema.extend({
-    tokenUse: z.enum(["access", "refresh"]), iat: z.number().int(), exp: z.number().int(),
+    sid: z.uuid().optional(), tokenUse: z.enum(["access", "refresh"]), iat: z.number().int(), exp: z.number().int(),
 });
 export const authUserSchema = z.object({
     id: z.uuid(), name: z.string(), email: z.email(), role: z.enum(wireRoles), schoolId: z.uuid().nullable(),

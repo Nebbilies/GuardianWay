@@ -10,7 +10,7 @@ export const driverRepository = {
             prisma.driverProfile.findMany({ where, ...listOptions(query, ["code", "fullName", "createdAt", "status"], "-createdAt"), ...(exportAll ? { skip: undefined, take: undefined } : {}) }),
             prisma.driverProfile.count({ where }),
         ]);
-        return pageResult(rows, count, query);
+        return exportAll ? pageResult(rows, rows.length, { page: 1, limit: Math.max(1, rows.length) }) : pageResult(rows, count, query);
     },
     create(database: Database, data: Prisma.DriverProfileUncheckedCreateInput) { return database.driverProfile.create({ data }); },
     async update(database: Database, schoolId: string, id: string, data: Prisma.DriverProfileUncheckedUpdateInput) {

@@ -30,7 +30,7 @@ export async function readAuthenticationAccountById(id: string, database?: Datab
 }
 
 export async function requireLinkedAccount(database: Database, schoolId: string, id: string, role: "PARENT" | "DRIVER") {
-    const account = await accountRepository.find(schoolId, id, database);
+    const account = await accountRepository.lockAndFind(database, schoolId, id);
     if (!account || account.deletedAt || account.role !== role || account.status === "LOCKED") {
         throw new ValidationError("Linked account is invalid or does not belong to this school");
     }
@@ -128,7 +128,7 @@ export const accountService = {
     async change(actor: Principal, schoolId: string, id: string, input: unknown, operation: "update" | "delete" | "restore", metadata: RequestMetadata) {
         const data = operation === "update" ? accountPatch.parse(input) : {};
         return transaction(async database => {
-            const before = await accountRepository.find(schoolId, id, database);
+            const before = await accountRepository.lockAndFind(database, schoolId, id);
             if (!before || (operation === "restore" ? !before.deletedAt : before.deletedAt)) throw new NotFoundError("Account not found");
             authorizeTarget(actor, schoolId, before.role);
             const role = data.role ? fromWireRole(data.role) : before.role;
@@ -136,6 +136,9 @@ export const accountService = {
             if (role === "PLATFORM_ADMIN") throw new AuthorizationError();
             if (role !== before.role && await accountRepository.hasRoleLinks(database, schoolId, id, role)) throw new ConflictError("Resolve guardian or driver links before changing the account role", "ACCOUNT_HAS_ROLE_LINKS");
             if ((data.status === "ACTIVE" && !before.activatedAt) || (data.status === "INVITED" && before.activatedAt)) throw new ValidationError("Account activation must be handled through an invitation");
+            if ((data.email && data.email !== before.email) || operation === "delete" || data.status === "LOCKED") {
+                await accountRepository.revokeInvites(database, id, new Date());
+            }
             const after = await accountRepository.update(database, schoolId, id, {
                 ...data, role, ...(operation === "delete" ? { deletedAt: new Date() } : operation === "restore" ? { deletedAt: null } : {}),
             });
@@ -146,7 +149,7 @@ export const accountService = {
     },
     async resend(actor: Principal, schoolId: string, id: string, metadata: RequestMetadata) {
         const result = await transaction(async database => {
-            const account = await accountRepository.find(schoolId, id, database);
+            const account = await accountRepository.lockAndFind(database, schoolId, id);
             if (!account || account.deletedAt) throw new NotFoundError("Account not found");
             authorizeTarget(actor, schoolId, account.role);
             if (account.status === "LOCKED") throw new ConflictError("Unlock the account before issuing an invitation");
@@ -162,7 +165,7 @@ export const accountService = {
             const now = new Date();
             const invite = await accountRepository.invite(hash, database);
             if (!invite || invite.status !== "ISSUED" || invite.expiresAt <= now || invite.revokedAt || invite.acceptedAt) throw new ValidationError("Invitation link is invalid or expired", undefined, "INVITATION_INVALID");
-            const account = await accountRepository.find(invite.schoolId, invite.accountId, database);
+            const account = await accountRepository.lockAndFind(database, invite.schoolId, invite.accountId);
             if (!account || account.deletedAt || account.status === "LOCKED") throw new AuthenticationError("Account is not active");
             await activeSchool(invite.schoolId, database);
             if ((await accountRepository.consumeInvite(database, invite.id, now)).count !== 1) throw new ConflictError("Invitation has already been used", "INVITATION_INVALID");

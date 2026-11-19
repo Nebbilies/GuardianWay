@@ -32,7 +32,7 @@ export async function requireActiveSchedule(schoolId: string, id: string, servic
 }
 export const scheduleService = {
     async list(actor: Principal, query: z.infer<typeof scheduleQuery>) { const page = await scheduleRepository.list(requireSchoolAdmin(actor).schoolId, query); return { ...page, data: page.data.filter((row): row is Schedule => Boolean(row)).map(view) }; },
-    async get(actor: Principal, id: string) { const row = await scheduleRepository.find(requireSchoolAdmin(actor).schoolId, id); if (!row) throw new NotFoundError("Schedule not found"); return view(row); },
+    async get(actor: Principal, id: string) { const row = await transaction(database => scheduleRepository.find(requireSchoolAdmin(actor).schoolId, id, database), "RepeatableRead"); if (!row) throw new NotFoundError("Schedule not found"); return view(row); },
     async create(actor: Principal, input: unknown, metadata: RequestMetadata, previousId?: string) {
         const { schoolId } = requireSchoolAdmin(actor), data = scheduleBody.parse(input);
         return transaction(async database => {

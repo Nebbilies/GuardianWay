@@ -11,8 +11,9 @@ export async function closeStudentGuardians(database: Database, actor: Principal
     const { schoolId } = requireSchoolAdmin(actor);
     const rows = await guardianRepository.list(schoolId, studentId, database);
     for (const row of rows.filter(row => !row.effectiveTo)) {
-        await guardianRepository.close(database, schoolId, studentId, new Date(Math.max(at.getTime(), row.effectiveFrom.getTime() + 1)), reason, row.id);
-        await recordAudit(database, actor, { action: "guardian.closed", subjectKind: "GUARDIAN_LINK", subjectReference: row.id, before: row, after: { effectiveTo: at }, reason }, metadata);
+        const end = new Date(Math.max(at.getTime(), row.effectiveFrom.getTime() + 1));
+        await guardianRepository.close(database, schoolId, studentId, end, reason, row.id);
+        await recordAudit(database, actor, { action: "guardian.closed", subjectKind: "GUARDIAN_LINK", subjectReference: row.id, before: row, after: { effectiveTo: end }, reason }, metadata);
     }
 }
 export const guardianService = {

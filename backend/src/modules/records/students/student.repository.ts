@@ -7,7 +7,7 @@ export const studentRepository = {
     async list(schoolId: string, query: ListQuery & { status?: string }, exportAll = false) {
         const where: Prisma.StudentWhereInput = { schoolId, deletedAt: deletedFilter(query), status: query.status, ...(query.search ? { OR: [{ fullName: { contains: query.search, mode: "insensitive" } }, { studentCode: { contains: query.search, mode: "insensitive" } }] } : {}) };
         const [rows, count] = await Promise.all([prisma.student.findMany({ where, ...listOptions(query, ["studentCode", "fullName", "createdAt", "status"], "-createdAt"), ...(exportAll ? { skip: undefined, take: undefined } : {}) }), prisma.student.count({ where })]);
-        return pageResult(rows, count, query);
+        return exportAll ? pageResult(rows, rows.length, { page: 1, limit: Math.max(1, rows.length) }) : pageResult(rows, count, query);
     },
     create(database: Database, data: Prisma.StudentUncheckedCreateInput) { return database.student.create({ data }); },
     async update(database: Database, schoolId: string, id: string, data: Prisma.StudentUncheckedUpdateInput) {

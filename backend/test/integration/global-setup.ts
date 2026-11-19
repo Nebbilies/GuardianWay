@@ -33,7 +33,7 @@ export async function setup({ provide }: GlobalSetupContext) {
 
     execFileSync(process.execPath, [require.resolve("prisma/build/index.js"), "migrate", "deploy", "--config", "prisma.config.ts"], {
         cwd: process.cwd(),
-        env: { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl },
+        env: { ...process.env, SCHEMA_SHADOW_DATABASE_URL: undefined, SCHEMA_DATABASE_URL: databaseUrl, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl },
         stdio: "inherit",
     });
 

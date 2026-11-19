@@ -13,10 +13,10 @@ npm run database:generate --workspace backend
 npm run database:validate --workspace backend
 npm run test:database-schema --workspace backend
 npm run test:architecture --workspace backend
-npm run test:contracts
+npm run test:integration --workspace backend
 ```
 
-Docker must run for database and HTTP tests. They create disposable PostgreSQL/TimescaleDB/PostGIS and Redis containers. The contract gate runs HTTP integration once, writes sanitized cases to a fresh temporary directory and checks the independently owned frontend/mobile contracts. It rejects stale or missing cases and removes only that temporary directory.
+Docker must run for database and HTTP tests. They create disposable PostgreSQL/TimescaleDB/PostGIS and Redis containers. The backend integration suite exercises the HTTP provider. Leave SCHEMA_SHADOW_DATABASE_URL unset in deployments; only configure it for isolated migration-diff tests.
 
 ## Guarded local demo commands
 

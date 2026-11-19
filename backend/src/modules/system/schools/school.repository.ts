@@ -5,6 +5,11 @@ import { deletedFilter, listOptions, pageResult, type ListQuery } from "../../..
 import type { CreateSchool, UpdateSchool } from "./school.contracts";
 
 export const schoolRepository = {
+    async lock(database: Database, id: string, exclusive: boolean) {
+        if (exclusive) await database.$queryRaw`SELECT id FROM school WHERE id = ${id}::uuid FOR UPDATE`;
+        else await database.$queryRaw`SELECT id FROM school WHERE id = ${id}::uuid FOR SHARE`;
+    },
+    preparedTrips(database: Database, schoolId: string) { return database.trip.count({ where: { schoolId, status: "PLANNED" } }); },
     find(id: string, database: Database = prisma) { return database.school.findUnique({ where: { id } }); },
     async list(query: ListQuery) {
         const where: Prisma.SchoolWhereInput = {
