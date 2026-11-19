@@ -5,7 +5,8 @@ import type { ListQuery } from "../../../http/contracts/pagination";
 import { recordAudit, type RequestMetadata } from "../../system/audit";
 import { stopRepository } from "./stop.repository";
 import { stopBody, stopPatch } from "./stop.contracts";
-export async function requireStop(schoolId: string, id: string, database?: Database) {
+export async function requireStop(schoolId: string, id: string, database?: Database, lock = false) {
+    if (database && lock) await stopRepository.lockForRead(database, schoolId, id);
     const row = await stopRepository.find(schoolId, id, database);
     if (!row || row.deletedAt || row.status !== "ACTIVE") throw new ValidationError("Stop is unavailable or does not belong to this school");
     return row;
@@ -29,6 +30,7 @@ export const stopService = {
     async change(actor: Principal, id: string, input: unknown, operation: "update" | "delete" | "restore", metadata: RequestMetadata) {
         const { schoolId } = requireSchoolAdmin(actor), patch = operation === "update" ? stopPatch.parse(input) : {};
         return transaction(async database => {
+            await stopRepository.lock(database, schoolId, id);
             const before = await stopRepository.find(schoolId, id, database);
             if (!before || (operation === "restore" ? !before.deletedAt : before.deletedAt)) throw new NotFoundError("Stop not found");
             const data = { ...before, ...patch };

@@ -18,7 +18,7 @@ try {
     if (!["dev:app", "database:migrate", "database:seed"].includes(script)) throw new Error("Unsupported database command");
     if (!process.env.npm_execpath) throw new Error("Run this command through npm");
     const result = spawnSync(process.execPath, [process.env.npm_execpath, "run", script], {
-        cwd: backend, env: { ...environment, DATABASE_URL: url, DIRECT_URL: url }, stdio: "inherit",
+        cwd: backend, env: { ...environment, GUARDIANWAY_ENV_LOADED: "1", DATABASE_URL: url, DIRECT_URL: url }, stdio: "inherit",
     });
     if (result.error) throw new Error("Unable to start database command");
     process.exitCode = result.status ?? 1;

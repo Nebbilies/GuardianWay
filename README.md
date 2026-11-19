@@ -46,23 +46,7 @@ npm ci
 
 ### 2. Configure the environment
 
-Copy the backend example file:
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-On PowerShell, use `Copy-Item backend/.env.example backend/.env` instead.
-
-For development outside Docker, update these values in `backend/.env`:
-
-```dotenv
-DATABASE_URL="postgresql://gw:gw_pw@localhost:5432/guardianway"
-DIRECT_URL="postgresql://gw:gw_pw@localhost:5432/guardianway"
-REDIS_URL="redis://localhost:6379"
-WEB_BASE_URL="http://localhost:3000"
-TRUST_PROXY_HOPS=0
-```
+Copy `backend/.env.example` to `backend/.env` and `database/.env.example` to `database/.env` for a new development checkout. Preserve existing credentials when reusing a database volume. Set the PostgreSQL password and matching loopback connection URL in the database file. The guarded dev commands read both files. Set `REDIS_ENABLED=false`, `WEB_BASE_URL=http://localhost:3000` and `TRUST_PROXY_HOPS=0` in the backend file for host development.
 
 Replace `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` with separate random
 values. This cross-platform Node.js command generates one value:
@@ -80,27 +64,21 @@ Create `frontend/.env.local`:
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
 
-### 3. Start PostgreSQL and Redis
+### 3. Start the dedicated demo database
 
 ```bash
-docker compose up -d postgres redis
+docker compose -f docker-compose.database.yml up -d --wait
 ```
 
 ### 4. Prepare the database
 
+Set `BOOTSTRAP_PLATFORM_EMAIL` and `BOOTSTRAP_PLATFORM_PASSWORD` in the backend environment. For an additional school administrator, set both `DEMO_ADMIN_EMAIL` and `DEMO_ADMIN_PASSWORD`. Use passwords of at least 12 characters and at most 72 UTF-8 bytes. Existing passwords are preserved.
+
 ```bash
-npm exec --workspace backend -- prisma generate
-npm exec --workspace backend -- prisma migrate deploy
-npm run seed --workspace backend
+npm run database:generate --workspace backend
+npm run database:migrate:demo --workspace backend
+npm run database:seed:demo --workspace backend
 ```
-
-The seed is safe to run more than once. It creates two sample schools and a
-platform administrator:
-
-- Email: `superadmin@guardianway.vn`
-- Password: `Password123!`
-
-These credentials are for local development only.
 
 ### 5. Start the applications
 
@@ -136,13 +114,14 @@ npm run lint --workspace frontend
 To stop the local data services:
 
 ```bash
-docker compose stop postgres redis
+docker compose -f docker-compose.database.yml stop
 ```
 
-To run the production-like container stack after initializing the database,
-restore the Docker service hostnames from `backend/.env.example`, then run:
+The full Compose stack uses its own database and volume. In `backend/.env` set `DATABASE_URL` and `DIRECT_URL` to the Compose PostgreSQL service, for example `postgresql://gw:gw_pw@postgres:5432/guardianway`, set `REDIS_ENABLED=true`, `REDIS_URL=redis://redis:6379` and `WEB_BASE_URL=http://localhost:8080`. Initialize a fresh Compose database before starting the application. The legacy database is not a migration target.
 
 ```bash
+docker compose up -d postgres redis
+docker compose run --rm --build backend npm run database:migrate
 docker compose up --build
 ```
 

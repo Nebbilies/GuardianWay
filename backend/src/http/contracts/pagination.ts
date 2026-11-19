@@ -34,7 +34,7 @@ export function listOptions(query: ListQuery, fields: readonly string[], fallbac
     if (!fields.includes(field)) throw new ValidationError("Invalid sort field");
     return {
         skip: (query.page - 1) * query.limit, take: query.limit,
-        orderBy: { [field]: sort.startsWith("-") ? "desc" as const : "asc" as const },
+        orderBy: [{ [field]: sort.startsWith("-") ? "desc" as const : "asc" as const }, { id: "asc" as const }],
     };
 }
 

@@ -70,7 +70,7 @@ export async function requireApprovedRoute(schoolId: string, id: string, databas
 }
 export const planService = {
     async list(actor: Principal, query: z.infer<typeof planQuery>) { const page = await planRepository.list(requireSchoolAdmin(actor).schoolId, query); return { ...page, data: page.data.filter((row): row is Plan => Boolean(row)).map(view) }; },
-    async get(actor: Principal, id: string) { const row = await planRepository.find(requireSchoolAdmin(actor).schoolId, id); if (!row) throw new NotFoundError("Plan not found"); return view(row); },
+    async get(actor: Principal, id: string) { const row = await transaction(database => planRepository.find(requireSchoolAdmin(actor).schoolId, id, database), "RepeatableRead"); if (!row) throw new NotFoundError("Plan not found"); return view(row); },
     async create(actor: Principal, input: unknown, metadata: RequestMetadata, previousId?: string) {
         const { schoolId } = requireSchoolAdmin(actor), data = planBody.parse(input);
         return transaction(async database => {
@@ -117,10 +117,10 @@ export const planService = {
             await draftData(database, schoolId, planBody.parse(snapshot.input));
             // Persisted snapshots must still match the resources that were reviewed.
             for (const route of before.routes) {
-                const vehicle = await requireVehicle(schoolId, route.vehicleId, database);
+                const vehicle = await requireVehicle(schoolId, route.vehicleId, database, true);
                 if (vehicle.studentCapacity !== route.capacitySnapshot) throw new ConflictError("Vehicle capacity changed; save the draft again before approval");
                 for (const point of route.stops) {
-                    const stop = await requireStop(schoolId, point.stopId, database);
+                    const stop = await requireStop(schoolId, point.stopId, database, true);
                     const snapshot = point.stopSnapshot as { code?: string; name?: string; address?: string; latitude?: number; longitude?: number; kind?: string; accessNote?: string | null };
                     if (["code", "name", "address", "latitude", "longitude", "kind", "accessNote"].some(key => stop[key as keyof typeof stop] !== snapshot[key as keyof typeof snapshot])) throw new ConflictError("Stop changed; save the draft again before approval");
                 }

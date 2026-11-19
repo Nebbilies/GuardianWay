@@ -10,14 +10,14 @@ beforeAll(async () => { app = await loadApp(); });
 beforeEach(async () => { fixture = await resetAndSeed(); await redisClient.flushDb(); cookies = await loginAs(app, fixture.adminA.email); });
 
 it.each([
-    { direction: "DROPOFF", from: "2026-09-01T06:00:00.000Z", to: null, schoolTime: "16:00", first: "16:00", last: "16:30" },
-    { direction: "PICKUP", from: "2026-08-31T17:00:00.000Z", to: "2026-09-01T02:00:00.000Z", schoolTime: "08:00", first: "07:00", last: "07:30" },
+    { direction: "DROPOFF", from: "2026-09-03T06:00:00.000Z", to: null, schoolTime: "16:00", first: "16:00", last: "16:30" },
+    { direction: "PICKUP", from: "2026-09-02T17:00:00.000Z", to: "2026-09-03T02:00:00.000Z", schoolTime: "08:00", first: "07:00", last: "07:30" },
 ])("uses actual $direction route times to validate policy applicability", async test => {
     const terminal = await request(app).post("/api/bus-stops").set("Cookie", cookies).send({ code: "SCHOOL", name: "School", address: "School address", latitude: 10.8, longitude: 106.7, kind: "SCHOOL", allowsPickup: true, allowsDropoff: true, status: "ACTIVE" });
     expect(terminal.status).toBe(201);
     const policy = await request(app).post("/api/school-policies").set("Cookie", cookies).send({ effectiveFrom: test.from, effectiveTo: test.to, ...(test.direction === "PICKUP" ? { pickupArrivalTime: test.schoolTime } : { dropoffDepartureTime: test.schoolTime }), approvalBasis: "Configured service hours" });
     expect(policy.status).toBe(201);
-    const plan = await request(app).post("/api/route-plans").set("Cookie", cookies).send({ referenceDate: "2026-09-01", direction: test.direction, policyVersionId: policy.body.id, effectiveFrom: "2026-09-01", effectiveTo: "2026-09-30", routes: [{ routeCode: "R002", label: "Service route", vehicleId: fixture.busA.id, distanceMetres: 10000, durationSeconds: 3600, stops: [
+    const plan = await request(app).post("/api/route-plans").set("Cookie", cookies).send({ referenceDate: "2026-09-03", direction: test.direction, policyVersionId: policy.body.id, effectiveFrom: "2026-09-03", effectiveTo: "2026-09-30", routes: [{ routeCode: "R002", label: "Service route", vehicleId: fixture.busA.id, distanceMetres: 10000, durationSeconds: 3600, stops: [
         { stopId: test.direction === "PICKUP" ? fixture.stopA.id : terminal.body.id, plannedTime: test.first },
         { stopId: test.direction === "PICKUP" ? terminal.body.id : fixture.stopA.id, plannedTime: test.last },
     ] }] });

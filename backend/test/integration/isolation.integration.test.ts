@@ -148,8 +148,12 @@ describe("tenant isolation", () => {
     });
 
     it("platform audit excludes school operational actions", async () => {
-        await request(app).patch("/api/buses/" + fx.busA.id).set("Cookie", cookiesA).send({ description: "Changed" });
+        const platformChange = await request(app).patch("/api/schools/" + fx.schoolA.id).set("Cookie", cookiesSuper).send({ name: "Updated school" });
+        expect(platformChange.status).toBe(200);
+        const schoolChange = await request(app).patch("/api/buses/" + fx.busA.id).set("Cookie", cookiesA).send({ description: "Changed" });
+        expect(schoolChange.status).toBe(200);
         const res = await request(app).get("/api/audit-logs").set("Cookie", cookiesSuper);
+        expect(rowsOf(res.body).some(row => row.action === "school.update")).toBe(true);
         expect(res.status).toBe(200);
         expect(rowsOf(res.body).every(row => (row.changeSummary as { scope: string }).scope === "PLATFORM")).toBe(true);
         expect(rowsOf(res.body).some(row => row.action === "vehicle.update")).toBe(false);

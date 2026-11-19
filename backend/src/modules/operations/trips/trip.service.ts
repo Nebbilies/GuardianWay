@@ -16,7 +16,7 @@ import { tripRepository } from "./trip.repository";
 import { tripBody, tripPatch, cancelBody, tripQuery } from "./trip.contracts";
 type Trip = NonNullable<Awaited<ReturnType<typeof tripRepository.find>>>;
 function view<T extends { serviceDate: Date }>(row: T) { return { ...row, serviceDate: dateText(row.serviceDate), passengerManifestPrepared: false }; }
-async function schoolTimezone(schoolId: string, database: Database) { const school = await readSchool(schoolId, database); if (!school) throw new NotFoundError("School not found"); return school.timezone; }
+async function schoolTimezone(schoolId: string, database: Database) { const school = await readSchool(schoolId, database, true); if (!school) throw new NotFoundError("School not found"); return school.timezone; }
 async function checkPolicy(database: Database, schoolId: string, policyId: string | null, direction: string, date: string, timezone: string, start: Date, times: Date[]) {
     if (!policyId) throw new ValidationError("Operating policy is required");
     const policy = await requirePolicy(schoolId, policyId, database);
@@ -33,7 +33,7 @@ function planned(before: Trip, version: number) {
 }
 export const tripService = {
     async list(actor: Principal, query: z.infer<typeof tripQuery>) { const page = await tripRepository.list(requireSchoolAdmin(actor).schoolId, query); return { ...page, data: page.data.map(view) }; },
-    async get(actor: Principal, id: string) { const row = await tripRepository.find(requireSchoolAdmin(actor).schoolId, id); if (!row) throw new NotFoundError("Trip not found"); return view(row); },
+    async get(actor: Principal, id: string) { const row = await transaction(database => tripRepository.find(requireSchoolAdmin(actor).schoolId, id, database), "RepeatableRead"); if (!row) throw new NotFoundError("Trip not found"); return view(row); },
     async create(actor: Principal, input: unknown, metadata: RequestMetadata) {
         const { schoolId } = requireSchoolAdmin(actor), data = tripBody.parse(input);
         return transaction(async database => {

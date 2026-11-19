@@ -15,7 +15,9 @@ function scope(req: Request) {
 }
 export async function listAccounts(req: Request, res: Response) {
     const { actor, schoolId } = scope(req);
-    res.json(await accountService.list(actor, schoolId, accountQuery.parse(req.query), req.path === "/export"));
+    const query = accountQuery.parse(req.query);
+    if (query.schoolId && query.schoolId !== schoolId) throw new AuthorizationError();
+    res.json(await accountService.list(actor, schoolId, query, req.route.path === "/export"));
 }
 export async function getAccount(req: Request, res: Response) {
     const { actor, schoolId } = scope(req);

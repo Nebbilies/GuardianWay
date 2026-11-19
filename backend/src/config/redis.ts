@@ -1,6 +1,6 @@
 // @ts-ignore
 import { createClient } from "redis"
-import "dotenv/config"
+
 
 export const redisEnabled = process.env.REDIS_ENABLED !== "false";
 if (!redisEnabled && !["development", "test"].includes(process.env.NODE_ENV || "development")) {

@@ -15,7 +15,7 @@ export const accountQuery = listQuerySchema.extend({ role: z.enum(wireRoles).opt
 export type CreateAccount = z.infer<typeof accountBody>;
 export type UpdateAccount = z.infer<typeof accountPatch>;
 export const invitationBody = z.object({ email: emailAddress }).strict();
-export const activationBody = z.object({ token: z.string().min(1), password: z.string().min(8).max(200) }).strict();
+export const activationBody = z.object({ token: z.string().min(1), password: z.string().min(8).refine(value => Buffer.byteLength(value, "utf8") <= 72, "Password exceeds bcrypt byte limit") }).strict();
 export const accountViewSchema = z.object({
     id: z.uuid(), schoolId: z.uuid().nullable(), email: z.email(), displayName: z.string(), phone: z.string().nullable(),
     role: z.enum(wireRoles), status: z.enum(["INVITED", "ACTIVE", "LOCKED"]), activatedAt: z.iso.datetime().nullable(),

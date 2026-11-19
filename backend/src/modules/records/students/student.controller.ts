@@ -7,7 +7,7 @@ import { studentQuery } from "./student.contracts";
 import { studentService } from "./student.service";
 import { guardianService } from "./guardian-links";
 import { cardService } from "./cards";
-export async function listStudents(req: Request, res: Response) { res.json(await studentService.list(authenticatedActor(req), studentQuery.parse(req.query), req.path === "/export")); }
+export async function listStudents(req: Request, res: Response) { res.json(await studentService.list(authenticatedActor(req), studentQuery.parse(req.query), req.route.path === "/export")); }
 export async function getStudent(req: Request, res: Response) { res.json(await studentService.get(authenticatedActor(req), idParams.parse(req.params).id)); }
 export async function createStudent(req: Request, res: Response) { res.status(201).json(await studentService.create(authenticatedActor(req), req.body, requestMetadata(req))); }
 export function changeStudent(operation: "update" | "delete" | "restore") { return async (req: Request, res: Response) => { res.json(await studentService.change(authenticatedActor(req), idParams.parse(req.params).id, req.body, operation, requestMetadata(req))); }; }
