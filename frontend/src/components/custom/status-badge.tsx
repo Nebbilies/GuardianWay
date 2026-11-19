@@ -1,5 +1,11 @@
 import {Badge} from '@/components/ui/badge'
-import {BusStatus, BusTripStatus, Role, TripType} from '@/types/types'
+import type { Vehicle } from '@/modules/records/vehicles/contracts'
+import type { Trip } from '@/modules/operations/trips/contracts'
+import type { Account } from '@/modules/system/accounts/contracts'
+type BusStatus = Vehicle['status']
+type BusTripStatus = Trip['status']
+type TripType = Trip['direction']
+type Role = Account['role']
 
 // Muted, theme-aware status tones. Backgrounds sit at low opacity so they read
 // on both the warm light surface and the dark surface; text carries the hue.
@@ -20,9 +26,8 @@ function ToneBadge({tone, children}: { tone: Tone; children: React.ReactNode }) 
 }
 
 const busStatus: Record<BusStatus, { tone: Tone; label: string }> = {
-    ACTIVE: {tone: 'success', label: 'Đang hoạt động'},
-    MAINTENANCE: {tone: 'warning', label: 'Đang bảo trì'},
-    RETIRED: {tone: 'neutral', label: 'Ngừng hoạt động'},
+    AVAILABLE: {tone: 'success', label: 'Sẵn sàng'},
+    UNAVAILABLE: {tone: 'neutral', label: 'Không sẵn sàng'},
 }
 
 export function BusStatusBadge({status}: { status: BusStatus }) {
@@ -31,8 +36,8 @@ export function BusStatusBadge({status}: { status: BusStatus }) {
 }
 
 const tripStatus: Record<BusTripStatus, { tone: Tone; label: string }> = {
-    SCHEDULED: {tone: 'info', label: 'Đã lên lịch'},
-    IN_PROGRESS: {tone: 'success', label: 'Đang chạy'},
+    PLANNED: {tone: 'info', label: 'Đã lên lịch'},
+    OPEN: {tone: 'success', label: 'Đang chạy'},
     COMPLETED: {tone: 'neutral', label: 'Hoàn thành'},
     CANCELLED: {tone: 'danger', label: 'Đã hủy'},
 }

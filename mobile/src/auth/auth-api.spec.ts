@@ -3,6 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { authApi, HttpError } from './auth-api';
 
 const fetchMock = vi.fn<typeof fetch>();
+const user = { id: 'u-1', name: 'Parent', email: 'parent@example.com', role: 'PARENT', schoolId: 's-1' };
+const session = {
+  tokenType: 'Bearer', accessToken: 'access', refreshToken: 'refresh',
+  accessTokenExpiresIn: 900, refreshTokenExpiresIn: 604800,
+};
 
 function jsonResponse(body: unknown, status = 200) {
   return {
@@ -19,7 +24,7 @@ describe('authApi', () => {
   });
 
   it('posts credentials to the mobile login endpoint', async () => {
-    const payload = { user: { id: 'u-1' }, session: { accessToken: 'access' } };
+    const payload = { user, session };
     fetchMock.mockResolvedValueOnce(jsonResponse(payload));
 
     await expect(authApi.login('parent@example.com', 'password')).resolves.toEqual(payload);
@@ -35,9 +40,9 @@ describe('authApi', () => {
 
   it('refreshes, logs out, and reads the current user with bearer auth', async () => {
     fetchMock
-      .mockResolvedValueOnce(jsonResponse({ user: {}, session: {} }))
+      .mockResolvedValueOnce(jsonResponse({ user, session }))
       .mockResolvedValueOnce(jsonResponse({ message: 'ok' }))
-      .mockResolvedValueOnce(jsonResponse({ user: { id: 'u-1' } }));
+      .mockResolvedValueOnce(jsonResponse({ user }));
 
     await authApi.refresh('refresh-token');
     await authApi.logout('refresh-token');
@@ -68,5 +73,13 @@ describe('authApi', () => {
       status: 401,
       message: 'Email hoặc mật khẩu không đúng',
     });
+  });
+
+  it('rejects a successful login response missing its required session contract', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ user: { id: 'u-1' } }));
+
+    await expect(authApi.login('parent@example.com', 'password')).rejects.toThrow(
+      'Phản hồi đăng nhập không hợp lệ',
+    );
   });
 });

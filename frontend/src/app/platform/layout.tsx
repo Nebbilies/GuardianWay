@@ -3,18 +3,16 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import PlatformSidebar from "@/app/platform/_components/platform-sidebar";
 import PlatformHeader from "@/app/platform/_components/platform-header";
 
-export default function PlatformLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    return (
-        <SidebarProvider>
-            <div className={'min-h-screen w-full bg-background flex'}>
-                <PlatformSidebar />
-                <div className={'flex-1 flex flex-col'}>
-                    <PlatformHeader />
-                    <main className={'flex-1 p-4'}>
-                        {children}
-                    </main>
-                </div>
-            </div>
-        </SidebarProvider>
-    )
+export default function PlatformLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <SidebarProvider className="gw-shell flex-col">
+      <PlatformHeader />
+      <div className="flex w-full flex-1">
+        <PlatformSidebar />
+        <main className="gw-workspace">{children}</main>
+      </div>
+    </SidebarProvider>
+  );
 }
