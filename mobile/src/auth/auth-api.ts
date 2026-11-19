@@ -1,23 +1,5 @@
-export type MobileRole = 'DRIVER' | 'PARENT' | 'ADMIN' | 'SUPER_ADMIN';
-
-export type AuthUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: MobileRole;
-  schoolId: string | null;
-};
-
-export type AuthSessionResponse = {
-  user: AuthUser;
-  session: {
-    tokenType: 'Bearer';
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiresIn: number;
-    refreshTokenExpiresIn: number;
-  };
-};
+import { decodeAuthSession, decodeCurrentUser, decodeErrorMessage, decodeLogout } from './auth-contract';
+export type { MobileRole, AuthUser, AuthSessionResponse } from './auth-contract';
 
 export class HttpError extends Error {
   constructor(
@@ -37,7 +19,7 @@ export function getApiUrl(path: string) {
   return `${baseUrl}${path}`;
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, init: RequestInit, decode: (value: unknown) => T): Promise<T> {
   let response: Response;
   try {
     response = await fetch(getApiUrl(path), init);
@@ -45,40 +27,38 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     throw new Error('Không thể kết nối máy chủ', { cause: error });
   }
 
-  const payload = await response.json().catch(() => undefined);
+  const payload: unknown = await response.json().catch(() => undefined);
   if (!response.ok) {
-    const message =
-      typeof payload?.message === 'string' ? payload.message : 'Yêu cầu không thành công';
-    throw new HttpError(response.status, message);
+    throw new HttpError(response.status, decodeErrorMessage(payload));
   }
 
-  return payload as T;
+  return decode(payload);
 }
 
-function post<T>(path: string, body: unknown) {
-  return request<T>(path, {
+function post<T>(path: string, body: unknown, decode: (value: unknown) => T) {
+  return request(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  });
+  }, decode);
 }
 
 export const authApi = {
   login(email: string, password: string) {
-    return post<AuthSessionResponse>('/api/auth/token/login', { email, password });
+    return post('/api/auth/token/login', { email, password }, decodeAuthSession);
   },
 
   refresh(refreshToken: string) {
-    return post<AuthSessionResponse>('/api/auth/token/refresh', { refreshToken });
+    return post('/api/auth/token/refresh', { refreshToken }, decodeAuthSession);
   },
 
   logout(refreshToken: string) {
-    return post<{ message: string }>('/api/auth/token/logout', { refreshToken });
+    return post('/api/auth/token/logout', { refreshToken }, decodeLogout);
   },
 
   me(accessToken: string) {
-    return request<{ user: AuthUser }>('/api/auth/me', {
+    return request('/api/auth/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    }, decodeCurrentUser);
   },
 };

@@ -1,0 +1,11 @@
+import { Router } from "express";
+import { list, get, create, change, onboard } from "./driver.controller";
+export const driverRouter = Router();
+driverRouter.get("/", list);
+driverRouter.get("/export", list);
+driverRouter.get("/:id", get);
+driverRouter.post("/", create);
+driverRouter.post("/onboarding", onboard);
+driverRouter.patch("/:id", change("update"));
+driverRouter.delete("/:id", change("delete"));
+driverRouter.post("/:id/restore", change("restore"));

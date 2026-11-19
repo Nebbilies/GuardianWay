@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 type AuthTokenPayload = {
-    role?: string
+    role: "PLATFORM_ADMIN" | "SCHOOL_ADMIN" | "DRIVER" | "PARENT"
 }
 
 const PLATFORM_HOME = '/platform/schools'
@@ -14,7 +14,13 @@ function decodeJwtPayload(token: string): AuthTokenPayload | null {
     try {
         const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
         const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
-        return JSON.parse(atob(padded)) as AuthTokenPayload
+        // Routing hint only. The backend verifies JWT signatures and permissions.
+        const payload: unknown = JSON.parse(atob(padded))
+        if (!payload || typeof payload !== 'object' || !('role' in payload) || !('contractVersion' in payload) || payload.contractVersion !== 2 || !('tokenUse' in payload) || payload.tokenUse !== 'access' || !('schoolId' in payload)) return null
+        const role = payload.role
+        if (role === 'PLATFORM_ADMIN' && payload.schoolId === null) return { role }
+        if (['SCHOOL_ADMIN', 'DRIVER', 'PARENT'].includes(String(role)) && typeof payload.schoolId === 'string' && payload.schoolId) return { role: role as AuthTokenPayload['role'] }
+        return null
     } catch {
         return null
     }
@@ -36,13 +42,13 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL('/login', req.url))
     }
 
-    if (isPlatform && role !== 'SUPER_ADMIN') {
-        const dest = role === 'ADMIN' ? ADMIN_HOME : '/login'
+    if (isPlatform && role !== 'PLATFORM_ADMIN') {
+        const dest = role === 'SCHOOL_ADMIN' ? ADMIN_HOME : '/login'
         return NextResponse.redirect(new URL(dest, req.url))
     }
 
-    if (isAdmin && role !== 'ADMIN') {
-        const dest = role === 'SUPER_ADMIN' ? PLATFORM_HOME : '/login'
+    if (isAdmin && role !== 'SCHOOL_ADMIN') {
+        const dest = role === 'PLATFORM_ADMIN' ? PLATFORM_HOME : '/login'
         return NextResponse.redirect(new URL(dest, req.url))
     }
 

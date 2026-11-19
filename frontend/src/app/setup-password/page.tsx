@@ -1,12 +1,13 @@
 'use client'
 
+import { ErrorNotice } from "@/components/error-notice";
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {Field, FieldLabel, FieldDescription} from '@/components/ui/field'
 import {PasswordInput} from '@/components/custom/password-input'
 import {AuthShell} from '@/components/custom/auth-shell'
-import { apiRequest } from '@/lib/api-client'
+import { setupPassword } from '@/modules/system/auth/contracts'
 
 function SetupPasswordForm() {
     const router = useRouter()
@@ -15,39 +16,36 @@ function SetupPasswordForm() {
 
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
-    const [error, setError] = useState('')
+    const [error, setError] = useState<unknown>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        setError('')
+        setError(null)
 
         if (!token) {
-            setError('Liên kết không hợp lệ')
+            setError({ code: "INVITATION_INVALID" })
             return
         }
 
         if (password.length < 8) {
-            setError('Mật khẩu phải có ít nhất 8 ký tự')
+            setError({ code: "PASSWORD_TOO_SHORT" })
             return
         }
 
         if (password !== confirmPassword) {
-            setError('Mật khẩu xác nhận không khớp')
+            setError({ code: "PASSWORD_MISMATCH" })
             return
         }
 
         setIsSubmitting(true)
 
         try {
-            await apiRequest('/auth/setup-password', {
-                method: 'POST',
-                body: JSON.stringify({ token, password }),
-            })
+            await setupPassword(token, password)
 
             router.push('/login')
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Thiết lập mật khẩu thất bại')
+            setError(err)
         } finally {
             setIsSubmitting(false)
         }
@@ -63,6 +61,7 @@ function SetupPasswordForm() {
                     <FieldLabel htmlFor="password">Mật khẩu mới</FieldLabel>
                     <PasswordInput
                         id="password"
+                        placeholder="Nhập mật khẩu mới"
                         autoComplete="new-password"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
@@ -76,6 +75,7 @@ function SetupPasswordForm() {
                     <FieldLabel htmlFor="confirmPassword">Xác nhận mật khẩu</FieldLabel>
                     <PasswordInput
                         id="confirmPassword"
+                        placeholder="Nhập lại mật khẩu mới"
                         autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(event) => setConfirmPassword(event.target.value)}
@@ -84,11 +84,7 @@ function SetupPasswordForm() {
                     />
                 </Field>
 
-                {error ? (
-                    <div role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                        {error}
-                    </div>
-                ) : null}
+                {error ? <ErrorNotice error={error} /> : null}
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? 'Đang lưu...' : 'Hoàn tất'}

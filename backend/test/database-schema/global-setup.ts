@@ -34,16 +34,16 @@ export async function setup({ provide }: GlobalSetupContext) {
         }
         // Before the baseline exists, the first contract test intentionally sees
         // an empty database. Once present, a migration error must fail setup.
-        if (existsSync(path.resolve("database-schema/migrations/20261116000000_schema_baseline/migration.sql"))) {
+        if (existsSync(path.resolve("prisma/migrations/20261116000000_schema_baseline/migration.sql"))) {
             execFileSync(process.execPath, [
                 path.join(path.dirname(createRequire(import.meta.url).resolve("prisma/package.json")), "build/index.js"),
-                "migrate", "deploy", "--config", "prisma.database.config.ts",
+                "migrate", "deploy", "--config", "prisma.config.ts",
             ], {
                 cwd: process.cwd(),
-                env: { ...process.env, SCHEMA_DATABASE_URL: url },
+                env: { ...process.env, SCHEMA_DATABASE_URL: url, DATABASE_URL: url },
                 stdio: "pipe",
             });
-            const { seed } = await import("../../database-schema/seed.cjs");
+            const { seed } = await import("./fixtures/sql-seed.cjs");
             await seed(url);
             const info = new Client({ connectionString: url });
             await info.connect();

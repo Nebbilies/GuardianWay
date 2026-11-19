@@ -2,19 +2,21 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import busStopRoutes from "./routes/busStop.routes";
-import busRouteRoutes from "./routes/busRoute.routes";
-import busRoutes from "./routes/bus.routes";
-import userRoutes from "./routes/user.routes";
-import schoolRoutes from "./routes/school.routes";
-import busTripRoutes from "./routes/busTrip.routes";
-import studentRoutes from "./routes/student.routes";
-import auditRoutes from "./routes/audit.routes";
-import publicRoutes from "./routes/public.routes";
-import authRoutes from "./routes/auth.routes";
+import { authRouter } from "./modules/system/auth/auth.routes";
+import { schoolRouter, schoolContextRouter } from "./modules/system/schools/school.routes";
+import { accountRouter } from "./modules/system/accounts/account.routes";
+import { auditRouter } from "./modules/system/audit/audit.routes";
+import { studentRouter } from "./modules/records/students/student.routes";
+import { vehicleRouter } from "./modules/records/vehicles/vehicle.routes";
+import { stopRouter } from "./modules/planning/stops/stop.routes";
+import { driverRouter } from "./modules/records/drivers/driver.routes";
+import { policyRouter } from "./modules/system/school-policies/policy.routes";
+import { planRouter } from "./modules/planning/route-plans/plan.routes";
+import { scheduleRouter } from "./modules/planning/schedules/schedule.routes";
+import { tripRouter } from "./modules/operations/trips/trip.routes";
+import { publicRouter } from "./modules/public-reporting/public.routes";
 import healthRoutes from "./routes/health.routes";
 import {authenticate} from "./middlewares/auth.middleware";
-import {tenantContext} from "./middlewares/tenant.middleware";
 import {authorize} from "./middlewares/authorize.middleware";
 import {requestContext} from "./middlewares/request-context.middleware";
 import {errorHandler, notFoundHandler} from "./middlewares/error.middleware";
@@ -69,19 +71,21 @@ app.use(pinoHttp({
 }));
 app.use(metricsMiddleware);
 
-app.use("/api/auth", authRoutes);
-app.use("/api/public", publicRoutes);
-
-app.use("/api/users", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), userRoutes);
-// SUPER_ADMIN has schoolId=null, so tenantContext resolves to the unscoped base
-// client here — it is mounted purely so the audit trail knows who acted.
-app.use("/api/schools", authenticate, tenantContext, authorize(["SUPER_ADMIN"]), schoolRoutes);
-app.use("/api/buses", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRoutes);
-app.use("/api/bus-routes", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busRouteRoutes);
-app.use("/api/bus-stops", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busStopRoutes);
-app.use("/api/bus-trips", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), busTripRoutes);
-app.use("/api/students", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), studentRoutes);
-app.use("/api/audit-logs", authenticate, tenantContext, authorize(["SUPER_ADMIN", "ADMIN"]), auditRoutes);
+app.use("/api/auth", authRouter);
+app.use("/api/public", publicRouter);
+app.use("/api/users", authenticate, authorize(["SCHOOL_ADMIN"]), accountRouter());
+app.use("/api/schools/:schoolId/admins", authenticate, authorize(["PLATFORM_ADMIN"]), accountRouter());
+app.use("/api/schools", authenticate, authorize(["PLATFORM_ADMIN"]), schoolRouter);
+app.use("/api/school-context", authenticate, authorize(["SCHOOL_ADMIN"]), schoolContextRouter);
+app.use("/api/audit-logs", authenticate, authorize(["PLATFORM_ADMIN", "SCHOOL_ADMIN"]), auditRouter);
+app.use("/api/students", authenticate, authorize(["SCHOOL_ADMIN"]), studentRouter);
+app.use("/api/buses", authenticate, authorize(["SCHOOL_ADMIN"]), vehicleRouter);
+app.use("/api/bus-stops", authenticate, authorize(["SCHOOL_ADMIN"]), stopRouter);
+app.use("/api/drivers", authenticate, authorize(["SCHOOL_ADMIN"]), driverRouter);
+app.use("/api/school-policies", authenticate, authorize(["SCHOOL_ADMIN"]), policyRouter);
+app.use("/api/route-plans", authenticate, authorize(["SCHOOL_ADMIN"]), planRouter);
+app.use("/api/recurring-schedules", authenticate, authorize(["SCHOOL_ADMIN"]), scheduleRouter);
+app.use("/api/bus-trips", authenticate, authorize(["SCHOOL_ADMIN"]), tripRouter);
 
 app.get("/", (_req, res) => {
     res.send("Hello, api is on!");

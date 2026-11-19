@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { targetUrl, shadowUrl } from "../../database-schema/target-guard.cjs";
+import { targetUrl, shadowUrl } from "../../prisma/target-guard.cjs";
 
 describe("database URL guard", () => {
     it.each(["host=remote.example", "port=6543", "user=other", "password=other", "sslmode=disable"])(

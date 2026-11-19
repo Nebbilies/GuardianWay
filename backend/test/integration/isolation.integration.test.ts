@@ -8,7 +8,7 @@ import redisClient from "../../src/config/redis";
 
 const LIST_ENDPOINTS = [
     "/api/buses",
-    "/api/bus-routes",
+    "/api/route-plans",
     "/api/bus-stops",
     "/api/bus-trips",
     "/api/students",
@@ -84,7 +84,7 @@ describe("tenant isolation", () => {
 
         expect(res.status).toBe(404);
 
-        const survivor = await prisma.bus.findFirst({ where: { id: fx.busB.id } });
+        const survivor = await prisma.vehicle.findFirst({ where: { id: fx.busB.id } });
         expect(survivor).not.toBeNull();
         expect(survivor?.deletedAt).toBeNull();
     });
@@ -100,7 +100,7 @@ describe("tenant isolation", () => {
 
     it("a forged schoolId query param on audit logs is overridden, not honoured", async () => {
         // The audit query schema declares schoolId, so it survives validation and
-        // reaches the repository — the extension must win.
+        // reaches the repository — the explicit authenticated school scope must win.
         const res = await request(app)
             .get(`/api/audit-logs?schoolId=${fx.schoolB.id}`)
             .set("Cookie", cookiesA);
@@ -126,21 +126,10 @@ describe("tenant isolation", () => {
         }
     });
 
-    it("a forged schoolId in a non-strict create body is ignored", async () => {
-        const res = await request(app)
-            .post("/api/buses")
-            .set("Cookie", cookiesA)
-            .send({
-                licensePlate: "51A-99999",
-                model: "Ford Transit",
-                capacity: 16,
-                status: "ACTIVE",
-                schoolId: fx.schoolB.id,
-            });
-
-        expect(res.status).toBe(201);
-        const created = await prisma.bus.findFirst({ where: { licensePlate: "51A-99999" } });
-        expect(created?.schoolId).toBe(fx.schoolA.id);
+    it("a forged schoolId in a vehicle create body is rejected", async () => {
+        const res = await request(app).post("/api/buses").set("Cookie", cookiesA)
+            .send({ code: "BUS2", plateNumber: "51A99999", studentCapacity: 16, status: "AVAILABLE", schoolId: fx.schoolB.id });
+        expect(res.status).toBe(400);
     });
 
     it("a forged schoolId in a strict create body is rejected", async () => {
@@ -149,9 +138,8 @@ describe("tenant isolation", () => {
             .set("Cookie", cookiesA)
             .send({
                 fullName: "Hoc sinh moi",
-                studentId: "HS-A-002",
-                studentClass: "5B",
-                dateOfBirth: "2016-06-01",
+                studentCode: "HS-A-002",
+                classLabel: "5B",
                 schoolId: fx.schoolB.id,
             });
 
@@ -159,12 +147,11 @@ describe("tenant isolation", () => {
         expect(res.status).toBe(400);
     });
 
-    it("super admin sees rows from both schools", async () => {
+    it("platform audit excludes school operational actions", async () => {
+        await request(app).patch("/api/buses/" + fx.busA.id).set("Cookie", cookiesA).send({ description: "Changed" });
         const res = await request(app).get("/api/audit-logs").set("Cookie", cookiesSuper);
         expect(res.status).toBe(200);
-
-        const schoolIds = new Set(rowsOf(res.body).map((r) => r.schoolId));
-        expect(schoolIds.has(fx.schoolA.id)).toBe(true);
-        expect(schoolIds.has(fx.schoolB.id)).toBe(true);
+        expect(rowsOf(res.body).every(row => (row.changeSummary as { scope: string }).scope === "PLATFORM")).toBe(true);
+        expect(rowsOf(res.body).some(row => row.action === "vehicle.update")).toBe(false);
     });
 });

@@ -1,5 +1,6 @@
 import {ReactNode} from 'react'
 import {Bus} from 'lucide-react'
+import { LanguageSwitch } from '@/components/language-switch'
 
 interface AuthShellProps {
     title: string
@@ -21,6 +22,7 @@ export function AuthShell({title, description, children}: AuthShellProps) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+                    <div className="mb-3 flex justify-end"><LanguageSwitch /></div>
                     <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
                     <p className="mt-1.5 mb-6 text-sm text-muted-foreground">{description}</p>
                     {children}

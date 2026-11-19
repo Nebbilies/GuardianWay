@@ -1,7 +1,17 @@
 'use client'
 import {MapContainer, Marker, Popup, TileLayer, useMapEvents} from "react-leaflet";
-import {RefObject, useRef, useState} from "react";
-import L, {latLng, LatLng} from "leaflet";
+import {RefObject, useRef} from "react";
+import L from "leaflet";
+
+const markerIcon = L.icon({
+    iconUrl: "/img/leaflet/marker-icon.png",
+    iconRetinaUrl: "/img/leaflet/marker-icon-2x.png",
+    shadowUrl: "/img/leaflet/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+});
 
 interface MapDescendantProps {
     onMapClick?: (position: { lat: number, lng: number }) => void;
@@ -40,14 +50,14 @@ export default function MapComponent({ mapHeight = "80vh", latLng, setLatLng, st
                 />
                 <MapDescendant onMapClick={setLatLng}/>
                 {latLng && (
-                    <Marker position={latLng}>
+                    <Marker position={latLng} icon={markerIcon}>
                         <Popup>
                             Selected Location
                         </Popup>
                     </Marker>
                 )}
                 {stopLocations && stopLocations.map((location, index) => (
-                    <Marker key={index} position={location}>
+                    <Marker key={index} position={location} icon={markerIcon}>
                         <Popup>
                             Trạm #{index + 1}
                         </Popup>

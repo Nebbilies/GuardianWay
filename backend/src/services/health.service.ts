@@ -6,13 +6,14 @@ export interface ReadinessReport {
     status: "ok" | "fail";
     checks: {
         db: CheckResult;
-        redis: CheckResult;
+        redis: CheckResult | "disabled";
     };
 }
 
 export interface ReadinessDeps {
     pingDb: () => Promise<unknown>;
     pingRedis: () => Promise<unknown>;
+    redisEnabled?: boolean;
     timeoutMs?: number;
 }
 
@@ -52,11 +53,11 @@ export async function checkReadiness(deps: ReadinessDeps): Promise<ReadinessRepo
 
     const [db, redis] = await Promise.all([
         run("db", deps.pingDb, ms),
-        run("redis", deps.pingRedis, ms),
+        deps.redisEnabled === false ? Promise.resolve("disabled" as const) : run("redis", deps.pingRedis, ms),
     ]);
 
     return {
-        status: db === "ok" && redis === "ok" ? "ok" : "fail",
+        status: db === "ok" && redis !== "fail" ? "ok" : "fail",
         checks: { db, redis },
     };
 }

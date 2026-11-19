@@ -1,9 +1,9 @@
 import {AppError, FieldError} from "./app-error";
 
 export class ValidationError extends AppError {
-    constructor(detail = "Validation failed", errors?: FieldError[]) {
+    constructor(detail = "Validation failed", errors?: FieldError[], code = "VALIDATION_ERROR") {
         super({
-            code: "VALIDATION_ERROR",
+            code,
             status: 400,
             title: "Validation failed",
             detail,
@@ -13,9 +13,9 @@ export class ValidationError extends AppError {
 }
 
 export class AuthenticationError extends AppError {
-    constructor(detail = "Authentication required") {
+    constructor(detail = "Authentication required", code = "AUTHENTICATION_ERROR") {
         super({
-            code: "AUTHENTICATION_ERROR",
+            code,
             status: 401,
             title: "Authentication failed",
             detail,
@@ -46,9 +46,9 @@ export class NotFoundError extends AppError {
 }
 
 export class ConflictError extends AppError {
-    constructor(detail = "Resource conflict") {
+    constructor(detail = "Resource conflict", code = "CONFLICT") {
         super({
-            code: "CONFLICT",
+            code,
             status: 409,
             title: "Conflict",
             detail,
@@ -57,9 +57,9 @@ export class ConflictError extends AppError {
 }
 
 export class DomainRuleError extends AppError {
-    constructor(detail = "Domain rule violated") {
+    constructor(detail = "Domain rule violated", code = "DOMAIN_RULE_ERROR") {
         super({
-            code: "DOMAIN_RULE_ERROR",
+            code,
             status: 422,
             title: "Domain rule violation",
             detail,
@@ -80,7 +80,7 @@ export class InternalError extends AppError {
 }
 
 export class TooManyRequestsError extends AppError {
-    constructor(detail = "Quá nhiều yêu cầu, vui lòng thử lại sau") {
+    constructor(detail = "Too many requests. Please try again later") {
         super({
             code: "TOO_MANY_REQUESTS",
             status: 429,
@@ -91,7 +91,7 @@ export class TooManyRequestsError extends AppError {
 }
 
 export class ServiceUnavailableError extends AppError {
-    constructor(detail = "Dịch vụ tạm thời không khả dụng, vui lòng thử lại sau") {
+    constructor(detail = "Service is temporarily unavailable. Please try again later") {
         super({
             code: "SERVICE_UNAVAILABLE",
             status: 503,

@@ -4,7 +4,9 @@ import {LogOut} from "lucide-react";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
 import {SidebarMenuButton} from "@/components/ui/sidebar";
-import {apiRequest} from "@/lib/api-client";
+import {logoutWeb} from "@/modules/system/auth/contracts";
+import {toast} from "sonner";
+import {getErrorMessage} from "@/lib/i18n";
 
 export default function LogoutButton() {
     const router = useRouter();
@@ -14,12 +16,13 @@ export default function LogoutButton() {
         if (loading) return;
         setLoading(true);
         try {
-            await apiRequest("/auth/logout", {method: "POST"});
-        } catch {
-
-        } finally {
+            await logoutWeb();
             router.push("/login");
             router.refresh();
+        } catch (error) {
+            toast.error(getErrorMessage(error));
+        } finally {
+            setLoading(false);
         }
     }
 

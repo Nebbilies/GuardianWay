@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { list, get, create, change } from "./vehicle.controller";
+export const vehicleRouter = Router();
+vehicleRouter.get("/", list);
+vehicleRouter.get("/export", list);
+vehicleRouter.get("/:id", get);
+vehicleRouter.post("/", create);
+vehicleRouter.patch("/:id", change("update"));
+vehicleRouter.delete("/:id", change("delete"));
+vehicleRouter.post("/:id/restore", change("restore"));

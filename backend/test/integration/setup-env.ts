@@ -7,6 +7,7 @@ import { inject } from "vitest";
 process.env.DATABASE_URL = inject("databaseUrl");
 process.env.DIRECT_URL = inject("databaseUrl");
 process.env.REDIS_URL = inject("redisUrl");
+process.env.REDIS_ENABLED = "true";
 process.env.JWT_ACCESS_SECRET = "test-access-secret";
 process.env.JWT_REFRESH_SECRET = "test-refresh-secret";
 process.env.WEB_BASE_URL = "http://localhost:3000";

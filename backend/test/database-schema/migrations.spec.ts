@@ -14,8 +14,8 @@ describe("independent migration history", () => {
 
     function cli(args: string[], url = inject("schemaDatabaseUrl"), shadow?: string) {
         return execFileSync(process.execPath, [path.join(path.dirname(createRequire(import.meta.url).resolve("prisma/package.json")), "build/index.js"), ...args,
-            "--config", "prisma.database.config.ts"], {
-            encoding: "utf8", env: { ...process.env, SCHEMA_DATABASE_URL: url,
+            "--config", "prisma.config.ts"], {
+            encoding: "utf8", env: { ...process.env, SCHEMA_DATABASE_URL: url, DATABASE_URL: url,
                 ...(shadow ? { SCHEMA_SHADOW_DATABASE_URL: shadow } : {}) },
         });
     }
@@ -55,14 +55,14 @@ describe("independent migration history", () => {
         await db.query("CREATE DATABASE guardianway_schema_shadow");
         const shadow = new URL(inject("schemaDatabaseUrl"));
         shadow.pathname = "/guardianway_schema_shadow";
-        const output = cli(["migrate", "diff", "--from-migrations", "database-schema/migrations",
+        const output = cli(["migrate", "diff", "--from-migrations", "prisma/migrations",
             "--to-config-datasource", "--exit-code"], inject("schemaDatabaseUrl"), shadow.toString());
         writeFileSync(path.join(qa, "migration-drift.txt"), output);
         expect(output).toContain("No difference");
     });
 
     it("proposes no destructive or duplicate SQL from the ORM schema", () => {
-        const output = cli(["migrate", "diff", "--from-config-datasource", "--to-schema", "database-schema/schema.prisma", "--script"]);
+        const output = cli(["migrate", "diff", "--from-config-datasource", "--to-schema", "prisma/schema.prisma", "--script"]);
         writeFileSync(path.join(qa, "orm-diff.sql"), output);
         // Keep the actual script as evidence; a CREATE/DROP/ALTER proposal here
         // would make a later schema-driven migration unsafe without review.

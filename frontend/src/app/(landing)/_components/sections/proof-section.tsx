@@ -1,11 +1,11 @@
-import type {LandingProofResponse} from '@gw/shared'
+import type {LandingProofResponse} from '@/modules/public-reporting/contracts'
 import {Badge} from '@/components/ui/badge'
 import SectionReveal from '../motion/section-reveal'
 import AbstractMotionGraphic, {PROOF_WAVE_GRAPHIC} from '../graphics/abstract-motion-graphic'
 
 interface ProofSectionProps {
-    proof: LandingProofResponse
-    isFallback: boolean
+    proof: LandingProofResponse | null
+    isUnavailable: boolean
 }
 
 const formatNumber = (value: number) => new Intl.NumberFormat('vi-VN').format(value)
@@ -23,25 +23,25 @@ const formatTimestamp = (value: string | null) => {
     }).format(new Date(value))
 }
 
-export default function ProofSection({proof, isFallback}: ProofSectionProps) {
+export default function ProofSection({proof, isUnavailable}: ProofSectionProps) {
     const metrics = [
         {
-            value: formatNumber(proof.metrics.activeRoutes),
+            value: proof ? formatNumber(proof.metrics.activeRoutes) : "—",
             label: 'Tuyến đang hoạt động',
             detail: 'Đang phục vụ phụ huynh trong hệ thống',
         },
         {
-            value: formatNumber(proof.metrics.activeBuses),
+            value: proof ? formatNumber(proof.metrics.activeBuses) : "—",
             label: 'Xe đang vận hành',
             detail: 'Xe có trạng thái hoạt động',
         },
         {
-            value: formatNumber(proof.metrics.schoolStops),
+            value: proof ? formatNumber(proof.metrics.schoolStops) : "—",
             label: 'Điểm trường được theo dõi',
             detail: 'Điểm dừng trường học đã cấu hình',
         },
         {
-            value: formatNumber(proof.metrics.completedTripsLast30Days),
+            value: proof ? formatNumber(proof.metrics.completedTripsLast30Days) : "—",
             label: 'Chuyến hoàn tất trong 30 ngày',
             detail: 'Tổng số chuyến có trạng thái hoàn thành',
         },
@@ -60,7 +60,7 @@ export default function ProofSection({proof, isFallback}: ProofSectionProps) {
                     </div>
                     <Badge variant={'secondary'}
                            className={'border border-background/20 bg-background/10 text-background'}>
-                        {isFallback ? 'Nguồn: Ước tính dự phòng' : 'Nguồn: Dữ liệu hệ thống'}
+                        {isUnavailable ? 'Dữ liệu tạm chưa khả dụng' : 'Nguồn: Dữ liệu hệ thống'}
                     </Badge>
                 </SectionReveal>
 
@@ -79,7 +79,7 @@ export default function ProofSection({proof, isFallback}: ProofSectionProps) {
                                className={'mt-8 flex items-center justify-between gap-3 rounded-2xl border border-background/15 bg-background/5 p-4'}>
                     <div>
                         <p className={'text-sm text-background/75'}>Điểm theo dõi gần nhất</p>
-                        <p className={'text-base font-semibold'}>{formatTimestamp(proof.metrics.latestTrackingAt)}</p>
+                        <p className={'text-base font-semibold'}>{isUnavailable ? "Chưa thể kết nối dữ liệu hệ thống" : formatTimestamp(proof?.metrics.latestTrackingAt ?? null)}</p>
                     </div>
                     <div className={'relative h-16 w-28'}>
                         <AbstractMotionGraphic id={PROOF_WAVE_GRAPHIC} className={'h-16 w-28'}/>

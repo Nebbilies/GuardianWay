@@ -1,9 +1,23 @@
-export class ApiError extends Error {
-    status: number;
+import { z } from "zod";
+import { errorMessage } from "./i18n";
 
-    constructor(message: string, status: number) {
-        super(message);
+const problemSchema = z.object({
+    code: z.string().min(1).max(100).optional(), traceId: z.string().optional(),
+    errors: z.array(z.object({ field: z.string(), message: z.string(), code: z.string().optional() })).optional(),
+});
+export class ApiError extends Error {
+    readonly code: string;
+    readonly status: number;
+    readonly traceId?: string;
+    readonly errors?: z.infer<typeof problemSchema>["errors"];
+
+    constructor(code: string, status: number, context: z.infer<typeof problemSchema> = {}) {
+        super(errorMessage(code));
+        this.name = "ApiError";
+        this.code = code;
         this.status = status;
+        this.traceId = context.traceId;
+        this.errors = context.errors;
     }
 }
 
@@ -29,35 +43,36 @@ function shouldSkipRefresh(path: string) {
     );
 }
 
-async function parseErrorMessage(response: Response) {
-    const errorData = await response
-        .json()
-        .catch(() => ({detail: response.statusText || "Đã xảy ra lỗi"}));
-
-    return errorData.detail || errorData.message || "Đã xảy ra lỗi";
+async function responseError(response: Response) {
+    const parsed = problemSchema.safeParse(await response.json().catch(() => null));
+    const problem = parsed.success ? parsed.data : {};
+    return new ApiError(problem.code ?? "UNKNOWN_ERROR", response.status, problem);
 }
 
 async function requestOnce(url: string, init: RequestInit = {}) {
-    return fetch(url, {
+    try { return await fetch(url, {
         ...init,
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
             ...(init.headers || {}),
         },
-    });
+    }); } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") throw new ApiError("REQUEST_ABORTED", 0);
+        throw new ApiError("NETWORK_ERROR", 0);
+    }
 }
 
 async function refreshToken() {
     if (!refreshPromise) {
         refreshPromise = (async () => {
-            const res = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
+            const res = await requestOnce(`${getApiBaseUrl()}/auth/refresh`, {
                 method: "POST",
                 credentials: "include",
             });
 
             if (!res.ok) {
-                throw new ApiError("Failed to refresh token", res.status);
+                throw await responseError(res);
             }
         })().finally(() => {
             refreshPromise = null;
@@ -78,15 +93,14 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     }
 
     if (!response.ok) {
-        const errorMessage = await parseErrorMessage(response);
-        throw new ApiError(errorMessage, response.status);
+        throw await responseError(response);
     }
 
     if (response.status === 204) {
         return undefined as T;
     }
 
-    return response.json();
+    try { return await response.json(); } catch { throw new ApiError("INVALID_RESPONSE", response.status); }
 }
 
 export function buildQuery(params: Record<string, string | number | undefined | null>) {

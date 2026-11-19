@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { Client } from "pg";
 
-export const seedRecords = JSON.parse(readFileSync(path.resolve("database-schema/seed-data.json"), "utf8"));
+export const seedRecords = JSON.parse(readFileSync(path.resolve("test/database-schema/fixtures/sql-seed-data.json"), "utf8"));
 export const data = (model: string) => seedRecords.find((row: any) => row.model === model).data;
 export const schoolB = seedRecords.filter((row: any) => row.model === "school")[1].data.id;
 export { randomUUID };

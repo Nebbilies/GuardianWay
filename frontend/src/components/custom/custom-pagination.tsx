@@ -1,4 +1,4 @@
-import { PaginationMetadata } from "@gw/shared"
+import { PaginationMetadata } from "@/lib/http/contracts"
 import {
     Pagination,
     PaginationEllipsis,
