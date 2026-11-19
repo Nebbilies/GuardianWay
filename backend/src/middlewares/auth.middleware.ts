@@ -1,33 +1,35 @@
 import { NextFunction, Request, Response } from "express";
-import { authService } from "../services/auth.service";
+import { authService, ACCESS_COOKIE_NAME } from "../modules/system/auth";
 import { AuthenticatedRequestUser } from "../types/auth";
+import { AuthenticationError } from "../errors/http-errors";
+import type { Principal } from "../http/principal";
 
 export interface AuthenticatedRequest extends Request {
     user?: AuthenticatedRequestUser;
 }
 
-export async function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function authenticatedActor(req: Request): Principal {
+    if (!req.user) throw new AuthenticationError("Authentication required");
+    return req.user;
+}
+
+export function authenticate(req: AuthenticatedRequest, _res: Response, next: NextFunction) {
     try {
         const bearerToken = req.headers.authorization?.startsWith("Bearer ")
             ? req.headers.authorization.slice(7)
             : undefined;
 
-        const cookieToken = req.cookies?.[authService.getAccessCookieName()];
+        const cookieToken = req.cookies?.[ACCESS_COOKIE_NAME];
         const token = bearerToken || cookieToken;
 
         if (!token) {
-            return res.status(401).json({ message: "Chưa xác thực người dùng" });
+            throw new AuthenticationError("Authentication required");
         }
 
-        const payload = authService.verifyAccessToken(token);
-        req.user = {
-            userId: payload.userId,
-            role: payload.role,
-            schoolId: payload.schoolId ?? null,
-        };
+        req.user = authService.verifyAccessToken(token);
 
         return next();
-    } catch {
-        return res.status(401).json({ message: "Phiên đăng nhập không hợp lệ" });
+    } catch (error) {
+        return next(error);
     }
 }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../config/prisma";
-import redisClient, { isRedisReady } from "../config/redis";
+import redisClient, { isRedisReady, redisEnabled } from "../config/redis";
 import { checkReadiness } from "../services/health.service";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -17,6 +17,7 @@ router.get("/healthz", (_req, res) => {
 // this replica from the load balancer.
 router.get("/readyz", asyncHandler(async (_req, res) => {
     const report = await checkReadiness({
+        redisEnabled,
         pingDb: () => prisma.$queryRaw`SELECT 1`,
         pingRedis: async () => {
             if (!isRedisReady()) throw new Error("redis not connected");

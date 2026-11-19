@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 import { Client } from "pg";
-import { seed } from "../../database-schema/seed.cjs";
-import { targetUrl } from "../../database-schema/target-guard.cjs";
+import { seed } from "./fixtures/sql-seed.cjs";
+import { targetUrl } from "../../prisma/target-guard.cjs";
 
 describe("fictional seed and target isolation", () => {
     let db: Client;

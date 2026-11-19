@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../../generated/database-client";
+import { PrismaClient } from "@prisma/client";
 import { data, randomUUID } from "./fixtures";
 
 describe("isolated Prisma client", () => {

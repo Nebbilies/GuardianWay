@@ -1,47 +1,24 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { config as loadEnv } from "dotenv";
 import path from "path";
-import {pagination} from "prisma-extension-pagination";
-import {mapPrismaError} from "../errors/prisma-error.mapper";
 
-loadEnv({ path: path.resolve(process.cwd(), "backend/.env") });
-loadEnv({ path: path.resolve(process.cwd(), ".env") });
+if (process.env.GUARDIANWAY_ENV_LOADED !== "1") {
+    loadEnv({ path: path.resolve(process.cwd(), "backend/.env"), quiet: true });
+    loadEnv({ path: path.resolve(process.cwd(), ".env"), quiet: true });
+}
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({
+const options: Prisma.PrismaClientOptions = {
     adapter,
-    // Never return the password hash by default. Re-include explicitly
-    // (omit: { password: false }) only on the auth lookup that must compare it.
+    // Credential reads opt in inside the accounts repository only.
     omit: {
-        user: {
-            password: true,
+        userAccount: {
+            passwordHash: true,
         },
     },
-})
-    .$extends({
-        query: {
-            $allModels: {
-                async $allOperations({args, query}) {
-                    try {
-                        return await query(args);
-                    } catch (error) {
-                        throw mapPrismaError(error);
-                    }
-                },
-            },
-        },
-    })
-    .$extends(pagination({
-        pages: {
-            limit: 10,
-            includePageCount: true,
-        },
-        cursor: {
-            limit: 10,
-            includeTotalCount: true,
-        }
-    }));
+};
+const prisma = new PrismaClient(options);
 
 export default prisma;
 export * from "@prisma/client"

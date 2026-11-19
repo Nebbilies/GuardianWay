@@ -45,7 +45,7 @@ describe("auth refresh token uniqueness", () => {
         expect(second.status).toBe(200);
 
         const tokens = await prisma.refreshToken.findMany({
-            where: { userId: fx.adminA.id },
+            where: { accountId: fx.adminA.id },
         });
         expect(tokens).toHaveLength(2);
         expect(tokens[0].tokenHash).not.toBe(tokens[1].tokenHash);

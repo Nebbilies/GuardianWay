@@ -1,140 +1,61 @@
 import bcrypt from "bcrypt";
-import { BusStatus, BusTripStatus, Role, TripType } from "@prisma/client";
+import { randomUUID } from "node:crypto";
 import prisma from "../../src/config/prisma";
 
 export const TEST_PASSWORD = "Password123!";
 
-export interface Fixture {
-    schoolA: { id: string; slug: string };
-    schoolB: { id: string; slug: string };
-    superAdmin: { id: string; email: string };
-    adminA: { id: string; email: string };
-    adminB: { id: string; email: string };
-    parentA: { id: string; email: string };
-    driverA: { id: string; email: string };
-    busA: { id: string };
-    busB: { id: string };
-    stopA: { id: string };
-    stopB: { id: string };
-    routeA: { id: string };
-    routeB: { id: string };
-    tripA: { id: string };
-    tripB: { id: string };
-    studentA: { id: string };
-    studentB: { id: string };
-}
-
 export async function resetDatabase() {
+    const url = new URL(process.env.DATABASE_URL ?? "");
+    if (process.env.NODE_ENV !== "test" || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.pathname !== "/guardianway_test") {
+        throw new Error("Integration reset requires the temporary guardianway_test database");
+    }
     const tables = await prisma.$queryRaw<{ tablename: string }[]>`
-        SELECT tablename FROM pg_tables
-        WHERE schemaname = 'public' AND tablename NOT LIKE '\\_prisma%'
+        SELECT tablename FROM pg_tables WHERE schemaname = 'public'
+        AND tablename NOT LIKE '\\_prisma%' AND tablename <> 'spatial_ref_sys'
     `;
-    if (tables.length === 0) return;
-    const list = tables.map((t) => `"public"."${t.tablename}"`).join(", ");
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${list} RESTART IDENTITY CASCADE`);
+    if (!tables.length) return;
+    const list = tables.map(t => '"public"."' + t.tablename.replaceAll('"', '""') + '"').join(", ");
+    await prisma.$executeRawUnsafe("TRUNCATE TABLE " + list + " RESTART IDENTITY CASCADE");
 }
 
-export async function resetAndSeed(): Promise<Fixture> {
+export async function resetAndSeed() {
     await resetDatabase();
     const passwordHash = await bcrypt.hash(TEST_PASSWORD, 10);
-
-    const schoolA = await prisma.school.create({
-        data: { name: "Truong A", address: "1 Duong A", slug: "truong-a" },
-    });
-    const schoolB = await prisma.school.create({
-        data: { name: "Truong B", address: "2 Duong B", slug: "truong-b" },
-    });
-
-    const mkUser = (name: string, email: string, role: Role, schoolId: string | null) =>
-        prisma.user.create({
-            data: {
-                name, email, role, schoolId,
-                password: passwordHash,
-                passwordSetupRequired: false,
-            },
-        });
-
-    const superAdmin = await mkUser("Super Admin", "super@gw.test", Role.SUPER_ADMIN, null);
-    const adminA = await mkUser("Admin A", "admin-a@gw.test", Role.ADMIN, schoolA.id);
-    const adminB = await mkUser("Admin B", "admin-b@gw.test", Role.ADMIN, schoolB.id);
-    const parentA = await mkUser("Parent A", "parent-a@gw.test", Role.PARENT, schoolA.id);
-    const driverAUser = await mkUser("Driver A", "driver-a@gw.test", Role.DRIVER, schoolA.id);
-    const driverBUser = await mkUser("Driver B", "driver-b@gw.test", Role.DRIVER, schoolB.id);
-
-    const driverProfileA = await prisma.driverProfile.create({
-        data: { userId: driverAUser.id, licenseNumber: "A-0001" },
-    });
-    const driverProfileB = await prisma.driverProfile.create({
-        data: { userId: driverBUser.id, licenseNumber: "B-0001" },
-    });
-
-    const mkBus = (schoolId: string, plate: string) =>
-        prisma.bus.create({
-            data: { schoolId, licensePlate: plate, model: "Hyundai County", capacity: 29, status: BusStatus.ACTIVE },
-        });
-    const busA = await mkBus(schoolA.id, "51A-00001");
-    const busB = await mkBus(schoolB.id, "51B-00002");
-
-    // BusStop.location is a PostGIS geography column outside the Prisma Client, but it
-    // is nullable — plain creates are fine here. Only TrackingLog requires raw SQL.
-    const mkStop = (schoolId: string, name: string, lat: number, lng: number) =>
-        prisma.busStop.create({
-            data: { schoolId, name, address: `${name} address`, latitude: lat, longitude: lng },
-        });
-    const stopA = await mkStop(schoolA.id, "Diem A1", 10.77, 106.69);
-    const stopA2 = await mkStop(schoolA.id, "Diem A2", 10.78, 106.70);
-    const stopB = await mkStop(schoolB.id, "Diem B1", 21.02, 105.83);
-    const stopB2 = await mkStop(schoolB.id, "Diem B2", 21.03, 105.84);
-
-    const mkRoute = async (schoolId: string, name: string, s1: string, s2: string) => {
-        const route = await prisma.busRoute.create({ data: { schoolId, name } });
-        await prisma.routeStop.createMany({
-            data: [
-                { routeId: route.id, stopId: s1, stopOrder: 1 },
-                { routeId: route.id, stopId: s2, stopOrder: 2, isFinalStop: true },
-            ],
-        });
-        return route;
+    const mkSchool = (code: string) => prisma.school.create({ data: {
+        code, name: "Truong " + code, address: "1 Duong " + code, timezone: "Asia/Ho_Chi_Minh", status: "ACTIVE",
+    } });
+    const schoolA = await mkSchool("A");
+    const schoolB = await mkSchool("B");
+    const mkUser = (displayName: string, email: string, role: string, schoolId: string | null) => prisma.userAccount.create({ data: {
+        displayName, email, role, schoolId, passwordHash, status: "ACTIVE", activatedAt: new Date(),
+    } });
+    const superAdmin = await mkUser("Super Admin", "super@gw.test", "PLATFORM_ADMIN", null);
+    const adminA = await mkUser("Admin A", "admin-a@gw.test", "SCHOOL_ADMIN", schoolA.id);
+    const adminB = await mkUser("Admin B", "admin-b@gw.test", "SCHOOL_ADMIN", schoolB.id);
+    const parentA = await mkUser("Parent A", "parent-a@gw.test", "PARENT", schoolA.id);
+    const driverA = await mkUser("Driver A", "driver-a@gw.test", "DRIVER", schoolA.id);
+    const driverB = await mkUser("Driver B", "driver-b@gw.test", "DRIVER", schoolB.id);
+    const mkResources = async (schoolId: string, adminId: string, accountId: string) => {
+        const vehicle = await prisma.vehicle.create({ data: { schoolId, code: "BUS001", plateNumber: schoolId.slice(0,8).toUpperCase(), studentCapacity: 29, status: "AVAILABLE" } });
+        const driver = await prisma.driverProfile.create({ data: { schoolId, accountId, code: "DRV001", fullName: "Driver", phone: "0900000000", status: "AVAILABLE" } });
+        const stop = await prisma.stop.create({ data: { schoolId, code: "STOP001", name: "Diem don", address: "1 Duong", latitude: 10.77, longitude: 106.69, kind: "SERVICE_POINT", allowsPickup: true, allowsDropoff: true, status: "ACTIVE" } });
+        const policy = await prisma.schoolPolicyVersion.create({ data: { schoolId, versionNo: 1, effectiveFrom: new Date("2026-01-01Z"), status: "APPROVED", approvedById: adminId, approvedAt: new Date(), approvalBasis: "Test", pickupArrivalTime: new Date("1970-01-01T08:00Z") } });
+        const plan = await prisma.planVersion.create({ data: { schoolId, planKey: randomUUID(), versionNo: 1, referenceDate: new Date("2026-09-01Z"), direction: "PICKUP", policyVersionId: policy.id, inputSnapshot: { source: "MANUAL" }, pickupArrivalDeadline: new Date("1970-01-01T08:00Z"), status: "APPROVED", createdById: adminId, approvedById: adminId, approvedAt: new Date(), effectiveFrom: new Date("2026-09-01Z") } });
+        const route = await prisma.plannedRoute.create({ data: { schoolId, planVersionId: plan.id, routeCode: "R001", label: "Tuyen 1", vehicleId: vehicle.id, capacitySnapshot: 29, distanceMetres: 12000, durationSeconds: 1800 } });
+        const plannedStop = await prisma.plannedStop.create({ data: { schoolId, routeId: route.id, stopId: stop.id, sequenceNo: 1, plannedTime: new Date("1970-01-01T07:00Z"), stopSnapshot: { code: stop.code, name: stop.name, address: stop.address, latitude: stop.latitude, longitude: stop.longitude, kind: stop.kind, accessNote: stop.accessNote } } });
+        const schedule = await prisma.recurringSchedule.create({ data: { schoolId, scheduleKey: randomUUID(), versionNo: 1, routeId: route.id, effectiveFrom: new Date("2026-09-01Z"), direction: "PICKUP", plannedStartTime: new Date("1970-01-01T06:30Z"), defaultVehicleId: vehicle.id, defaultDriverId: driver.id, status: "ACTIVE", createdById: adminId } });
+        await prisma.scheduleWeekday.create({ data: { schoolId, scheduleId: schedule.id, isoWeekday: 2 } });
+        const trip = await prisma.trip.create({ data: { schoolId, scheduleId: schedule.id, scheduleKey: schedule.scheduleKey, serviceDate: new Date("2026-09-01Z"), direction: "PICKUP", plannedStartAt: new Date("2026-08-31T23:30Z"), initialVehicleId: vehicle.id, initialDriverId: driver.id, operatingPolicyId: policy.id, status: "PLANNED", dataVersion: 1 } });
+        await prisma.tripStop.create({ data: { schoolId, tripId: trip.id, logicalStopKey: randomUUID(), versionNo: 1, plannedStopId: plannedStop.id, stopId: stop.id, sequenceNo: 1, plannedAt: new Date("2026-09-01T00:00Z"), stopSnapshot: plannedStop.stopSnapshot!, effectiveFrom: new Date(), changedById: adminId } });
+        const student = await prisma.student.create({ data: { schoolId, studentCode: "HS001", fullName: "Hoc sinh", classLabel: "5A", status: "ACTIVE" } });
+        return { vehicle, driver, stop, policy, plan, route, schedule, trip, student };
     };
-    const routeA = await mkRoute(schoolA.id, "Tuyen A", stopA.id, stopA2.id);
-    const routeB = await mkRoute(schoolB.id, "Tuyen B", stopB.id, stopB2.id);
-
-    const mkTrip = (schoolId: string, routeId: string, busId: string, driverId: string) =>
-        prisma.busTrip.create({
-            data: {
-                schoolId, routeId, busId, driverId,
-                tripType: TripType.PICKUP,
-                status: BusTripStatus.SCHEDULED,
-                scheduledStartTime: new Date("2026-09-01T00:00:00.000Z"),
-                scheduledEndTime: new Date("2026-09-01T01:00:00.000Z"),
-            },
-        });
-    const tripA = await mkTrip(schoolA.id, routeA.id, busA.id, driverProfileA.id);
-    const tripB = await mkTrip(schoolB.id, routeB.id, busB.id, driverProfileB.id);
-
-    const mkStudent = (schoolId: string, fullName: string, studentId: string) =>
-        prisma.studentProfile.create({
-            data: {
-                schoolId, fullName, studentId,
-                studentClass: "5A",
-                dateOfBirth: new Date("2016-05-01T00:00:00.000Z"),
-            },
-        });
-    const studentA = await mkStudent(schoolA.id, "Hoc sinh A", "HS-A-001");
-    const studentB = await mkStudent(schoolB.id, "Hoc sinh B", "HS-B-001");
-
-    return {
-        schoolA: { id: schoolA.id, slug: schoolA.slug },
-        schoolB: { id: schoolB.id, slug: schoolB.slug },
-        superAdmin: { id: superAdmin.id, email: superAdmin.email },
-        adminA: { id: adminA.id, email: adminA.email },
-        adminB: { id: adminB.id, email: adminB.email },
-        parentA: { id: parentA.id, email: parentA.email },
-        driverA: { id: driverAUser.id, email: driverAUser.email },
-        busA: { id: busA.id }, busB: { id: busB.id },
-        stopA: { id: stopA.id }, stopB: { id: stopB.id },
-        routeA: { id: routeA.id }, routeB: { id: routeB.id },
-        tripA: { id: tripA.id }, tripB: { id: tripB.id },
-        studentA: { id: studentA.id }, studentB: { id: studentB.id },
+    const a = await mkResources(schoolA.id, adminA.id, driverA.id);
+    const b = await mkResources(schoolB.id, adminB.id, driverB.id);
+    return { schoolA, schoolB, superAdmin, adminA, adminB, parentA, driverA,
+        busA: a.vehicle, busB: b.vehicle, stopA: a.stop, stopB: b.stop,
+        routeA: a.route, routeB: b.route, tripA: a.trip, tripB: b.trip, studentA: a.student, studentB: b.student,
+        resourcesA: a, resourcesB: b,
     };
 }
+export type Fixture = Awaited<ReturnType<typeof resetAndSeed>>;

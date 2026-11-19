@@ -1,7 +1,9 @@
 import {NextFunction, Request, Response} from "express";
 import {AppError, FieldError} from "../errors/app-error";
-import {InternalError, NotFoundError} from "../errors/http-errors";
+import {InternalError, NotFoundError, ValidationError} from "../errors/http-errors";
+import { ZodError } from "zod";
 import {logger} from "../utils/logger";
+import { mapPrismaError } from "../errors/prisma-error.mapper";
 
 interface ProblemDetails {
     type: string;
@@ -39,8 +41,13 @@ function toProblemDetails(req: Request, error: AppError): ProblemDetails {
 
 // return AppError else generic InternalError to avoid leaking internal details
 function normalizeError(error: unknown): AppError {
-    if (error instanceof AppError) {
-        return error;
+    if (error instanceof ZodError) {
+        const errors = error.issues.map(issue => ({ field: issue.path.join("."), message: issue.message, code: issue.code }));
+        return new ValidationError("Invalid input data", errors);
+    }
+    const mapped = mapPrismaError(error);
+    if (mapped instanceof AppError) {
+        return mapped;
     }
 
     return new InternalError();
