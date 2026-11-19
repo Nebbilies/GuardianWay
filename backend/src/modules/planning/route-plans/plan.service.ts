@@ -121,6 +121,7 @@ export const planService = {
                 if (vehicle.studentCapacity !== route.capacitySnapshot) throw new ConflictError("Vehicle capacity changed; save the draft again before approval");
                 for (const point of route.stops) {
                     const stop = await requireStop(schoolId, point.stopId, database, true);
+                    if (before.direction === "PICKUP" ? !stop.allowsPickup : !stop.allowsDropoff) throw new ConflictError("Stop no longer supports the route direction");
                     const snapshot = point.stopSnapshot as { code?: string; name?: string; address?: string; latitude?: number; longitude?: number; kind?: string; accessNote?: string | null };
                     if (["code", "name", "address", "latitude", "longitude", "kind", "accessNote"].some(key => stop[key as keyof typeof stop] !== snapshot[key as keyof typeof snapshot])) throw new ConflictError("Stop changed; save the draft again before approval");
                 }

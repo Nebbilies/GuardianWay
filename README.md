@@ -117,11 +117,12 @@ To stop the local data services:
 docker compose -f docker-compose.database.yml stop
 ```
 
-The full Compose stack uses its own database and volume. In `backend/.env` set `DATABASE_URL` and `DIRECT_URL` to the Compose PostgreSQL service, for example `postgresql://gw:gw_pw@postgres:5432/guardianway`, set `REDIS_ENABLED=true`, `REDIS_URL=redis://redis:6379` and `WEB_BASE_URL=http://localhost:8080`. Initialize a fresh Compose database before starting the application. The legacy database is not a migration target.
+The full Compose stack uses its own database and volume. In `backend/.env` set `DATABASE_URL` and `DIRECT_URL` to the Compose PostgreSQL service, for example `postgresql://gw:gw_pw@postgres:5432/guardianway`, set `REDIS_ENABLED=true`, `REDIS_URL=redis://redis:6379` and `WEB_BASE_URL=http://localhost:8080`. Set your own `BOOTSTRAP_PLATFORM_EMAIL` and `BOOTSTRAP_PLATFORM_PASSWORD` in `backend/.env` before provisioning the first administrator. Use a password of at least 12 characters and at most 72 UTF-8 bytes. Initialize a fresh Compose database before starting the application. The legacy database is not a migration target.
 
 ```bash
 docker compose up -d postgres redis
 docker compose run --rm --build backend npm run database:migrate
+docker compose run --rm backend node prisma/bootstrap-compose.cjs
 docker compose up --build
 ```
 

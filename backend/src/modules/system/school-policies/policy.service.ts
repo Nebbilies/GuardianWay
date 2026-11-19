@@ -21,7 +21,7 @@ export const policyService = {
             if (previous && effectiveFrom <= previous.effectiveFrom) throw new ConflictError("A new policy version must start after its previous version");
             if (previous && (!previous.effectiveTo || previous.effectiveTo > effectiveFrom)) {
                 await policyRepository.lock(database, schoolId, previous.id, true);
-                if (await policyRepository.affectedTrips(database, schoolId, previous.id, effectiveFrom)) throw new ConflictError("Policy change would invalidate a prepared trip");
+                if (await policyRepository.affectedTrips(database, schoolId, previous.id, effectiveFrom)) throw new ConflictError("Policy change would invalidate an existing trip");
                 await policyRepository.close(database, schoolId, previous.id, effectiveFrom);
             }
             const row = await policyRepository.create(database, { ...data, schoolId, versionNo: (previous?.versionNo ?? 0) + 1, previousVersionId: previous?.id, effectiveFrom,
