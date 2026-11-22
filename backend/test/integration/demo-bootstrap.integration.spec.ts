@@ -1,5 +1,6 @@
 import { beforeAll, beforeEach, expect, it } from "vitest";
 import request from "supertest";
+import { school as demo } from "../../prisma/seed-demo-data.json";
 import type { Express } from "express";
 import prisma from "../../src/config/prisma";
 import redisClient from "../../src/config/redis";
@@ -69,6 +70,15 @@ it("seeds registration, access and trip scenarios and preserves edits on repeat"
             include: { TripPassengerByTripId: { orderBy: { id: "asc" } } },
         });
     const before = await trips();
+    for (const trip of before) {
+        expect(trip.createdAt.getTime()).toBeLessThanOrEqual(
+            (
+                trip.cancelledAt ??
+                trip.startedAt ??
+                trip.plannedStartAt
+            ).getTime(),
+        );
+    }
     expect(before.map((t) => t.status).sort()).toEqual([
         "CANCELLED",
         "COMPLETED",
@@ -136,6 +146,36 @@ it("bootstraps usable demo logins and preserves existing passwords on repeat", a
             })
         ).status,
     ).toBe(401);
+});
+
+it("rejects conflicting school settings before loading transport records", async () => {
+    const school = await prisma.school.create({
+        data: {
+            ...demo,
+            status: "ACTIVE",
+            code: environment.DEMO_SCHOOL_CODE,
+            timezone: "America/New_York",
+        },
+    });
+    await expect(seedDemo(prisma, environment)).rejects.toThrow(
+        "Demo trip times",
+    );
+    await prisma.school.update({
+        where: { id: school.id },
+        data: { timezone: demo.timezone },
+    });
+    await prisma.schoolPolicyVersion.create({
+        data: {
+            schoolId: school.id,
+            versionNo: 1,
+            effectiveFrom: new Date(),
+            status: "DRAFT",
+        },
+    });
+    await expect(seedDemo(prisma, environment)).rejects.toThrow(
+        "different version 1 policy",
+    );
+    expect(await prisma.trip.count({ where: { schoolId: school.id } })).toBe(0);
 });
 
 it("refuses a second platform identity during Compose provisioning", async () => {

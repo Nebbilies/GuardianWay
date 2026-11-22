@@ -2,7 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { records } = require("../backend/prisma/seed-demo-data.json");
-const { recordId } = require("../backend/prisma/seed-demo.cjs");
+const { recordId } = require("../backend/prisma/demo-record-id.cjs");
 const school = "76a75c7a-a9cc-4e50-a556-b1847746d6c2";
 const key = (ref) => ref.slice(1);
 const id = (ref) => recordId(school, key(ref));

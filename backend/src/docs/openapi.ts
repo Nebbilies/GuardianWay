@@ -97,10 +97,10 @@ type Options = {
     refreshCookie?: boolean;
     fixtureExamples?: Record<string, { value: unknown }>;
 };
-function jsonSchema(schema: z.ZodType) {
+function jsonSchema(schema: z.ZodType, io: "input" | "output" = "input") {
     // Input view preserves wire formats for normalized codes, plates and query strings.
     const { $schema: dialect, ...json } = z.toJSONSchema(schema, {
-        io: "input",
+        io,
         unrepresentable: "any",
     });
     void dialect;
@@ -162,7 +162,7 @@ export function buildOpenApi() {
                 description: summary,
                 content: {
                     [options.media ?? "application/json"]: {
-                        schema: jsonSchema(response),
+                        schema: jsonSchema(response, "output"),
                         ...(options.fixtureExamples && {
                             examples: options.fixtureExamples,
                         }),
@@ -517,7 +517,7 @@ export function buildOpenApi() {
         servers: [{ url: "/" }],
         paths,
         components: {
-            schemas: { Problem: jsonSchema(problemSchema) },
+            schemas: { Problem: jsonSchema(problemSchema, "output") },
             securitySchemes: {
                 bearerAuth: {
                     type: "http",

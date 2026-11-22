@@ -4,7 +4,8 @@ const { z } = require("zod");
 const { PrismaClient } = require("@prisma/client");
 const { PrismaPg } = require("@prisma/adapter-pg");
 const { targetUrl } = require("./target-guard.cjs");
-const { createHash } = require("node:crypto");
+const { recordId } = require("./demo-record-id.cjs");
+class DemoSchoolConflict extends Error {}
 const { school: demoSchool, records } = require("./seed-demo-data.json");
 const credential = z.object({
     email: z.string().trim().toLowerCase().pipe(z.email()),
@@ -16,26 +17,6 @@ const credential = z.object({
             "Password exceeds bcrypt byte limit",
         ),
 });
-// UUIDv5 uses the school's UUID as namespace, so the same dataset can be
-// provisioned independently for each configured demo school.
-function recordId(schoolId, key) {
-    const bytes = createHash("sha1")
-        .update(Buffer.from(schoolId.replaceAll("-", ""), "hex"))
-        .update(key)
-        .digest()
-        .subarray(0, 16);
-    bytes[6] = (bytes[6] & 0x0f) | 0x50;
-    bytes[8] = (bytes[8] & 0x3f) | 0x80;
-    const hex = bytes.toString("hex");
-    return [
-        hex.slice(0, 8),
-        hex.slice(8, 12),
-        hex.slice(12, 16),
-        hex.slice(16, 20),
-        hex.slice(20),
-    ].join("-");
-}
-
 async function seedSchoolData(database, schoolId, adminId, userPassword) {
     const ids = new Map([["$admin", adminId]]);
     for (const rows of Object.values(records)) {
@@ -179,12 +160,14 @@ async function seedDemo(
                 const code = (environment.DEMO_SCHOOL_CODE || "DEMO")
                     .trim()
                     .toUpperCase();
-                const school = await database.school.upsert({
+                const { id } = await database.school.upsert({
                     where: { code },
                     update: {},
                     create: { code, ...demoSchool, status: "ACTIVE" },
                 });
-                if (school.deletedAt || school.status !== "ACTIVE") {
+                const [school] =
+                    await database.$queryRaw`SELECT id, name, address, timezone, status, deleted_at AS "deletedAt" FROM school WHERE id = ${id}::uuid FOR SHARE`;
+                if (!school || school.deletedAt || school.status !== "ACTIVE") {
                     throw new Error("Demo school is not active");
                 }
                 if (
@@ -193,6 +176,24 @@ async function seedDemo(
                 ) {
                     throw new Error(
                         "Demo school code belongs to a different school",
+                    );
+                }
+                if (school.timezone !== demoSchool.timezone) {
+                    throw new DemoSchoolConflict(
+                        "Demo trip times require a school in " +
+                            demoSchool.timezone,
+                    );
+                }
+                const policy = await database.schoolPolicyVersion.findFirst({
+                    where: {
+                        schoolId: id,
+                        versionNo: records.schoolPolicyVersion.policy.versionNo,
+                    },
+                    select: { id: true },
+                });
+                if (policy && policy.id !== recordId(id, "policy")) {
+                    throw new DemoSchoolConflict(
+                        "The school already has a different version 1 policy. Use a dedicated demo school and administrator.",
                     );
                 }
                 const schoolAdmin = await account(
@@ -217,7 +218,7 @@ async function seedDemo(
         { timeout: 30_000 },
     );
 }
-module.exports = { seedDemo, recordId };
+module.exports = { seedDemo };
 if (require.main === module) {
     const url = targetUrl(process.env.DATABASE_URL);
     const database = new PrismaClient({
@@ -229,9 +230,11 @@ if (require.main === module) {
                 "Demo bootstrap completed; existing accounts and history preserved",
             ),
         )
-        .catch(() => {
+        .catch((error) => {
             console.error(
-                "Demo bootstrap failed. Check required credentials and existing ownership; no credentials are logged.",
+                error instanceof DemoSchoolConflict
+                    ? error.message
+                    : "Demo bootstrap failed. Check required credentials and existing ownership; no credentials are logged.",
             );
             process.exitCode = 1;
         })
