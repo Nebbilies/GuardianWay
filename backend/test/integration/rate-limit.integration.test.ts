@@ -14,11 +14,19 @@ import type { AuditLog, Prisma } from "@prisma/client";
 // asserting on the very next tick.
 async function findAuditRowEventually(
     where: Prisma.AuditLogWhereInput,
-    { attempts = 20, delayMs = 50 }: { attempts?: number; delayMs?: number } = {},
+    {
+        attempts = 20,
+        delayMs = 50,
+    }: { attempts?: number; delayMs?: number } = {},
 ): Promise<AuditLog | null> {
     for (let i = 0; i < attempts; i += 1) {
-        const row = await prisma.auditLog.findFirst({ where, orderBy: { createdAt: "desc" } });
-        if (row) return row;
+        const row = await prisma.auditLog.findFirst({
+            where,
+            orderBy: { createdAt: "desc" },
+        });
+        if (row) {
+            return row;
+        }
         await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
     return null;
@@ -65,11 +73,18 @@ describe("login rate limiting", () => {
         // The write is fire-and-forget (the 429 must not wait on it), so it can
         // still be in flight when the request above resolves — poll instead of
         // asserting on the very next tick.
-        const row = await findAuditRowEventually({ action: "auth.rate_limited" });
+        const row = await findAuditRowEventually({
+            action: "auth.rate_limited",
+        });
 
         expect(row).not.toBeNull();
-        expect(row?.subjectReference).toBe(createHash("sha256").update(fx.adminA.email).digest("hex"));
-        expect((row?.changeSummary as { after?: { reason?: string } } | null)?.after?.reason).toBe("account");
+        expect(row?.subjectReference).toBe(
+            createHash("sha256").update(fx.adminA.email).digest("hex"),
+        );
+        expect(
+            (row?.changeSummary as { after?: { reason?: string } } | null)
+                ?.after?.reason,
+        ).toBe("account");
     });
 
     it("records at most one auth.rate_limited row per key per window under a burst", async () => {
@@ -94,7 +109,12 @@ describe("login rate limiting", () => {
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         const rows = await prisma.auditLog.findMany({
-            where: { action: "auth.rate_limited", subjectReference: createHash("sha256").update(fx.adminA.email).digest("hex") },
+            where: {
+                action: "auth.rate_limited",
+                subjectReference: createHash("sha256")
+                    .update(fx.adminA.email)
+                    .digest("hex"),
+            },
         });
 
         expect(rows).toHaveLength(1);

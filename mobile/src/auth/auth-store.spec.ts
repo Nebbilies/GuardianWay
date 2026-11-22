@@ -7,7 +7,10 @@ vi.mock('expo-secure-store', () => ({
   deleteItemAsync: vi.fn(),
 }));
 
-function makeSession(role: 'DRIVER' | 'PARENT' | 'ADMIN' = 'PARENT', suffix = 'next') {
+function makeSession(
+  role: 'DRIVER' | 'PARENT' | 'ADMIN' = 'PARENT',
+  suffix = 'next',
+) {
   return {
     user: {
       id: 'user-1',
@@ -28,9 +31,15 @@ function makeSession(role: 'DRIVER' | 'PARENT' | 'ADMIN' = 'PARENT', suffix = 'n
 
 function setup() {
   const storage = {
-    getRefreshToken: vi.fn<() => Promise<string | null>>().mockResolvedValue(null),
-    setRefreshToken: vi.fn<(token: string) => Promise<void>>().mockResolvedValue(undefined),
-    clearRefreshToken: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    getRefreshToken: vi
+      .fn<() => Promise<string | null>>()
+      .mockResolvedValue(null),
+    setRefreshToken: vi
+      .fn<(token: string) => Promise<void>>()
+      .mockResolvedValue(undefined),
+    clearRefreshToken: vi
+      .fn<() => Promise<void>>()
+      .mockResolvedValue(undefined),
   };
   const api = {
     login: vi.fn(),
@@ -85,7 +94,10 @@ describe('auth store', () => {
     await store.getState().restoreSession();
 
     expect(events).toEqual(['read', 'refresh', 'save:refresh-rotated', 'me']);
-    expect(store.getState()).toMatchObject({ status: 'signedIn', user: { role: 'PARENT' } });
+    expect(store.getState()).toMatchObject({
+      status: 'signedIn',
+      user: { role: 'PARENT' },
+    });
   });
 
   it('does not expose authenticated routes before /me confirms the restored user', async () => {
@@ -94,8 +106,12 @@ describe('auth store', () => {
     api.refresh.mockResolvedValue(makeSession('PARENT', 'rotated'));
 
     let confirmMeStarted!: () => void;
-    let resolveMe!: (value: { user: ReturnType<typeof makeSession>['user'] }) => void;
-    const meStarted = new Promise<void>((resolve) => (confirmMeStarted = resolve));
+    let resolveMe!: (value: {
+      user: ReturnType<typeof makeSession>['user'];
+    }) => void;
+    const meStarted = new Promise<void>(
+      (resolve) => (confirmMeStarted = resolve),
+    );
     api.me.mockImplementation(
       () =>
         new Promise((resolve) => {
@@ -117,11 +133,17 @@ describe('auth store', () => {
     const { api, storage, store } = setup();
     api.login.mockResolvedValue(makeSession('ADMIN', 'admin'));
 
-    await expect(store.getState().signIn('admin@example.com', 'password')).rejects.toThrow();
+    await expect(
+      store.getState().signIn('admin@example.com', 'password'),
+    ).rejects.toThrow();
 
     expect(api.logout).toHaveBeenCalledWith('refresh-admin');
     expect(storage.setRefreshToken).not.toHaveBeenCalled();
-    expect(store.getState()).toMatchObject({ status: 'signedOut', accessToken: null, user: null });
+    expect(store.getState()).toMatchObject({
+      status: 'signedOut',
+      accessToken: null,
+      user: null,
+    });
   });
 
   it('retains credentials and offers retry after a transient restore failure', async () => {
@@ -134,9 +156,15 @@ describe('auth store', () => {
 
     await store.getState().restoreSession();
 
-    expect(store.getState()).toMatchObject({ status: 'unavailable', refreshToken: 'refresh-old' });
+    expect(store.getState()).toMatchObject({
+      status: 'unavailable',
+      refreshToken: 'refresh-old',
+    });
     await store.getState().restoreSession();
-    expect(store.getState()).toMatchObject({ status: 'signedIn', refreshToken: 'refresh-retry' });
+    expect(store.getState()).toMatchObject({
+      status: 'signedIn',
+      refreshToken: 'refresh-retry',
+    });
   });
 
   it('clears session after an invalid refresh token', async () => {
@@ -147,7 +175,11 @@ describe('auth store', () => {
     await store.getState().restoreSession();
 
     expect(storage.clearRefreshToken).toHaveBeenCalledOnce();
-    expect(store.getState()).toMatchObject({ status: 'signedOut', refreshToken: null, user: null });
+    expect(store.getState()).toMatchObject({
+      status: 'signedOut',
+      refreshToken: null,
+      user: null,
+    });
   });
 
   it('always clears local credentials when logout request fails', async () => {
@@ -159,7 +191,11 @@ describe('auth store', () => {
     await store.getState().signOut();
 
     expect(storage.clearRefreshToken).toHaveBeenCalledOnce();
-    expect(store.getState()).toMatchObject({ status: 'signedOut', accessToken: null, user: null });
+    expect(store.getState()).toMatchObject({
+      status: 'signedOut',
+      accessToken: null,
+      user: null,
+    });
   });
 
   it('shares a refresh across simultaneous requests', async () => {
@@ -183,15 +219,21 @@ describe('auth store', () => {
   });
 });
 
-  it('revokes a newly created session when secure storage cannot save its refresh token', async () => {
-    const { api, storage, store } = setup();
-    api.login.mockResolvedValue(makeSession('PARENT', 'login'));
-    storage.setRefreshToken.mockRejectedValue(new Error('secure storage unavailable'));
+it('revokes a newly created session when secure storage cannot save its refresh token', async () => {
+  const { api, storage, store } = setup();
+  api.login.mockResolvedValue(makeSession('PARENT', 'login'));
+  storage.setRefreshToken.mockRejectedValue(
+    new Error('secure storage unavailable'),
+  );
 
-    await expect(store.getState().signIn('parent@example.com', 'password')).rejects.toThrow(
-      'secure storage unavailable',
-    );
+  await expect(
+    store.getState().signIn('parent@example.com', 'password'),
+  ).rejects.toThrow('secure storage unavailable');
 
-    expect(api.logout).toHaveBeenCalledWith('refresh-login');
-    expect(store.getState()).toMatchObject({ status: 'signedOut', accessToken: null, user: null });
+  expect(api.logout).toHaveBeenCalledWith('refresh-login');
+  expect(store.getState()).toMatchObject({
+    status: 'signedOut',
+    accessToken: null,
+    user: null,
   });
+});

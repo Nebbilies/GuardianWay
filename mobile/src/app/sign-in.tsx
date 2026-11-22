@@ -23,7 +23,11 @@ export default function SignInScreen() {
     try {
       await signIn(email.trim(), password);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Không thể đăng nhập. Vui lòng thử lại.');
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Không thể đăng nhập. Vui lòng thử lại.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -80,7 +84,8 @@ export default function SignInScreen() {
             accessibilityLabel="Đăng nhập vào GuardianWay"
             fullWidth
             loading={submitting}
-            onPress={() => void submit()}>
+            onPress={() => void submit()}
+          >
             Đăng nhập
           </Button>
         </Stack>

@@ -9,11 +9,17 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export function authenticatedActor(req: Request): Principal {
-    if (!req.user) throw new AuthenticationError("Authentication required");
+    if (!req.user) {
+        throw new AuthenticationError("Authentication required");
+    }
     return req.user;
 }
 
-export function authenticate(req: AuthenticatedRequest, _res: Response, next: NextFunction) {
+export function authenticate(
+    req: AuthenticatedRequest,
+    _res: Response,
+    next: NextFunction,
+) {
     try {
         const bearerToken = req.headers.authorization?.startsWith("Bearer ")
             ? req.headers.authorization.slice(7)

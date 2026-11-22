@@ -8,7 +8,12 @@ export type AppTextProps = TextProps & {
   tone?: TextTone;
 };
 
-export function AppText({ style, variant = 'body', tone = 'default', ...props }: AppTextProps) {
+export function AppText({
+  style,
+  variant = 'body',
+  tone = 'default',
+  ...props
+}: AppTextProps) {
   const { colors, typography } = useTheme();
   const toneColor = {
     default: colors.text,
@@ -21,6 +26,14 @@ export function AppText({ style, variant = 'body', tone = 'default', ...props }:
   }[tone];
 
   return (
-    <Text style={[{ flexShrink: 1 }, typography[variant], { color: toneColor }, style]} {...props} />
+    <Text
+      style={[
+        { flexShrink: 1 },
+        typography[variant],
+        { color: toneColor },
+        style,
+      ]}
+      {...props}
+    />
   );
 }

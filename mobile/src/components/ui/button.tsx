@@ -38,7 +38,8 @@ export function Button({
   onBlur,
   ...props
 }: ButtonProps) {
-  const { colors, compactControlHeight, controlHeight, radius, spacing } = useTheme();
+  const { colors, compactControlHeight, controlHeight, radius, spacing } =
+    useTheme();
   const [focused, setFocused] = useState(false);
   const inactive = disabled || loading;
   const foreground = inactive
@@ -92,9 +93,14 @@ export function Button({
         },
         style,
       ]}
-      {...props}>
+      {...props}
+    >
       <Stack direction="row" gap="sm" align="center" justify="center">
-        {loading ? <ActivityIndicator color={foreground} size="small" /> : leftIcon}
+        {loading ? (
+          <ActivityIndicator color={foreground} size="small" />
+        ) : (
+          leftIcon
+        )}
         <AppText variant="compact" style={{ color: foreground }}>
           {children}
         </AppText>

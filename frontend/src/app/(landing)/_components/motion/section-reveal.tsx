@@ -1,37 +1,41 @@
-'use client'
+"use client";
 
-import {motion, useReducedMotion} from 'framer-motion'
-import {ReactNode} from 'react'
+import { motion, useReducedMotion } from "framer-motion";
+import { ReactNode } from "react";
 
 interface SectionRevealProps {
-    children: ReactNode
-    delay?: number
-    className?: string
+    children: ReactNode;
+    delay?: number;
+    className?: string;
 }
 
-export default function SectionReveal({children, delay = 0, className}: SectionRevealProps) {
-    const reduceMotion = useReducedMotion()
+export default function SectionReveal({
+    children,
+    delay = 0,
+    className,
+}: SectionRevealProps) {
+    const reduceMotion = useReducedMotion();
 
     if (reduceMotion) {
         return (
             <motion.div
                 className={className}
-                initial={{opacity: 0}}
-                whileInView={{opacity: 1}}
-                viewport={{once: true, amount: 0.2}}
-                transition={{duration: 0.24, delay}}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.24, delay }}
             >
                 {children}
             </motion.div>
-        )
+        );
     }
 
     return (
         <motion.div
             className={className}
-            initial={{opacity: 0, y: 36}}
-            whileInView={{opacity: 1, y: 0}}
-            viewport={{once: true, amount: 0.2}}
+            initial={{ opacity: 0, y: 36 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{
                 duration: 0.56,
                 delay,
@@ -40,5 +44,5 @@ export default function SectionReveal({children, delay = 0, className}: SectionR
         >
             {children}
         </motion.div>
-    )
+    );
 }

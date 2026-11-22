@@ -1,5 +1,14 @@
-import { decodeAuthSession, decodeCurrentUser, decodeErrorMessage, decodeLogout } from './auth-contract';
-export type { MobileRole, AuthUser, AuthSessionResponse } from './auth-contract';
+import {
+  decodeAuthSession,
+  decodeCurrentUser,
+  decodeErrorMessage,
+  decodeLogout,
+} from './auth-contract';
+export type {
+  MobileRole,
+  AuthUser,
+  AuthSessionResponse,
+} from './auth-contract';
 
 export class HttpError extends Error {
   constructor(
@@ -19,7 +28,11 @@ export function getApiUrl(path: string) {
   return `${baseUrl}${path}`;
 }
 
-async function request<T>(path: string, init: RequestInit, decode: (value: unknown) => T): Promise<T> {
+async function request<T>(
+  path: string,
+  init: RequestInit,
+  decode: (value: unknown) => T,
+): Promise<T> {
   let response: Response;
   try {
     response = await fetch(getApiUrl(path), init);
@@ -36,16 +49,24 @@ async function request<T>(path: string, init: RequestInit, decode: (value: unkno
 }
 
 function post<T>(path: string, body: unknown, decode: (value: unknown) => T) {
-  return request(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }, decode);
+  return request(
+    path,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+    decode,
+  );
 }
 
 export const authApi = {
   login(email: string, password: string) {
-    return post('/api/auth/token/login', { email, password }, decodeAuthSession);
+    return post(
+      '/api/auth/token/login',
+      { email, password },
+      decodeAuthSession,
+    );
   },
 
   refresh(refreshToken: string) {
@@ -57,8 +78,12 @@ export const authApi = {
   },
 
   me(accessToken: string) {
-    return request('/api/auth/me', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }, decodeCurrentUser);
+    return request(
+      '/api/auth/me',
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+      decodeCurrentUser,
+    );
   },
 };

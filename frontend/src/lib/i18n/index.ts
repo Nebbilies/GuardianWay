@@ -6,13 +6,20 @@ export type Language = "vi" | "en";
 export const languageStorageKey = "guardianway.language";
 export const i18n = createInstance();
 void i18n.use(initReactI18next).init({
-    resources, lng: "vi", fallbackLng: "en", supportedLngs: ["vi", "en"],
-    initAsync: false, interpolation: { escapeValue: false }, react: { useSuspense: false },
+    resources,
+    lng: "vi",
+    fallbackLng: "en",
+    supportedLngs: ["vi", "en"],
+    initAsync: false,
+    interpolation: { escapeValue: false },
+    react: { useSuspense: false },
 });
 
 function errorKey(code: string): string {
     // Check our own catalogue so an untrusted code cannot select other namespaces.
-    const key = Object.hasOwn(resources.en.translation.errors, code) ? code : "UNKNOWN_ERROR";
+    const key = Object.hasOwn(resources.en.translation.errors, code)
+        ? code
+        : "UNKNOWN_ERROR";
     return "errors." + key;
 }
 
@@ -21,7 +28,12 @@ export function errorMessage(code: string): string {
 }
 
 export function getErrorKey(error: unknown): string {
-    if (typeof error === "object" && error !== null && "code" in error && typeof error.code === "string") {
+    if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        typeof error.code === "string"
+    ) {
         return errorKey(error.code);
     }
     return errorKey("UNKNOWN_ERROR");

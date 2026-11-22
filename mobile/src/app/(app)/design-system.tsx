@@ -5,7 +5,14 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/app-text';
 import { Screen } from '@/components/screen';
 import { Stack } from '@/components/stack';
-import { Alert, Button, Card, EmptyState, StatusBadge, TextField } from '@/components/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  StatusBadge,
+  TextField,
+} from '@/components/ui';
 import {
   radius as radiusTokens,
   spacing as spacingTokens,
@@ -49,8 +56,8 @@ export default function DesignSystemScreen() {
         </AppText>
         <AppText variant="pageTitle">GuardianWay UI Foundation</AppText>
         <AppText tone="muted">
-          Màn hình kiểm thử token, khả năng phóng to chữ và các trạng thái vận hành trước khi
-          thành phần được đưa vào luồng nghiệp vụ thực tế.
+          Màn hình kiểm thử token, khả năng phóng to chữ và các trạng thái vận
+          hành trước khi thành phần được đưa vào luồng nghiệp vụ thực tế.
         </AppText>
       </Stack>
 
@@ -58,7 +65,12 @@ export default function DesignSystemScreen() {
         <Stack direction="row" gap="md" wrap>
           {palette.map(([name, value]) => (
             <Card key={name} style={styles.swatchCard}>
-              <View style={[styles.swatch, { backgroundColor: value, borderColor: colors.border }]} />
+              <View
+                style={[
+                  styles.swatch,
+                  { backgroundColor: value, borderColor: colors.border },
+                ]}
+              />
               <AppText variant="compact">{name}</AppText>
               <AppText variant="mono" tone="muted">
                 {value}
@@ -149,7 +161,11 @@ export default function DesignSystemScreen() {
               error="Biển số không đúng định dạng. Ví dụ hợp lệ: 51B-123.45."
               value="51B"
             />
-            <TextField label="Mã hệ thống" editable={false} value="GW-BUS-008" />
+            <TextField
+              label="Mã hệ thống"
+              editable={false}
+              value="GW-BUS-008"
+            />
           </Stack>
         </Card>
       </Section>
@@ -166,8 +182,8 @@ export default function DesignSystemScreen() {
           </Card>
           <Card muted>
             <AppText tone="muted">
-              Surface phụ dành cho thông tin ít quan trọng hơn, không dùng shadow hoặc card lồng
-              nhau.
+              Surface phụ dành cho thông tin ít quan trọng hơn, không dùng
+              shadow hoặc card lồng nhau.
             </AppText>
           </Card>
         </Stack>
@@ -192,13 +208,16 @@ export default function DesignSystemScreen() {
             Tất cả học sinh tại điểm Nguyễn Du đã được ghi nhận lên xe.
           </Alert>
           <Alert severity="warning" title="Vị trí có thể đã cũ">
-            Tín hiệu GPS gần nhất được nhận 8 phút trước. Hãy xác nhận với tài xế.
+            Tín hiệu GPS gần nhất được nhận 8 phút trước. Hãy xác nhận với tài
+            xế.
           </Alert>
           <Alert severity="danger" title="Không thể xác nhận học sinh xuống xe">
-            Kết nối bị gián đoạn. Dữ liệu đã nhập vẫn được giữ an toàn trên thiết bị.
+            Kết nối bị gián đoạn. Dữ liệu đã nhập vẫn được giữ an toàn trên
+            thiết bị.
           </Alert>
           <Alert severity="info" title="Đang đồng bộ dữ liệu">
-            Các thay đổi sẽ xuất hiện trên cổng quản trị sau khi đồng bộ hoàn tất.
+            Các thay đổi sẽ xuất hiện trên cổng quản trị sau khi đồng bộ hoàn
+            tất.
           </Alert>
         </Stack>
       </Section>

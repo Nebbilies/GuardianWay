@@ -22,7 +22,11 @@ const ROUTES: RouteCase[] = [
     { method: "get", path: "/api/bus-stops", allowed: ["admin"] },
     { method: "get", path: "/api/bus-trips", allowed: ["admin"] },
     { method: "get", path: "/api/students", allowed: ["admin"] },
-    { method: "get", path: "/api/audit-logs", allowed: ["admin", "superAdmin"] },
+    {
+        method: "get",
+        path: "/api/audit-logs",
+        allowed: ["admin", "superAdmin"],
+    },
     { method: "get", path: "/api/schools", allowed: ["superAdmin"] },
 ];
 
@@ -30,7 +34,10 @@ describe("RBAC matrix", () => {
     let app: Express;
     let fx: Fixture;
     const cookies: Record<Exclude<Actor, "anonymous">, string[]> = {
-        parent: [], driver: [], admin: [], superAdmin: [],
+        parent: [],
+        driver: [],
+        admin: [],
+        superAdmin: [],
     };
 
     beforeAll(async () => {
@@ -58,11 +65,17 @@ describe("RBAC matrix", () => {
             expect(res.status).toBe(401);
         });
 
-        for (const actor of ["parent", "driver", "admin", "superAdmin"] as const) {
+        for (const actor of [
+            "parent",
+            "driver",
+            "admin",
+            "superAdmin",
+        ] as const) {
             const shouldAllow = route.allowed.includes(actor);
 
             it(`${label} ${shouldAllow ? "allows" : "forbids"} ${actor}`, async () => {
-                const res = await request(app)[route.method](route.path).set("Cookie", cookies[actor]);
+                const req = request(app)[route.method](route.path);
+                const res = await req.set("Cookie", cookies[actor]);
 
                 if (shouldAllow) {
                     expect(res.status).toBeLessThan(400);
@@ -91,7 +104,10 @@ describe("RBAC matrix: POST /api/auth/invites (route-level guard)", () => {
     let app: Express;
     let fx: Fixture;
     const cookies: Record<Exclude<Actor, "anonymous">, string[]> = {
-        parent: [], driver: [], admin: [], superAdmin: [],
+        parent: [],
+        driver: [],
+        admin: [],
+        superAdmin: [],
     };
     const body = { email: "nobody-xyz@gw.test" };
 
@@ -118,22 +134,34 @@ describe("RBAC matrix: POST /api/auth/invites (route-level guard)", () => {
     });
 
     it("forbids parent with 403", async () => {
-        const res = await request(app).post("/api/auth/invites").set("Cookie", cookies.parent).send(body);
+        const res = await request(app)
+            .post("/api/auth/invites")
+            .set("Cookie", cookies.parent)
+            .send(body);
         expect(res.status).toBe(403);
     });
 
     it("forbids driver with 403", async () => {
-        const res = await request(app).post("/api/auth/invites").set("Cookie", cookies.driver).send(body);
+        const res = await request(app)
+            .post("/api/auth/invites")
+            .set("Cookie", cookies.driver)
+            .send(body);
         expect(res.status).toBe(403);
     });
 
     it("admin passes the guard, gets 404 for the unknown email", async () => {
-        const res = await request(app).post("/api/auth/invites").set("Cookie", cookies.admin).send(body);
+        const res = await request(app)
+            .post("/api/auth/invites")
+            .set("Cookie", cookies.admin)
+            .send(body);
         expect(res.status).toBe(404);
     });
 
     it("superAdmin passes the guard, gets 404 for the unknown email", async () => {
-        const res = await request(app).post("/api/auth/invites").set("Cookie", cookies.superAdmin).send(body);
+        const res = await request(app)
+            .post("/api/auth/invites")
+            .set("Cookie", cookies.superAdmin)
+            .send(body);
         expect(res.status).toBe(404);
     });
 });

@@ -14,7 +14,9 @@ export async function loginAs(
     email: string,
     password: string = TEST_PASSWORD,
 ): Promise<string[]> {
-    const res = await request(app).post("/api/auth/login").send({ email, password });
+    const res = await request(app)
+        .post("/api/auth/login")
+        .send({ email, password });
     if (res.status !== 200) {
         throw new Error(`login failed for ${email}: ${res.status} ${res.text}`);
     }

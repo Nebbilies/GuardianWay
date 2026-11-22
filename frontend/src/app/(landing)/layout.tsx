@@ -1,10 +1,12 @@
 import Header from "@/components/header";
 
-export default function LandingLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function LandingLayout({
+    children,
+}: Readonly<{ children: React.ReactNode }>) {
     return (
         <div>
-            <Header/>
+            <Header />
             {children}
         </div>
-    )
+    );
 }

@@ -44,7 +44,8 @@ export function Alert({ severity, title, children, action }: AlertProps) {
         borderRadius: radius.md,
         borderWidth: 1,
         padding: spacing.lg,
-      }}>
+      }}
+    >
       <Stack gap="sm">
         <AppText variant="compact" tone={tone}>
           {title}

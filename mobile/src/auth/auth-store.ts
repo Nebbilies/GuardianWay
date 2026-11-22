@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
-import { authApi, HttpError, type AuthSessionResponse, type AuthUser } from './auth-api';
+import {
+  authApi,
+  HttpError,
+  type AuthSessionResponse,
+  type AuthUser,
+} from './auth-api';
 import { tokenStorage } from './token-storage';
 
 type SessionStatus = 'restoring' | 'signedOut' | 'signedIn' | 'unavailable';
@@ -43,7 +48,10 @@ function isSupportedRole(user: AuthUser) {
 function isUnauthorized(error: unknown) {
   return error instanceof HttpError
     ? error.status === 401
-    : typeof error === 'object' && error !== null && 'status' in error && error.status === 401;
+    : typeof error === 'object' &&
+        error !== null &&
+        'status' in error &&
+        error.status === 401;
 }
 
 export function createAuthStore({ api, storage }: AuthStoreDependencies) {
@@ -60,7 +68,9 @@ export function createAuthStore({ api, storage }: AuthStoreDependencies) {
       }
     };
 
-    const rejectUnsupportedRole = async (session: AuthSessionResponse): Promise<never> => {
+    const rejectUnsupportedRole = async (
+      session: AuthSessionResponse,
+    ): Promise<never> => {
       try {
         await api.logout(session.session.refreshToken);
       } catch {
@@ -98,7 +108,11 @@ export function createAuthStore({ api, storage }: AuthStoreDependencies) {
 
     const refresh = async (rejectedAccessToken?: string) => {
       const current = get();
-      if (rejectedAccessToken && current.accessToken && current.accessToken !== rejectedAccessToken) {
+      if (
+        rejectedAccessToken &&
+        current.accessToken &&
+        current.accessToken !== rejectedAccessToken
+      ) {
         return current.accessToken;
       }
       if (!current.refreshToken) {
@@ -144,7 +158,8 @@ export function createAuthStore({ api, storage }: AuthStoreDependencies) {
 
           set({
             status: 'unavailable',
-            restoreError: 'Không thể khôi phục phiên. Kiểm tra kết nối rồi thử lại.',
+            restoreError:
+              'Không thể khôi phục phiên. Kiểm tra kết nối rồi thử lại.',
           });
         }
       },
@@ -174,7 +189,10 @@ export function createAuthStore({ api, storage }: AuthStoreDependencies) {
         try {
           return await refreshRequest;
         } catch (error) {
-          if (isUnauthorized(error) && (get().status !== 'signedOut' || get().refreshToken !== null)) {
+          if (
+            isUnauthorized(error) &&
+            (get().status !== 'signedOut' || get().refreshToken !== null)
+          ) {
             await clearStoredSession();
           }
           throw error;
@@ -184,5 +202,8 @@ export function createAuthStore({ api, storage }: AuthStoreDependencies) {
   });
 }
 
-export const useAuthStore = createAuthStore({ api: authApi, storage: tokenStorage });
+export const useAuthStore = createAuthStore({
+  api: authApi,
+  storage: tokenStorage,
+});
 export type AuthStore = typeof useAuthStore;

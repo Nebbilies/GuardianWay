@@ -17,7 +17,9 @@ const LIST_ENDPOINTS = [
 function rowsOf(body: unknown): Array<Record<string, unknown>> {
     // List endpoints return { data: [...] } with pagination metadata alongside.
     const data = (body as { data?: unknown }).data;
-    if (!Array.isArray(data)) throw new Error(`expected { data: [] }, got ${JSON.stringify(body)}`);
+    if (!Array.isArray(data)) {
+        throw new Error(`expected { data: [] }, got ${JSON.stringify(body)}`);
+    }
     return data as Array<Record<string, unknown>>;
 }
 
@@ -46,7 +48,9 @@ describe("tenant isolation", () => {
     describe("list endpoints return only the caller's school", () => {
         for (const endpoint of LIST_ENDPOINTS) {
             it(`${endpoint} scopes to school A for admin A`, async () => {
-                const res = await request(app).get(endpoint).set("Cookie", cookiesA);
+                const res = await request(app)
+                    .get(endpoint)
+                    .set("Cookie", cookiesA);
                 expect(res.status).toBe(200);
                 const rows = rowsOf(res.body);
                 expect(rows.length).toBeGreaterThan(0);
@@ -56,7 +60,9 @@ describe("tenant isolation", () => {
             });
 
             it(`${endpoint} scopes to school B for admin B`, async () => {
-                const res = await request(app).get(endpoint).set("Cookie", cookiesB);
+                const res = await request(app)
+                    .get(endpoint)
+                    .set("Cookie", cookiesB);
                 expect(res.status).toBe(200);
                 const rows = rowsOf(res.body);
                 expect(rows.length).toBeGreaterThan(0);
@@ -68,7 +74,9 @@ describe("tenant isolation", () => {
     });
 
     it("audit logs are scoped to the caller's school", async () => {
-        const res = await request(app).get("/api/audit-logs").set("Cookie", cookiesA);
+        const res = await request(app)
+            .get("/api/audit-logs")
+            .set("Cookie", cookiesA);
         expect(res.status).toBe(200);
         const rows = rowsOf(res.body);
         expect(rows.length).toBeGreaterThan(0);
@@ -84,7 +92,9 @@ describe("tenant isolation", () => {
 
         expect(res.status).toBe(404);
 
-        const survivor = await prisma.vehicle.findFirst({ where: { id: fx.busB.id } });
+        const survivor = await prisma.vehicle.findFirst({
+            where: { id: fx.busB.id },
+        });
         expect(survivor).not.toBeNull();
         expect(survivor?.deletedAt).toBeNull();
     });
@@ -127,8 +137,16 @@ describe("tenant isolation", () => {
     });
 
     it("a forged schoolId in a vehicle create body is rejected", async () => {
-        const res = await request(app).post("/api/buses").set("Cookie", cookiesA)
-            .send({ code: "BUS2", plateNumber: "51A99999", studentCapacity: 16, status: "AVAILABLE", schoolId: fx.schoolB.id });
+        const res = await request(app)
+            .post("/api/buses")
+            .set("Cookie", cookiesA)
+            .send({
+                code: "BUS2",
+                plateNumber: "51A99999",
+                studentCapacity: 16,
+                status: "AVAILABLE",
+                schoolId: fx.schoolB.id,
+            });
         expect(res.status).toBe(400);
     });
 
@@ -148,14 +166,32 @@ describe("tenant isolation", () => {
     });
 
     it("platform audit excludes school operational actions", async () => {
-        const platformChange = await request(app).patch("/api/schools/" + fx.schoolA.id).set("Cookie", cookiesSuper).send({ name: "Updated school" });
+        const platformChange = await request(app)
+            .patch("/api/schools/" + fx.schoolA.id)
+            .set("Cookie", cookiesSuper)
+            .send({ name: "Updated school" });
         expect(platformChange.status).toBe(200);
-        const schoolChange = await request(app).patch("/api/buses/" + fx.busA.id).set("Cookie", cookiesA).send({ description: "Changed" });
+        const schoolChange = await request(app)
+            .patch("/api/buses/" + fx.busA.id)
+            .set("Cookie", cookiesA)
+            .send({ description: "Changed" });
         expect(schoolChange.status).toBe(200);
-        const res = await request(app).get("/api/audit-logs").set("Cookie", cookiesSuper);
-        expect(rowsOf(res.body).some(row => row.action === "school.update")).toBe(true);
+        const res = await request(app)
+            .get("/api/audit-logs")
+            .set("Cookie", cookiesSuper);
+        expect(
+            rowsOf(res.body).some((row) => row.action === "school.update"),
+        ).toBe(true);
         expect(res.status).toBe(200);
-        expect(rowsOf(res.body).every(row => (row.changeSummary as { scope: string }).scope === "PLATFORM")).toBe(true);
-        expect(rowsOf(res.body).some(row => row.action === "vehicle.update")).toBe(false);
+        expect(
+            rowsOf(res.body).every(
+                (row) =>
+                    (row.changeSummary as { scope: string }).scope ===
+                    "PLATFORM",
+            ),
+        ).toBe(true);
+        expect(
+            rowsOf(res.body).some((row) => row.action === "vehicle.update"),
+        ).toBe(false);
     });
 });

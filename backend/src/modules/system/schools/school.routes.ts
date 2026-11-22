@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { listSchools, createSchool, changeSchool, schoolContext } from "./school.controller";
+import {
+    listSchools,
+    createSchool,
+    changeSchool,
+    schoolContext,
+} from "./school.controller";
 export const schoolRouter = Router();
 export const schoolContextRouter = Router();
 schoolContextRouter.get("/", schoolContext);

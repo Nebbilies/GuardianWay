@@ -1,8 +1,97 @@
 import { z } from "zod";
-import { instant, localDate, localTime, pageSchema, parseInput, callApi, listPath, type ListParams, type ApiCall } from "@/lib/http/contracts";
-export const scheduleInput = z.object({ routeId: z.uuid(), effectiveFrom: localDate, effectiveTo: localDate.nullable().optional(), weekdays: z.array(z.number().int().min(1).max(7)).min(1), plannedStartTime: localTime, defaultVehicleId: z.uuid().nullable().optional(), defaultDriverId: z.uuid().nullable().optional() }).strict();
-export const scheduleSchema = z.object({ id: z.uuid(), schoolId: z.uuid(), scheduleKey: z.uuid(), versionNo: z.number().int().positive(), previousScheduleId: z.uuid().nullable(), routeId: z.uuid(), planVersionId: z.uuid(), routeLabel: z.string(), direction: z.enum(["PICKUP", "DROPOFF"]), effectiveFrom: localDate, effectiveTo: localDate.nullable(), weekdays: z.array(z.number().int().min(1).max(7)), plannedStartTime: localTime, defaultVehicleId: z.uuid().nullable(), defaultDriverId: z.uuid().nullable(), status: z.enum(["DRAFT", "ACTIVE", "INACTIVE"]), createdAt: instant, updatedAt: instant });
+import {
+    instant,
+    localDate,
+    localTime,
+    pageSchema,
+    parseInput,
+    callApi,
+    listPath,
+    type ListParams,
+    type ApiCall,
+} from "@/lib/http/contracts";
+export const scheduleInput = z
+    .object({
+        routeId: z.uuid(),
+        effectiveFrom: localDate,
+        effectiveTo: localDate.nullable().optional(),
+        weekdays: z.array(z.number().int().min(1).max(7)).min(1),
+        plannedStartTime: localTime,
+        defaultVehicleId: z.uuid().nullable().optional(),
+        defaultDriverId: z.uuid().nullable().optional(),
+    })
+    .strict();
+export const scheduleSchema = z.object({
+    id: z.uuid(),
+    schoolId: z.uuid(),
+    scheduleKey: z.uuid(),
+    versionNo: z.number().int().positive(),
+    previousScheduleId: z.uuid().nullable(),
+    routeId: z.uuid(),
+    planVersionId: z.uuid(),
+    routeLabel: z.string(),
+    direction: z.enum(["PICKUP", "DROPOFF"]),
+    effectiveFrom: localDate,
+    effectiveTo: localDate.nullable(),
+    weekdays: z.array(z.number().int().min(1).max(7)),
+    plannedStartTime: localTime,
+    defaultVehicleId: z.uuid().nullable(),
+    defaultDriverId: z.uuid().nullable(),
+    status: z.enum(["DRAFT", "ACTIVE", "INACTIVE"]),
+    createdAt: instant,
+    updatedAt: instant,
+});
 export type Schedule = z.infer<typeof scheduleSchema>;
-export function createScheduleRequest(input: unknown, previousId?: string): ApiCall { return { path: previousId ? "/recurring-schedules/" + previousId + "/versions" : "/recurring-schedules", method: "POST", body: parseInput(scheduleInput, input) }; }
-export function updateScheduleRequest(id: string, input: unknown): ApiCall { return { path: "/recurring-schedules/" + id, method: "PUT", body: parseInput(scheduleInput, input) }; }
-export const scheduleApi = { list: (query: ListParams) => callApi({ path: listPath("/recurring-schedules", query), method: "GET" }, pageSchema(scheduleSchema)), get: (id: string) => callApi({ path: "/recurring-schedules/" + id, method: "GET" }, scheduleSchema), create: (input: unknown, previousId?: string) => callApi(createScheduleRequest(input, previousId), scheduleSchema), update: (id: string, input: unknown) => callApi(updateScheduleRequest(id, input), scheduleSchema), activate: (id: string) => callApi({ path: "/recurring-schedules/" + id + "/activate", method: "POST", body: {} }, scheduleSchema), deactivate: (id: string) => callApi({ path: "/recurring-schedules/" + id + "/deactivate", method: "POST", body: {} }, scheduleSchema) };
+export function createScheduleRequest(
+    input: unknown,
+    previousId?: string,
+): ApiCall {
+    return {
+        path: previousId
+            ? "/recurring-schedules/" + previousId + "/versions"
+            : "/recurring-schedules",
+        method: "POST",
+        body: parseInput(scheduleInput, input),
+    };
+}
+export function updateScheduleRequest(id: string, input: unknown): ApiCall {
+    return {
+        path: "/recurring-schedules/" + id,
+        method: "PUT",
+        body: parseInput(scheduleInput, input),
+    };
+}
+export const scheduleApi = {
+    list: (query: ListParams) =>
+        callApi(
+            { path: listPath("/recurring-schedules", query), method: "GET" },
+            pageSchema(scheduleSchema),
+        ),
+    get: (id: string) =>
+        callApi(
+            { path: "/recurring-schedules/" + id, method: "GET" },
+            scheduleSchema,
+        ),
+    create: (input: unknown, previousId?: string) =>
+        callApi(createScheduleRequest(input, previousId), scheduleSchema),
+    update: (id: string, input: unknown) =>
+        callApi(updateScheduleRequest(id, input), scheduleSchema),
+    activate: (id: string) =>
+        callApi(
+            {
+                path: "/recurring-schedules/" + id + "/activate",
+                method: "POST",
+                body: {},
+            },
+            scheduleSchema,
+        ),
+    deactivate: (id: string) =>
+        callApi(
+            {
+                path: "/recurring-schedules/" + id + "/deactivate",
+                method: "POST",
+                body: {},
+            },
+            scheduleSchema,
+        ),
+};

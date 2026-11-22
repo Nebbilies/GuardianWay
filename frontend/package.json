@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write src test \"*.{js,cjs,mjs,ts}\"",
+    "format:check": "prettier --check src test \"*.{js,cjs,mjs,ts}\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:contract-consumer": "vitest run --config vitest.contracts.config.ts"
@@ -53,6 +55,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.7",
     "jsdom": "^25.0.1",
+    "prettier": "3.10.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.0.0"

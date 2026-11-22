@@ -1,4 +1,10 @@
-import { TabList, TabSlot, Tabs, TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
+import {
+  TabList,
+  TabSlot,
+  Tabs,
+  TabTrigger,
+  type TabTriggerSlotProps,
+} from 'expo-router/ui';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -33,7 +39,8 @@ function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
         styles.tab,
         isFocused && styles.tabSelected,
         pressed && styles.tabPressed,
-      ]}>
+      ]}
+    >
       <AppText variant="compact" tone={isFocused ? 'default' : 'muted'}>
         {children}
       </AppText>

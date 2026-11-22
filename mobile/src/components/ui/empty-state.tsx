@@ -12,7 +12,12 @@ export type EmptyStateProps = {
   action?: ReactNode;
 };
 
-export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+}: EmptyStateProps) {
   const { spacing } = useTheme();
 
   return (

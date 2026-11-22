@@ -38,12 +38,17 @@ export default function HomeScreen() {
               GuardianWay
             </AppText>
             <AppText tone="muted" style={styles.centered}>
-              Nền tảng vận hành giao thông học đường an toàn, rõ ràng và có trách nhiệm.
+              Nền tảng vận hành giao thông học đường an toàn, rõ ràng và có
+              trách nhiệm.
             </AppText>
           </Stack>
           <StatusBadge
             status="success"
-            label={role === 'DRIVER' ? 'Đã đăng nhập · Tài xế' : 'Đã đăng nhập · Phụ huynh'}
+            label={
+              role === 'DRIVER'
+                ? 'Đã đăng nhập · Tài xế'
+                : 'Đã đăng nhập · Phụ huynh'
+            }
           />
           {__DEV__ ? (
             <Button fullWidth onPress={() => router.push('/design-system')}>

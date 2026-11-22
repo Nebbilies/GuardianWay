@@ -1,17 +1,22 @@
-// @ts-ignore
-import { createClient } from "redis"
-
+import { createClient } from "redis";
 
 export const redisEnabled = process.env.REDIS_ENABLED !== "false";
-if (!redisEnabled && !["development", "test"].includes(process.env.NODE_ENV || "development")) {
-    throw new Error("REDIS_ENABLED=false is only supported in development or test");
+if (
+    !redisEnabled &&
+    !["development", "test"].includes(process.env.NODE_ENV || "development")
+) {
+    throw new Error(
+        "REDIS_ENABLED=false is only supported in development or test",
+    );
 }
 
 const redisClient = createClient({
     url: process.env.REDIS_URL,
-})
+});
 
-redisClient.on("error", (err: Error) => console.error("Redis Client Error", err));
+redisClient.on("error", (err: Error) =>
+    console.error("Redis Client Error", err),
+);
 
 // connect() is intentionally not awaited here — module load must not block app
 // startup. Callers that need a live connection must check isRedisReady() first;

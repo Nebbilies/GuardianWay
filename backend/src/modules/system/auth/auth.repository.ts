@@ -9,13 +9,28 @@ export const authRepository = {
     create(database: Database, data: Prisma.RefreshTokenUncheckedCreateInput) {
         return database.refreshToken.create({ data });
     },
-    rotate(database: Database, id: string, tokenHash: string, now: Date, data: Prisma.RefreshTokenUpdateManyMutationInput) {
-        return database.refreshToken.updateMany({ where: { id, tokenHash, revokedAt: null, expiresAt: { gt: now } }, data });
+    rotate(
+        database: Database,
+        id: string,
+        tokenHash: string,
+        now: Date,
+        data: Prisma.RefreshTokenUpdateManyMutationInput,
+    ) {
+        return database.refreshToken.updateMany({
+            where: { id, tokenHash, revokedAt: null, expiresAt: { gt: now } },
+            data,
+        });
     },
     revokeSession(id: string, accountId: string) {
-        return prisma.refreshToken.updateMany({ where: { id, accountId, revokedAt: null }, data: { revokedAt: new Date() } });
+        return prisma.refreshToken.updateMany({
+            where: { id, accountId, revokedAt: null },
+            data: { revokedAt: new Date() },
+        });
     },
     revokeHash(tokenHash: string) {
-        return prisma.refreshToken.updateMany({ where: { tokenHash, revokedAt: null }, data: { revokedAt: new Date() } });
+        return prisma.refreshToken.updateMany({
+            where: { tokenHash, revokedAt: null },
+            data: { revokedAt: new Date() },
+        });
     },
 };

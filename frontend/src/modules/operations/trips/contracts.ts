@@ -1,15 +1,110 @@
 import { z } from "zod";
-import { instant, localDate, localTime, pageSchema, parseInput, callApi, listPath, type ListParams, type ApiCall } from "@/lib/http/contracts";
+import {
+    instant,
+    localDate,
+    localTime,
+    pageSchema,
+    parseInput,
+    callApi,
+    listPath,
+    type ListParams,
+    type ApiCall,
+} from "@/lib/http/contracts";
 import { stopSnapshotSchema } from "@/modules/planning/route-plans/contracts";
-export const tripStopSchema = z.object({ id: z.uuid(), logicalStopKey: z.uuid(), versionNo: z.number().int().positive(), previousStopId: z.uuid().nullable(), stopId: z.uuid(), sequenceNo: z.number().int().positive(), plannedAt: instant, stopSnapshot: stopSnapshotSchema, effectiveFrom: instant, effectiveTo: instant.nullable() });
-export const tripSchema = z.object({ id: z.uuid(), schoolId: z.uuid(), scheduleId: z.uuid(), scheduleKey: z.uuid(), serviceDate: localDate, direction: z.enum(["PICKUP", "DROPOFF"]), status: z.enum(["PLANNED", "OPEN", "COMPLETED", "CANCELLED"]), dataVersion: z.number().int().positive(), plannedStartAt: instant, initialVehicleId: z.uuid().nullable(), initialDriverId: z.uuid().nullable(), vehicleLabel: z.string().nullable(), driverLabel: z.string().nullable(), operatingPolicyId: z.uuid().nullable(), cancellationReason: z.string().nullable(), cancelledAt: instant.nullable(), passengerManifestPrepared: z.literal(false), createdAt: instant, updatedAt: instant });
-export const tripDetailSchema = tripSchema.extend({ stops: z.array(tripStopSchema), stopHistory: z.array(tripStopSchema) });
-export const tripInput = z.object({ scheduleId: z.uuid(), serviceDate: localDate, vehicleId: z.uuid().optional(), driverId: z.uuid().optional() }).strict();
-export const tripUpdate = z.object({ expectedDataVersion: z.number().int().positive(), plannedStartTime: localTime.optional(), vehicleId: z.uuid().optional(), driverId: z.uuid().optional() }).strict();
-export const tripCancel = z.object({ expectedDataVersion: z.number().int().positive(), reason: z.string().trim().min(1) }).strict();
+export const tripStopSchema = z.object({
+    id: z.uuid(),
+    logicalStopKey: z.uuid(),
+    versionNo: z.number().int().positive(),
+    previousStopId: z.uuid().nullable(),
+    stopId: z.uuid(),
+    sequenceNo: z.number().int().positive(),
+    plannedAt: instant,
+    stopSnapshot: stopSnapshotSchema,
+    effectiveFrom: instant,
+    effectiveTo: instant.nullable(),
+});
+export const tripSchema = z.object({
+    id: z.uuid(),
+    schoolId: z.uuid(),
+    scheduleId: z.uuid(),
+    scheduleKey: z.uuid(),
+    serviceDate: localDate,
+    direction: z.enum(["PICKUP", "DROPOFF"]),
+    status: z.enum(["PLANNED", "OPEN", "COMPLETED", "CANCELLED"]),
+    dataVersion: z.number().int().positive(),
+    plannedStartAt: instant,
+    initialVehicleId: z.uuid().nullable(),
+    initialDriverId: z.uuid().nullable(),
+    vehicleLabel: z.string().nullable(),
+    driverLabel: z.string().nullable(),
+    operatingPolicyId: z.uuid().nullable(),
+    cancellationReason: z.string().nullable(),
+    cancelledAt: instant.nullable(),
+    passengerManifestPrepared: z.literal(false),
+    createdAt: instant,
+    updatedAt: instant,
+});
+export const tripDetailSchema = tripSchema.extend({
+    stops: z.array(tripStopSchema),
+    stopHistory: z.array(tripStopSchema),
+});
+export const tripInput = z
+    .object({
+        scheduleId: z.uuid(),
+        serviceDate: localDate,
+        vehicleId: z.uuid().optional(),
+        driverId: z.uuid().optional(),
+    })
+    .strict();
+export const tripUpdate = z
+    .object({
+        expectedDataVersion: z.number().int().positive(),
+        plannedStartTime: localTime.optional(),
+        vehicleId: z.uuid().optional(),
+        driverId: z.uuid().optional(),
+    })
+    .strict();
+export const tripCancel = z
+    .object({
+        expectedDataVersion: z.number().int().positive(),
+        reason: z.string().trim().min(1),
+    })
+    .strict();
 export type Trip = z.infer<typeof tripSchema>;
 export type TripDetail = z.infer<typeof tripDetailSchema>;
-export function createTripRequest(input: unknown): ApiCall { return { path: "/bus-trips", method: "POST", body: parseInput(tripInput, input) }; }
-export function updateTripRequest(id: string, input: unknown): ApiCall { return { path: "/bus-trips/" + id, method: "PATCH", body: parseInput(tripUpdate, input) }; }
-export function cancelTripRequest(id: string, input: unknown): ApiCall { return { path: "/bus-trips/" + id + "/cancel", method: "POST", body: parseInput(tripCancel, input) }; }
-export const tripApi = { list: (query: ListParams & { serviceDate?: string; direction?: string }) => callApi({ path: listPath("/bus-trips", query), method: "GET" }, pageSchema(tripSchema)), get: (id: string) => callApi({ path: "/bus-trips/" + id, method: "GET" }, tripDetailSchema), create: (input: unknown) => callApi(createTripRequest(input), tripDetailSchema), update: (id: string, input: unknown) => callApi(updateTripRequest(id, input), tripDetailSchema), cancel: (id: string, input: unknown) => callApi(cancelTripRequest(id, input), tripDetailSchema) };
+export function createTripRequest(input: unknown): ApiCall {
+    return {
+        path: "/bus-trips",
+        method: "POST",
+        body: parseInput(tripInput, input),
+    };
+}
+export function updateTripRequest(id: string, input: unknown): ApiCall {
+    return {
+        path: "/bus-trips/" + id,
+        method: "PATCH",
+        body: parseInput(tripUpdate, input),
+    };
+}
+export function cancelTripRequest(id: string, input: unknown): ApiCall {
+    return {
+        path: "/bus-trips/" + id + "/cancel",
+        method: "POST",
+        body: parseInput(tripCancel, input),
+    };
+}
+export const tripApi = {
+    list: (query: ListParams & { serviceDate?: string; direction?: string }) =>
+        callApi(
+            { path: listPath("/bus-trips", query), method: "GET" },
+            pageSchema(tripSchema),
+        ),
+    get: (id: string) =>
+        callApi({ path: "/bus-trips/" + id, method: "GET" }, tripDetailSchema),
+    create: (input: unknown) =>
+        callApi(createTripRequest(input), tripDetailSchema),
+    update: (id: string, input: unknown) =>
+        callApi(updateTripRequest(id, input), tripDetailSchema),
+    cancel: (id: string, input: unknown) =>
+        callApi(cancelTripRequest(id, input), tripDetailSchema),
+};

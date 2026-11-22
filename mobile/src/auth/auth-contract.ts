@@ -29,12 +29,18 @@ function object(value: unknown): Record<string, unknown> {
 }
 
 function nonempty(value: unknown): string {
-  if (typeof value !== 'string' || !value.trim()) throw new Error(INVALID_SESSION);
+  if (typeof value !== 'string' || !value.trim())
+    throw new Error(INVALID_SESSION);
   return value;
 }
 
 function role(value: unknown): MobileRole {
-  if (value === 'DRIVER' || value === 'PARENT' || value === 'ADMIN' || value === 'SUPER_ADMIN') {
+  if (
+    value === 'DRIVER' ||
+    value === 'PARENT' ||
+    value === 'ADMIN' ||
+    value === 'SUPER_ADMIN'
+  ) {
     return value;
   }
   throw new Error(INVALID_SESSION);
@@ -44,10 +50,14 @@ export function decodeAuthUser(value: unknown): AuthUser {
   const user = object(value);
   const userRole = role(user.role);
   const schoolId = user.schoolId === null ? null : nonempty(user.schoolId);
-  if ((userRole === 'SUPER_ADMIN') !== (schoolId === null)) throw new Error(INVALID_SESSION);
+  if ((userRole === 'SUPER_ADMIN') !== (schoolId === null))
+    throw new Error(INVALID_SESSION);
   return {
-    id: nonempty(user.id), name: nonempty(user.name), email: nonempty(user.email),
-    role: userRole, schoolId,
+    id: nonempty(user.id),
+    name: nonempty(user.name),
+    email: nonempty(user.email),
+    role: userRole,
+    schoolId,
   };
 }
 
@@ -65,7 +75,8 @@ export function decodeAuthSession(value: unknown): AuthSessionResponse {
   return {
     user: decodeAuthUser(result.user),
     session: {
-      tokenType: 'Bearer', accessToken: nonempty(session.accessToken),
+      tokenType: 'Bearer',
+      accessToken: nonempty(session.accessToken),
       refreshToken: nonempty(session.refreshToken),
       accessTokenExpiresIn: seconds(session.accessTokenExpiresIn),
       refreshTokenExpiresIn: seconds(session.refreshTokenExpiresIn),
@@ -84,8 +95,10 @@ export function decodeLogout(value: unknown): { message: string } {
 export function decodeErrorMessage(value: unknown): string {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const problem = value as Record<string, unknown>;
-    if (typeof problem.detail === 'string' && problem.detail) return problem.detail;
-    if (typeof problem.message === 'string' && problem.message) return problem.message;
+    if (typeof problem.detail === 'string' && problem.detail)
+      return problem.detail;
+    if (typeof problem.message === 'string' && problem.message)
+      return problem.message;
   }
   return 'Yêu cầu không thành công';
 }

@@ -1,1 +1,5 @@
-export { guardianService, readGuardianLinks, closeStudentGuardians } from "./guardian-link.service";
+export {
+    guardianService,
+    readGuardianLinks,
+    closeStudentGuardians,
+} from "./guardian-link.service";
