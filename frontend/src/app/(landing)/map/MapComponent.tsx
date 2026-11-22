@@ -21,8 +21,9 @@ function MapDescendant({ onMapClick }: MapDescendantProps) {
     const map = useMapEvents({
         click(e) {
             if (onMapClick) {
-                onMapClick(map.wrapLatLng(e.latlng));
-                map.flyTo(e.latlng, 14, {
+                const position = map.wrapLatLng(e.latlng);
+                onMapClick(position);
+                map.flyTo(position, 14, {
                     duration: 1.2,
                 })
             }
