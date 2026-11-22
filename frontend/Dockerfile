@@ -19,6 +19,7 @@ ENV NODE_ENV=production
 ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY frontend ./frontend
+COPY fixtures/transport ./fixtures/transport
 WORKDIR /usr/src/app/frontend
 RUN npm run build
 

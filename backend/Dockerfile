@@ -30,6 +30,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace backend -
 RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm run database:generate --workspace backend
 
 COPY --chown=node:node --from=build /usr/src/app/backend/dist ./backend/dist
+COPY fixtures/transport/demo.json ./fixtures/transport/demo.json
 
 WORKDIR /usr/src/app/backend
 USER node

@@ -72,13 +72,15 @@ docker compose -f docker-compose.database.yml up -d --wait
 
 ### 4. Prepare the database
 
-Set `BOOTSTRAP_PLATFORM_EMAIL` and `BOOTSTRAP_PLATFORM_PASSWORD` in the backend environment. For an additional school administrator, set both `DEMO_ADMIN_EMAIL` and `DEMO_ADMIN_PASSWORD`. Use passwords of at least 12 characters and at most 72 UTF-8 bytes. Existing passwords are preserved.
+Set `BOOTSTRAP_PLATFORM_EMAIL` and `BOOTSTRAP_PLATFORM_PASSWORD` in the backend environment. Set both `DEMO_ADMIN_EMAIL` and `DEMO_ADMIN_PASSWORD` to create the demo school administrator and load the registration and trip dataset. Set `DEMO_USER_PASSWORD` before the first seed to enable the sample parent and driver logins. Use passwords of at least 12 characters and at most 72 UTF-8 bytes. Existing passwords are preserved.
 
 ```bash
 npm run database:generate --workspace backend
 npm run database:migrate:demo --workspace backend
 npm run database:seed:demo --workspace backend
 ```
+
+For the web and mobile previews, see [registration and trip fixtures](fixtures/transport/README.md).
 
 ### 5. Start the applications
 
@@ -95,6 +97,8 @@ npm run dev --workspace frontend
 Open the web app at [http://localhost:3000](http://localhost:3000). The API runs
 at [http://localhost:8000](http://localhost:8000), with health checks at
 `/healthz` and `/readyz`.
+
+Browse and try backend endpoints in [Swagger UI](http://localhost:8000/api/docs), or download the [OpenAPI specification](http://localhost:8000/api/openapi.json). For protected endpoints, use the web login in Swagger or enter a mobile access token under **Authorize**.
 
 ### Useful commands
 

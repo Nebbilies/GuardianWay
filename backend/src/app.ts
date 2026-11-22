@@ -1,4 +1,5 @@
 import express from "express";
+import { docsRouter } from "./docs/router";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -81,6 +82,7 @@ app.use(
 );
 app.use(metricsMiddleware);
 
+app.use(docsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/public", publicRouter);
 app.use(

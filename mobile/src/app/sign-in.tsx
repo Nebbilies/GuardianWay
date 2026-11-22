@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Image } from 'expo-image';
+import { Link } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { useAuthStore } from '@/auth/auth-store';
@@ -88,6 +89,9 @@ export default function SignInScreen() {
           >
             Đăng nhập
           </Button>
+          {__DEV__ && (
+            <Link href="./fixtures">Mở fixture đăng ký và chuyến</Link>
+          )}
         </Stack>
       </Stack>
     </Screen>

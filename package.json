@@ -9,6 +9,7 @@
     "shadcn": "^4.16.0"
   },
   "scripts": {
+    "pretest:contracts": "node scripts/generate-transport-fixtures.cjs --check",
     "test:contracts": "node scripts/test-contracts.cjs"
   }
 }
