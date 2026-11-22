@@ -1,8 +1,10 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 import { colors } from '@/constants/theme';
+import { useRegistrationAccess } from '@/transport/registrations/registration-provider';
 
 export default function AppTabs() {
+  const registrationsEnabled = useRegistrationAccess();
   return (
     <NativeTabs
       backgroundColor={colors.surface}
@@ -19,6 +21,15 @@ export default function AppTabs() {
           src={require('@/assets/images/tabIcons/home.png')}
           renderingMode="template"
         />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger
+        name="registrations"
+        hidden={!registrationsEnabled}
+        disableTransparentOnScrollEdge
+      >
+        <NativeTabs.Trigger.Label>Đăng ký xe</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="list.clipboard" md="assignment" />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger

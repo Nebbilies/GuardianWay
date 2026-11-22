@@ -362,5 +362,65 @@
         "passengers": []
       }
     }
+  },
+  "registrationForm": {
+    "schoolName": "GuardianWay demonstration school",
+    "studentsByActor": {
+      "parent-1": [
+        {
+          "id": "32f4830d-49f6-53c7-9ff3-d9bf2018cbe7",
+          "code": "HS01",
+          "name": "An Nguyễn"
+        },
+        {
+          "id": "dbaf6958-86d0-549f-9204-261c466184b7",
+          "code": "HS02",
+          "name": "Bình Nguyễn"
+        }
+      ],
+      "parent-2": [
+        {
+          "id": "f43ad770-48ab-5fc9-8c49-cfb5089a85a6",
+          "code": "HS03",
+          "name": "Chi Trần"
+        },
+        {
+          "id": "bafb2d26-8c7e-5de2-b799-82376d779260",
+          "code": "HS04",
+          "name": "Duy Trần"
+        }
+      ],
+      "parent-3": [
+        {
+          "id": "42e9390f-6c57-51c2-92dc-8f001f3c5fe1",
+          "code": "HS05",
+          "name": "Hà Lê"
+        },
+        {
+          "id": "c99770d9-f02f-5295-ba16-31ac6727ba8e",
+          "code": "HS06",
+          "name": "Huy Lê"
+        }
+      ],
+      "parent-4": []
+    },
+    "points": [
+      {
+        "id": "139876b8-bdf3-5f5e-8800-9a06706f91bc",
+        "code": "BEN",
+        "name": "Điểm đón Bến An",
+        "address": "12 đường Bến An (demo)",
+        "allowsPickup": true,
+        "allowsDropoff": true
+      },
+      {
+        "id": "0368d00f-b13f-5e1b-a1fe-1d49b8a14ac5",
+        "code": "CV",
+        "name": "Điểm trả Công viên",
+        "address": "Cổng Công viên (demo)",
+        "allowsPickup": false,
+        "allowsDropoff": true
+      }
+    ]
   }
 }

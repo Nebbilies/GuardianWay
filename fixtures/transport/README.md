@@ -14,3 +14,5 @@ Start the web or mobile development server as usual and open `/fixtures`. In Exp
 Use `fixtureClient(actor).registrations()` or `.passengers(tripId)` during development. For the eventual live integration, `transportClient(get)` takes an authenticated JSON GET function with the same paths. Actor selection belongs only to the fixture.
 
 [demo.json](demo.json) projects the database seed into a fixed fictional school UUID. The two apps use identical IDs. A separately seeded database has its own school UUID. From the repo root, run `node scripts/generate-transport-fixtures.cjs` after editing seed data and `node scripts/generate-transport-fixtures.cjs --check` to check for drift.
+
+The mobile registration form also uses the generated student request permissions and active service points for each direction. Read access and permission to submit are checked separately.
