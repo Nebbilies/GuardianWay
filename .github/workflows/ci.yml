@@ -2,9 +2,12 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main ]
   push:
     branches: [ main ]
+
+# Client generation parses this URL only; test harnesses inject their own disposable targets.
+env:
+  DATABASE_URL: postgresql://unused:unused@127.0.0.1:1/guardianway_schema_test
 
 jobs:
   lint:
@@ -28,7 +31,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Generate Prisma client (types needed for typecheck)
-        run: npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+        run: npm run database:generate --workspace backend
       - run: npm run typecheck --workspace backend
       - run: npm run typecheck --workspace frontend
 
@@ -42,8 +45,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Generate Prisma client (mapper test imports @prisma/client)
-        run: npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+        run: npm run database:generate --workspace backend
       - run: npm run test --workspace backend
+      - run: npm run test:architecture --workspace backend
       - run: npm run test --workspace frontend
 
   integration:
@@ -56,9 +60,10 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Generate Prisma client
-        run: npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
-      - name: Run integration tests (Testcontainers)
-        run: npm run test:integration --workspace backend
+        run: npm run database:generate --workspace backend
+      - run: npm ci --prefix mobile
+      - name: Verify provider and both clients (Testcontainers)
+        run: npm run test:contracts
 
   build:
     runs-on: ubuntu-latest
@@ -70,6 +75,40 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Generate Prisma client
-        run: npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+        run: npm run database:generate --workspace backend
       - run: npm run build --workspace backend
       - run: npm run build --workspace frontend
+
+  database-schema:
+    runs-on: ubuntu-latest
+    env:
+      SCHEMA_DATABASE_URL: postgresql://unused:unused@127.0.0.1:1/guardianway_schema_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run database:validate --workspace backend
+      - run: npm run database:generate --workspace backend
+      - name: Verify target database (Testcontainers)
+        run: npm run test:database-schema --workspace backend
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+        working-directory: mobile
+      - run: npm test
+        working-directory: mobile
+      - run: npx tsc --noEmit
+        working-directory: mobile
+      - run: npm run lint
+        working-directory: mobile

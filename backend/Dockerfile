@@ -9,18 +9,14 @@ ENV NODE_ENV=development
 
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
-COPY shared/package.json ./shared/package.json
 COPY backend/prisma ./backend/prisma
-RUN --mount=type=cache,target=/root/.npm npm ci --workspace backend --workspace shared --include-workspace-root=false
+RUN --mount=type=cache,target=/root/.npm npm ci --workspace backend --include-workspace-root=false
 
 FROM deps AS build
 COPY backend/prisma.config.ts ./backend/prisma.config.ts
 COPY backend/tsconfig.json ./backend/tsconfig.json
 COPY backend/src ./backend/src
-COPY shared/index.ts ./shared/index.ts
-COPY shared/types ./shared/types
-COPY shared/utils ./shared/utils
-RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm run database:generate --workspace backend
 RUN npm run build --workspace backend
 
 FROM base AS runtime
@@ -28,14 +24,12 @@ ENV NODE_ENV=production
 
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
-COPY shared/package.json ./shared/package.json
 COPY backend/prisma ./backend/prisma
 COPY backend/prisma.config.ts ./backend/prisma.config.ts
-RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace backend --workspace shared --include-workspace-root=false
-RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm exec --workspace backend prisma generate -- --schema prisma/schema.prisma
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace backend --include-workspace-root=false
+RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" DIRECT_URL="postgresql://postgres:postgres@localhost:5432/postgres" npm run database:generate --workspace backend
 
 COPY --chown=node:node --from=build /usr/src/app/backend/dist ./backend/dist
-COPY --chown=node:node --from=build /usr/src/app/shared ./shared
 
 WORKDIR /usr/src/app/backend
 USER node

@@ -1,7 +1,17 @@
 'use client'
 import {MapContainer, Marker, Popup, TileLayer, useMapEvents} from "react-leaflet";
-import {RefObject, useRef, useState} from "react";
-import L, {latLng, LatLng} from "leaflet";
+import {RefObject, useRef} from "react";
+import L from "leaflet";
+
+const markerIcon = L.icon({
+    iconUrl: "/img/leaflet/marker-icon.png",
+    iconRetinaUrl: "/img/leaflet/marker-icon-2x.png",
+    shadowUrl: "/img/leaflet/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+});
 
 interface MapDescendantProps {
     onMapClick?: (position: { lat: number, lng: number }) => void;
@@ -11,8 +21,9 @@ function MapDescendant({ onMapClick }: MapDescendantProps) {
     const map = useMapEvents({
         click(e) {
             if (onMapClick) {
-                onMapClick(e.latlng);
-                map.flyTo(e.latlng, 14, {
+                const position = map.wrapLatLng(e.latlng);
+                onMapClick(position);
+                map.flyTo(position, 14, {
                     duration: 1.2,
                 })
             }
@@ -32,7 +43,7 @@ export default function MapComponent({ mapHeight = "80vh", latLng, setLatLng, st
     const mapRef: RefObject<L.Map | null> = useRef<L.Map | null>(null);
     const heightStyle = typeof mapHeight === 'number' ? `${mapHeight}px` : mapHeight;
     return (
-            <MapContainer center={[10.832, 106.6297]} zoom={10} scrollWheelZoom={true}
+            <MapContainer center={latLng ?? [10.832, 106.6297]} zoom={10} scrollWheelZoom={true}
                           style={{ height: heightStyle, width: "100%" }} ref={mapRef}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -40,14 +51,14 @@ export default function MapComponent({ mapHeight = "80vh", latLng, setLatLng, st
                 />
                 <MapDescendant onMapClick={setLatLng}/>
                 {latLng && (
-                    <Marker position={latLng}>
+                    <Marker position={latLng} icon={markerIcon}>
                         <Popup>
                             Selected Location
                         </Popup>
                     </Marker>
                 )}
                 {stopLocations && stopLocations.map((location, index) => (
-                    <Marker key={index} position={location}>
+                    <Marker key={index} position={location} icon={markerIcon}>
                         <Popup>
                             Trạm #{index + 1}
                         </Popup>

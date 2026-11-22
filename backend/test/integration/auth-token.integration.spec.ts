@@ -26,6 +26,13 @@ describe("mobile bearer-token authentication", () => {
             .send({ email, password: TEST_PASSWORD });
     }
 
+    it("does not issue a session when the account's school is inactive", async () => {
+        await prisma.school.update({ where: { id: fx.schoolA.id }, data: { status: "INACTIVE" } });
+        const res = await tokenLogin();
+        expect(res.status).toBe(401);
+        expect(res.body.session).toBeUndefined();
+    });
+
     it("returns a no-store JSON session without cookies for mobile login", async () => {
         const res = await tokenLogin();
 
@@ -102,7 +109,7 @@ describe("mobile bearer-token authentication", () => {
         const login = await tokenLogin();
         expect(login.status).toBe(200);
 
-        await prisma.user.update({ where: { id: fx.driverA.id }, data: { name: "Updated Driver" } });
+        await prisma.userAccount.update({ where: { id: fx.driverA.id }, data: { displayName: "Updated Driver" } });
 
         const res = await request(app)
             .get("/api/auth/me")
@@ -192,17 +199,17 @@ describe("mobile bearer-token authentication", () => {
     });
 
     it.each([
-        ["inactive", { isActive: false }],
+        ["inactive", { status: "LOCKED" }],
         ["soft-deleted", { deletedAt: new Date() }],
-        ["password setup required", { passwordSetupRequired: true }],
+        ["password setup required", { activatedAt: null }],
     ] as const)("rejects /me and revokes sessions for a %s account", async (_state, update) => {
         const login = await tokenLogin();
         const accessToken = login.body.session.accessToken as string;
         const refreshToken = login.body.session.refreshToken as string;
 
-        await prisma.user.update({
+        await prisma.userAccount.update({
             where: { id: fx.driverA.id },
-            data: update as Prisma.UserUpdateInput,
+            data: update as Prisma.UserAccountUpdateInput,
         });
 
         const me = await request(app)
@@ -211,7 +218,7 @@ describe("mobile bearer-token authentication", () => {
         const refresh = await request(app)
             .post("/api/auth/token/refresh")
             .send({ refreshToken });
-        const sessions = await prisma.refreshToken.findMany({ where: { userId: fx.driverA.id } });
+        const sessions = await prisma.refreshToken.findMany({ where: { accountId: fx.driverA.id } });
 
         expect(me.status).toBe(401);
         expect(refresh.status).toBe(401);

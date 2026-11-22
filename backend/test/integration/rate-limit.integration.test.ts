@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import type { Express } from "express";
@@ -67,8 +68,8 @@ describe("login rate limiting", () => {
         const row = await findAuditRowEventually({ action: "auth.rate_limited" });
 
         expect(row).not.toBeNull();
-        expect(row?.actorEmail).toBe(fx.adminA.email);
-        expect((row?.metadata as { reason?: string } | null)?.reason).toBe("account");
+        expect(row?.subjectReference).toBe(createHash("sha256").update(fx.adminA.email).digest("hex"));
+        expect((row?.changeSummary as { after?: { reason?: string } } | null)?.after?.reason).toBe("account");
     });
 
     it("records at most one auth.rate_limited row per key per window under a burst", async () => {
@@ -93,7 +94,7 @@ describe("login rate limiting", () => {
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         const rows = await prisma.auditLog.findMany({
-            where: { action: "auth.rate_limited", actorEmail: fx.adminA.email },
+            where: { action: "auth.rate_limited", subjectReference: createHash("sha256").update(fx.adminA.email).digest("hex") },
         });
 
         expect(rows).toHaveLength(1);

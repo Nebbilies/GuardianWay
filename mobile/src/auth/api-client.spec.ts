@@ -31,7 +31,7 @@ function response(status: number) {
   return { status, ok: status >= 200 && status < 300 } as Response;
 }
 
-function setup(fetchImpl: typeof fetch) {
+function setup(fetchImpl: NonNullable<Parameters<typeof createApiClient>[0]['fetchImpl']>) {
   const api = {
     login: vi.fn().mockResolvedValue(makeSession('access-old', 'refresh-old')),
     refresh: vi.fn().mockResolvedValue(makeSession('access-new', 'refresh-new')),

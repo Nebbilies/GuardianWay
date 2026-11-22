@@ -1,0 +1,8 @@
+import { z } from "zod";
+import { timestamps, profileStatus, pageSchema, parseInput, callApi, listPath, type ListParams, type ApiCall } from "@/lib/http/contracts";
+export const stopSchema = z.object({ id: z.uuid(), schoolId: z.uuid(), code: z.string(), name: z.string(), address: z.string(), latitude: z.number().min(-90).max(90), longitude: z.number().min(-180).max(180), kind: z.enum(["SERVICE_POINT", "SCHOOL"]), allowsPickup: z.boolean(), allowsDropoff: z.boolean(), status: profileStatus, accessNote: z.string().nullable(), ...timestamps });
+export const stopInput = stopSchema.omit({ id: true, schoolId: true, createdAt: true, updatedAt: true, deletedAt: true }).extend({ code: z.string().trim().min(1), name: z.string().trim().min(1), address: z.string().trim().min(1) }).strict();
+export type Stop = z.infer<typeof stopSchema>;
+export function createStopRequest(input: unknown): ApiCall { return { path: "/bus-stops", method: "POST", body: parseInput(stopInput, input) }; }
+export function updateStopRequest(id: string, input: unknown): ApiCall { return { path: "/bus-stops/" + id, method: "PATCH", body: parseInput(stopInput.partial(), input) }; }
+export const stopApi = { list: (query: ListParams & { kind?: Stop["kind"] }) => callApi({ path: listPath("/bus-stops", query), method: "GET" }, pageSchema(stopSchema)), create: (input: unknown) => callApi(createStopRequest(input), stopSchema), update: (id: string, input: unknown) => callApi(updateStopRequest(id, input), stopSchema), remove: (id: string) => callApi({ path: "/bus-stops/" + id, method: "DELETE" }, stopSchema), restore: (id: string) => callApi({ path: "/bus-stops/" + id + "/restore", method: "POST" }, stopSchema) };

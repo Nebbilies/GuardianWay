@@ -1,25 +1,26 @@
 "use client";
 
 import {LogOut} from "lucide-react";
-import {useRouter} from "next/navigation";
+import { navigateAfterSessionChange } from "@/lib/session-navigation";
 import {useState} from "react";
 import {SidebarMenuButton} from "@/components/ui/sidebar";
-import {apiRequest} from "@/lib/api-client";
+import {logoutWeb} from "@/modules/system/auth/contracts";
+import {toast} from "sonner";
+import {getErrorMessage} from "@/lib/i18n";
 
 export default function LogoutButton() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     async function handleLogout() {
         if (loading) return;
         setLoading(true);
         try {
-            await apiRequest("/auth/logout", {method: "POST"});
-        } catch {
-
+            await logoutWeb();
+            navigateAfterSessionChange("/login");
+        } catch (error) {
+            toast.error(getErrorMessage(error));
         } finally {
-            router.push("/login");
-            router.refresh();
+            setLoading(false);
         }
     }
 

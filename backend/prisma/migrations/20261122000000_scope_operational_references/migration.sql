@@ -1,0 +1,20 @@
+-- Match each reference within its route, trip, or attendance event.
+BEGIN;
+CREATE UNIQUE INDEX "uq_planned_stop_school_id_route" ON "planned_stop" ("school_id", "id", "route_id");
+ALTER TABLE "planned_passenger" DROP CONSTRAINT "fk_planned_passenger_planned_stop_id";
+ALTER TABLE "planned_passenger" ADD CONSTRAINT "fk_planned_passenger_planned_stop_id" FOREIGN KEY ("school_id", "planned_stop_id", "route_id") REFERENCES "planned_stop" ("school_id", "id", "route_id") ON DELETE RESTRICT ON UPDATE RESTRICT;
+CREATE UNIQUE INDEX "uq_trip_reconciliation_school_id_trip" ON "trip_reconciliation" ("school_id", "id", "trip_id");
+ALTER TABLE "trip" DROP CONSTRAINT "fk_trip_closed_reconciliation_id";
+ALTER TABLE "trip" ADD CONSTRAINT "fk_trip_closed_reconciliation_id" FOREIGN KEY ("school_id", "closed_reconciliation_id", "id") REFERENCES "trip_reconciliation" ("school_id", "id", "trip_id") ON DELETE RESTRICT ON UPDATE RESTRICT;
+CREATE UNIQUE INDEX "uq_trip_stop_school_id_history" ON "trip_stop" ("school_id", "id", "trip_id", "logical_stop_key");
+ALTER TABLE "trip_stop" DROP CONSTRAINT "fk_trip_stop_previous_stop_id";
+ALTER TABLE "trip_stop" ADD CONSTRAINT "fk_trip_stop_previous_stop_id" FOREIGN KEY ("school_id", "previous_stop_id", "trip_id", "logical_stop_key") REFERENCES "trip_stop" ("school_id", "id", "trip_id", "logical_stop_key") ON DELETE RESTRICT ON UPDATE RESTRICT;
+CREATE UNIQUE INDEX "uq_trip_stop_school_id_trip" ON "trip_stop" ("school_id", "id", "trip_id");
+ALTER TABLE "trip_passenger" DROP CONSTRAINT "fk_trip_passenger_trip_stop_id";
+ALTER TABLE "trip_passenger" ADD CONSTRAINT "fk_trip_passenger_trip_stop_id" FOREIGN KEY ("school_id", "trip_stop_id", "trip_id") REFERENCES "trip_stop" ("school_id", "id", "trip_id") ON DELETE RESTRICT ON UPDATE RESTRICT;
+CREATE UNIQUE INDEX "uq_attendance_revision_school_id_event" ON "attendance_revision" ("school_id", "id", "attendance_event_id");
+ALTER TABLE "attendance_revision" DROP CONSTRAINT "fk_attendance_revision_previous_revision_id";
+ALTER TABLE "attendance_revision" ADD CONSTRAINT "fk_attendance_revision_previous_revision_id" FOREIGN KEY ("school_id", "previous_revision_id", "attendance_event_id") REFERENCES "attendance_revision" ("school_id", "id", "attendance_event_id") ON DELETE RESTRICT ON UPDATE RESTRICT;
+ALTER TABLE "reconciliation_evidence" DROP CONSTRAINT "fk_reconciliation_evidence_attendance_revision_id";
+ALTER TABLE "reconciliation_evidence" ADD CONSTRAINT "fk_reconciliation_evidence_attendance_revision_id" FOREIGN KEY ("school_id", "attendance_revision_id", "attendance_event_id") REFERENCES "attendance_revision" ("school_id", "id", "attendance_event_id") ON DELETE RESTRICT ON UPDATE RESTRICT;
+COMMIT;
