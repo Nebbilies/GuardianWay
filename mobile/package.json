@@ -42,7 +42,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:contract-consumer": "vitest run --config vitest.contracts.config.ts"
   },
   "private": true
 }

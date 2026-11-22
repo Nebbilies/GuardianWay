@@ -3,10 +3,12 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "backend",
-    "shared"
+    "backend"
   ],
   "devDependencies": {
     "shadcn": "^4.16.0"
+  },
+  "scripts": {
+    "test:contracts": "node scripts/test-contracts.cjs"
   }
 }

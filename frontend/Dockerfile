@@ -9,8 +9,7 @@ ENV NODE_ENV=development
 
 COPY package.json package-lock.json ./
 COPY frontend/package.json ./frontend/package.json
-COPY shared/package.json ./shared/package.json
-RUN --mount=type=cache,target=/root/.npm npm ci --workspace frontend --workspace shared --include-workspace-root=false
+RUN --mount=type=cache,target=/root/.npm npm ci --workspace frontend --include-workspace-root=false
 RUN npm install --workspace frontend lightningcss-linux-arm64-musl@1.31.1 lightningcss-linux-x64-gnu@1.31.1 lightningcss-linux-x64-musl@1.31.1 @tailwindcss/oxide-linux-x64-musl@4.2.1 --save-optional
 
 FROM deps AS build
@@ -20,7 +19,6 @@ ENV NODE_ENV=production
 ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY frontend ./frontend
-COPY shared ./shared
 WORKDIR /usr/src/app/frontend
 RUN npm run build
 

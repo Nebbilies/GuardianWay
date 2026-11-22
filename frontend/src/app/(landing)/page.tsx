@@ -1,8 +1,11 @@
 import LandingPage from './_components/landing-page'
 import {getLandingProof} from './_lib/get-landing-proof'
 
-export default async function Home() {
-  const {data, isFallback} = await getLandingProof()
+// Keep ISR enabled even when the API is unavailable during image build.
+export const revalidate = 120
 
-  return <LandingPage proof={data} isFallback={isFallback}/>
+export default async function Home() {
+  const {data, isUnavailable} = await getLandingProof()
+
+  return <LandingPage proof={data} isUnavailable={isUnavailable}/>
 }

@@ -3,7 +3,7 @@ import { useAuthStore, type AuthStore } from './auth-store';
 
 type ApiClientOptions = {
   store: AuthStore;
-  fetchImpl?: typeof fetch;
+  fetchImpl?: (url: string, init?: RequestInit) => Promise<Response>;
 };
 
 export function createApiClient({ store, fetchImpl = fetch }: ApiClientOptions) {
