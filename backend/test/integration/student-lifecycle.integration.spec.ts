@@ -14,6 +14,13 @@ describe("student lifecycle", () => {
         const link = await request(app).post(url + "/guardians").set("Cookie", cookies)
             .send({ guardianAccountId: fx.parentA.id, canTrack: true, canRequest: true, relationshipLabel: "Mother" });
         expect(link.status).toBe(201);
+        const filtered = await request(app).get("/api/students").query({ parentId: fx.parentA.id }).set("Cookie", cookies);
+        expect(filtered.status).toBe(200);
+        expect(filtered.body.data.map((row: { id: string }) => row.id)).toEqual([fx.studentA.id]);
+        const otherSchool = await loginAs(app, fx.adminB.email);
+        const crossSchool = await request(app).get("/api/students").query({ parentId: fx.parentA.id }).set("Cookie", otherSchool);
+        expect(crossSchool.status).toBe(200);
+        expect(crossSchool.body.data).toEqual([]);
         const card = await request(app).post(url + "/cards").set("Cookie", cookies).send({ cardUid: "000abc", technology: "NFC" });
         expect(card.status).toBe(201);
         expect((await request(app).delete(url).set("Cookie", cookies)).status).toBe(200);
@@ -22,6 +29,9 @@ describe("student lifecycle", () => {
         expect(detail.status).toBe(200);
         expect(detail.body.guardians).toHaveLength(1);
         expect(detail.body.guardians[0].effectiveTo).not.toBeNull();
+        const retired = await request(app).get("/api/students").query({ parentId: fx.parentA.id }).set("Cookie", cookies);
+        expect(retired.status).toBe(200);
+        expect(retired.body.data).toEqual([]);
         expect(detail.body.cards).toHaveLength(1);
         expect(detail.body.cards[0]).toMatchObject({ cardUid: "000abc", technology: "NFC", revokedById: fx.adminA.id });
         expect(detail.body.cards[0].effectiveTo).not.toBeNull();

@@ -103,7 +103,7 @@ export function TripsPage() {
       setOpen(false);
       toast.success("Đã lưu chuyến chuẩn bị.");
     } catch (error) {
-      if (error instanceof ApiError && error.code === "TRIP_VERSION_CONFLICT") {
+      if (error instanceof ApiError && ["TRIP_VERSION_CONFLICT", "TRIP_NOT_PLANNED"].includes(error.code)) {
         setOpen(false); setEditing(undefined); setCancel(undefined);
       }
       toast.error(getErrorMessage(error));
@@ -128,7 +128,7 @@ export function TripsPage() {
       setCancel(undefined);
       toast.success("Đã hủy chuyến.");
     } catch (error) {
-      if (error instanceof ApiError && error.code === "TRIP_VERSION_CONFLICT") {
+      if (error instanceof ApiError && ["TRIP_VERSION_CONFLICT", "TRIP_NOT_PLANNED"].includes(error.code)) {
         setOpen(false); setEditing(undefined); setCancel(undefined);
       }
       toast.error(getErrorMessage(error));

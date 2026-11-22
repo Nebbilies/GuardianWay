@@ -14,6 +14,7 @@ import {
   vehicleSchema,
 } from "@/modules/records/vehicles/contracts";
 import { stopApi } from "@/modules/planning/stops/contracts";
+import { getSchoolContext } from "@/modules/system/schools/contracts";
 import { policyApi } from "@/modules/system/school-policies/contracts";
 import type { Plan } from "./contracts";
 type DraftStop = {
@@ -56,6 +57,8 @@ export function PlanForm({
   onSubmit: (input: unknown) => Promise<void>;
   onCancel: () => void;
 }) {
+  const { data: school, error: schoolError, mutate: reloadSchool } = useSWR("school-context", getSchoolContext);
+  const policyDate = school && new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeZone: school.timezone });
   const { data: policies, error, mutate } = useSWR("policy-versions", policyApi.list);
   const [direction, setDirection] = useState(
       initialData?.direction ?? "PICKUP",
@@ -145,13 +148,14 @@ export function PlanForm({
           </Button>
           <Button
             type="submit"
-            disabled={busy || Boolean(error) || !policies?.length || !policyId || routes.some((route) => route.stops.length < 2)}
+            disabled={busy || !school || Boolean(schoolError) || Boolean(error) || !policies?.length || !policyId || routes.some((route) => route.stops.length < 2)}
           >
             Lưu bản nháp
           </Button>
         </>
       }
     >
+      {schoolError && <div><ErrorNotice error={schoolError} /><Button type="button" variant="outline" onClick={() => void reloadSchool()}>Thử lại</Button></div>}
       {error && <div><ErrorNotice error={error} /><Button type="button" variant="outline" onClick={() => void mutate()}>Thử lại</Button></div>}
       <fieldset disabled={busy} className="space-y-5">
         <div className="grid gap-3 sm:grid-cols-2">
@@ -200,7 +204,7 @@ export function PlanForm({
             >
               {policies?.map((policy) => (
                 <Choice key={policy.id} value={policy.id}>
-                  v{policy.versionNo} · {policy.effectiveFrom.slice(0, 10)} ·
+                  v{policy.versionNo} · {policyDate?.format(new Date(policy.effectiveFrom))} ·
                   Đến {policy.pickupArrivalTime ?? "chưa đặt"} / Rời{" "}
                   {policy.dropoffDepartureTime ?? "chưa đặt"}
                 </Choice>
@@ -321,7 +325,7 @@ export function PlanForm({
                   onChange={(stopId) =>
                     patchStop(index, stopIndex, { stopId, label: undefined })
                   }
-                  load={(query) => stopApi.list(query)}
+                  load={(query) => stopApi.list({ ...query, status: "ACTIVE" })}
                   describe={(point) =>
                     point.code +
                     " · " +

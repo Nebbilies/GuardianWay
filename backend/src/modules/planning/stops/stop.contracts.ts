@@ -5,4 +5,4 @@ export const stopPatch = stopBody.partial().extend({ status: profileStatus.optio
 export type StopInput = z.infer<typeof stopBody>;
 
 import { listQuerySchema } from "../../../http/contracts/pagination";
-export const stopQuery = listQuerySchema.extend({ status: profileStatus.optional() });
+export const stopQuery = listQuerySchema.extend({ status: profileStatus.optional(), kind: stopBody.shape.kind.optional() });

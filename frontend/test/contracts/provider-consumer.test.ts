@@ -53,7 +53,7 @@ async function invoke(record: Case) {
         case "drivers.onboard": return callApi(onboardDriverRequest(input), driverInvitationSchema);
         case "policies.create": return policyApi.create(input);
         case "plans.create": return planApi.create(input);
-        case "plans.approve": return planApi.approve(resourceId(record));
+        case "plans.approve": return planApi.approve(resourceId(record), String(input!.approvalToken));
         case "schedules.create": return scheduleApi.create(input);
         case "schedules.activate": return scheduleApi.activate(resourceId(record));
         case "trips.create": case "problem.trip.duplicate": return tripApi.create(input);

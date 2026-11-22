@@ -10,6 +10,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/custom/form-dialog";
+import { ApiError } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/i18n";
 import { planApi, type Plan } from "./contracts";
 import { PlanForm } from "./form";
@@ -39,13 +40,15 @@ export function PlansPage() {
     }
   }
   async function approve(plan: Plan) {
+    if (!plan.approvalToken) return;
     setBusy(true);
     try {
-      await planApi.approve(plan.id);
+      await planApi.approve(plan.id, plan.approvalToken);
       await mutate();
       toast.success("Đã duyệt phương án.");
     } catch (error) {
       toast.error(getErrorMessage(error));
+      if (error instanceof ApiError && error.code === "PLAN_DRAFT_CHANGED") await mutate();
     } finally {
       setBusy(false);
     }

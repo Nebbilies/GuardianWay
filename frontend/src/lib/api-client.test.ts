@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { logoutWeb } from "@/modules/system/auth/contracts";
 import { apiRequest } from "./api-client";
 import { i18n, getErrorMessage } from "./i18n";
 
@@ -27,6 +28,19 @@ describe("API error presentation", () => {
         expect(getErrorMessage(error)).toBe("Đã xảy ra lỗi. Vui lòng thử lại.");
         await i18n.changeLanguage("en");
         expect(getErrorMessage(error)).toBe("Something went wrong. Please try again.");
+    });
+    it("completes web logout from response status even if the body is unreadable", async () => {
+        vi.stubEnv("NEXT_PUBLIC_API_URL", "http://api.test/api");
+        const response = new Response(null, { status: 200 });
+        const readBody = vi.spyOn(response, "json").mockRejectedValue(new Error("Interrupted"));
+        const fetch = vi.fn()
+            .mockResolvedValueOnce(response)
+            .mockResolvedValueOnce(new Response(JSON.stringify({ code: "AUTHENTICATION_ERROR" }), { status: 401 }));
+        vi.stubGlobal("fetch", fetch);
+        await expect(logoutWeb()).resolves.toBeUndefined();
+        expect(readBody).not.toHaveBeenCalled();
+        await expect(logoutWeb()).rejects.toMatchObject({ code: "AUTHENTICATION_ERROR", status: 401 });
+        expect(fetch).toHaveBeenCalledTimes(2);
     });
     it("localizes network failures and refresh failures through the same path", async () => {
         vi.stubEnv("NEXT_PUBLIC_API_URL", "http://api.test/api");

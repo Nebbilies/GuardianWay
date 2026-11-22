@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { Prisma } from "@prisma/client";
 import { transaction, type Database } from "../../../config/database";
 import { ConflictError, NotFoundError, ValidationError } from "../../../errors/http-errors";
@@ -15,7 +15,11 @@ import { planBody, type PlanInput, type planQuery } from "./plan.contracts";
 import type { z } from "zod";
 
 type Plan = NonNullable<Awaited<ReturnType<typeof planRepository.find>>>;
-function view(plan: Plan) { return { ...plan, referenceDate: dateText(plan.referenceDate), effectiveFrom: plan.effectiveFrom ? dateText(plan.effectiveFrom) : null, effectiveTo: plan.effectiveTo ? dateText(plan.effectiveTo) : null,
+function approvalToken(plan: Plan) {
+    // Draft saves replace the routes, so their IDs also distinguish writes within the same millisecond.
+    return createHash("sha256").update(JSON.stringify([plan.id, plan.updatedAt, plan.routes.map(route => route.id)])).digest("hex");
+}
+function view(plan: Plan) { return { ...plan, approvalToken: plan.status === "DRAFT" ? approvalToken(plan) : null, referenceDate: dateText(plan.referenceDate), effectiveFrom: plan.effectiveFrom ? dateText(plan.effectiveFrom) : null, effectiveTo: plan.effectiveTo ? dateText(plan.effectiveTo) : null,
     pickupArrivalDeadline: plan.pickupArrivalDeadline ? timeText(plan.pickupArrivalDeadline) : null, dropoffDepartureTime: plan.dropoffDepartureTime ? timeText(plan.dropoffDepartureTime) : null,
     source: "MANUAL", passengerPlanningComplete: false, routes: plan.routes.map(route => ({ ...route, stops: route.stops.map(stop => ({ ...stop, plannedTime: timeText(stop.plannedTime) })) })),
 }; }
@@ -111,13 +115,15 @@ export const planService = {
             return view(after);
         });
     },
-    async approve(actor: Principal, id: string, metadata: RequestMetadata) {
+    async approve(actor: Principal, id: string, expectedToken: string, metadata: RequestMetadata) {
         const { schoolId } = requireSchoolAdmin(actor);
         return transaction(async database => {
             await planRepository.lock(database, schoolId, id);
             const before = await planRepository.find(schoolId, id, database);
             if (!before) throw new NotFoundError("Plan not found");
-            if (before.status !== "DRAFT") throw new ConflictError("Only draft plans can be approved");
+            if (before.status !== "DRAFT" || approvalToken(before) !== expectedToken) {
+                throw new ConflictError("The draft changed; review the current plan before approving", "PLAN_DRAFT_CHANGED");
+            }
             const snapshot = before.inputSnapshot as { input?: unknown };
             const current = await draftData(database, schoolId, planBody.parse(snapshot.input), true);
             const routes = new Map(current.routes.map(route => [route.routeCode, route]));

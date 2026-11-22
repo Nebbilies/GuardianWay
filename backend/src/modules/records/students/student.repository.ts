@@ -4,8 +4,9 @@ import type { Database } from "../../../config/database";
 import { deletedFilter, listOptions, pageResult, type ListQuery } from "../../../http/contracts/pagination";
 export const studentRepository = {
     find(schoolId: string, id: string, database: Database = prisma) { return database.student.findFirst({ where: { id, schoolId } }); },
-    async list(schoolId: string, query: ListQuery & { status?: string }, exportAll = false) {
-        const where: Prisma.StudentWhereInput = { schoolId, deletedAt: deletedFilter(query), status: query.status, ...(query.search ? { OR: [{ fullName: { contains: query.search, mode: "insensitive" } }, { studentCode: { contains: query.search, mode: "insensitive" } }] } : {}) };
+    async list(schoolId: string, query: ListQuery & { status?: string; parentId?: string }, exportAll = false) {
+        const where: Prisma.StudentWhereInput = { schoolId, deletedAt: deletedFilter(query), status: query.status,
+            GuardianLinkByStudentId: query.parentId ? { some: { schoolId, guardianAccountId: query.parentId, effectiveTo: null } } : undefined, ...(query.search ? { OR: [{ fullName: { contains: query.search, mode: "insensitive" } }, { studentCode: { contains: query.search, mode: "insensitive" } }] } : {}) };
         const [rows, count] = await Promise.all([prisma.student.findMany({ where, ...listOptions(query, ["studentCode", "fullName", "createdAt", "status"], "-createdAt"), ...(exportAll ? { skip: undefined, take: undefined } : {}) }), prisma.student.count({ where })]);
         return exportAll ? pageResult(rows, rows.length, { page: 1, limit: Math.max(1, rows.length) }) : pageResult(rows, count, query);
     },

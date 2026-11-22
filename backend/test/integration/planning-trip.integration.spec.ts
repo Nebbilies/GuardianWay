@@ -12,11 +12,25 @@ describe("manual planning and trip preparation", () => {
     it("approves a manual plan, prepares a trip with snapshots and keeps cancellation final", async () => {
         const terminal = await request(app).post("/api/bus-stops").set("Cookie", cookies).send({ code: "SCHOOL", name: "School", address: "School address", latitude: 10.8, longitude: 106.7, kind: "SCHOOL", allowsPickup: true, allowsDropoff: true, status: "ACTIVE" });
         expect(terminal.status).toBe(201);
+        const schools = await request(app).get("/api/bus-stops?kind=SCHOOL").set("Cookie", cookies);
+        expect(schools.status).toBe(200);
+        expect(schools.body.data.map((row: { id: string }) => row.id)).toEqual([terminal.body.id]);
+        const points = await request(app).get("/api/bus-stops?kind=SERVICE_POINT").set("Cookie", cookies);
+        expect(points.status).toBe(200);
+        expect(points.body.data.map((row: { id: string }) => row.id)).toEqual([fx.stopA.id]);
         const planBody = { referenceDate: "2026-09-01", direction: "PICKUP", policyVersionId: fx.resourcesA.policy.id, effectiveFrom: "2026-09-01", effectiveTo: "2026-12-31", routes: [{ routeCode: "MAN001", label: "Manual route", vehicleId: fx.busA.id, distanceMetres: 12000, durationSeconds: 3600, stops: [{ stopId: fx.stopA.id, plannedTime: "07:00" }, { stopId: terminal.body.id, plannedTime: "07:30" }] }] };
         const plan = await request(app).post("/api/route-plans").set("Cookie", cookies).send(planBody);
         expect(plan.status).toBe(201);
         expect(plan.body).toMatchObject({ status: "DRAFT", source: "MANUAL", passengerPlanningComplete: false });
-        const approved = await request(app).post("/api/route-plans/" + plan.body.id + "/approve").set("Cookie", cookies).send({});
+        const path = "/api/route-plans/" + plan.body.id;
+        const revision = await request(app).put(path).set("Cookie", cookies).send({
+            ...planBody, routes: [{ ...planBody.routes[0]!, distanceMetres: 12500 }],
+        });
+        expect(revision.status).toBe(200);
+        const staleApproval = await request(app).post(path + "/approve").set("Cookie", cookies).send({ approvalToken: plan.body.approvalToken });
+        expect(staleApproval.status).toBe(409);
+        expect(staleApproval.body.code).toBe("PLAN_DRAFT_CHANGED");
+        const approved = await request(app).post(path + "/approve").set("Cookie", cookies).send({ approvalToken: revision.body.approvalToken });
         expect(approved.status).toBe(200);
         const schedule = await request(app).post("/api/recurring-schedules").set("Cookie", cookies).send({ routeId: approved.body.routes[0].id, effectiveFrom: "2026-09-01", effectiveTo: "2026-12-31", weekdays: [1,2,3,4,5], plannedStartTime: "06:45", defaultVehicleId: fx.busA.id, defaultDriverId: fx.resourcesA.driver.id });
         expect(schedule.status).toBe(201);

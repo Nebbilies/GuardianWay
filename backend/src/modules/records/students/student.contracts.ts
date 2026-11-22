@@ -5,4 +5,4 @@ export const studentPatch = studentBody.partial().extend({ status: profileStatus
 export type StudentInput = z.infer<typeof studentBody>;
 
 import { listQuerySchema } from "../../../http/contracts/pagination";
-export const studentQuery = listQuerySchema.extend({ status: profileStatus.optional() });
+export const studentQuery = listQuerySchema.extend({ status: profileStatus.optional(), parentId: z.uuid().optional() });

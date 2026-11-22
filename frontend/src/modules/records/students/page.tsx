@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/i18n";
+import { PagedLookup } from "@/components/custom/paged-lookup";
+import { accountApi } from "@/modules/system/accounts/contracts";
 import { FormDialog } from "@/components/custom/form-dialog";
 import { studentApi, type Student } from "./contracts";
 import { StudentForm } from "./form";
@@ -26,11 +28,12 @@ export function StudentPage() {
   const [editing, setEditing] = useState<Student>(),
     [open, setOpen] = useState(false),
     [busy, setBusy] = useState(false);
+  const [parentId, setParentId] = useState("");
   const [accessId, setAccessId] = useState<string>();
   const query = useDebouncedValue(search);
   const { data, error, isValidating, mutate } = useSWR(
-    ["student", query, page, deleted, sort],
-    () => studentApi.list({ search: query, page, deleted, sort }),
+    ["student", query, page, deleted, sort, parentId],
+    () => studentApi.list({ search: query, page, deleted, sort, parentId }),
   );
   async function submit(input: unknown) {
     setBusy(true);
@@ -92,6 +95,10 @@ export function StudentPage() {
             setPage(1);
           }}
         />
+        <PagedLookup cacheKey="student-guardian-filter" label="Phụ huynh đang liên kết"
+          value={parentId} onChange={(id) => { setParentId(id); setPage(1); }}
+          load={query => accountApi.list({ ...query, role: "PARENT" })}
+          describe={guardian => guardian.displayName + " · " + guardian.email} />
         <ChoiceField
           aria-label="Hồ sơ đã xóa"
           value={deleted}
@@ -117,9 +124,10 @@ export function StudentPage() {
         sort={sort}
         onSort={changeSort}
         clearFilters={
-          search || deleted === "only"
+          search || parentId || deleted === "only"
             ? () => {
                 setSearch("");
+                setParentId("");
                 setDeleted("exclude");
                 setPage(1);
               }

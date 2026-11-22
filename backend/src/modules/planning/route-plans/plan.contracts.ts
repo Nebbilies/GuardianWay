@@ -9,5 +9,6 @@ export const planBody = z.object({
         stops: z.array(z.object({ stopId: resourceId, plannedTime: localTimeSchema }).strict()).min(2).max(100),
     }).strict()).min(1).max(50),
 }).strict().refine(data => !data.effectiveTo || data.effectiveTo > data.effectiveFrom, "Invalid plan validity interval");
+export const planApprovalBody = z.object({ approvalToken: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 export const planQuery = listQuerySchema.extend({ direction: direction.optional(), status: z.enum(["DRAFT", "APPROVED"]).optional() });
 export type PlanInput = z.infer<typeof planBody>;

@@ -177,6 +177,9 @@ body {
   border-radius: 0.5rem;
   overflow: hidden;
 }
+.gw-table-scroll:focus-visible {
+  outline-offset: -2px;
+}
 .gw-table {
   width: 100%;
   border-collapse: collapse;

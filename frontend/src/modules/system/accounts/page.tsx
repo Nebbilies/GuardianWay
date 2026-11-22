@@ -52,8 +52,11 @@ export function AccountsPage({
   async function submit(input: unknown, onboarding: boolean) {
     setBusy(true);
     try {
-      if (editing) await accountApi.update(editing.id, input, schoolId);
-      else
+      if (editing) {
+        const updated = await accountApi.update(editing.id, input, schoolId);
+        setInvitation(current => current?.account.id === updated.id &&
+          (updated.status === "LOCKED" || current.account.email !== updated.email) ? undefined : current);
+      } else
         setInvitation(
           onboarding
             ? await callApi(onboardDriverRequest(input), driverInvitationSchema)
@@ -72,7 +75,10 @@ export function AccountsPage({
     setBusy(true);
     try {
       if (row.deletedAt) await accountApi.restore(row.id, schoolId);
-      else await accountApi.remove(row.id, schoolId);
+      else {
+        await accountApi.remove(row.id, schoolId);
+        setInvitation(current => current?.account.id === row.id ? undefined : current);
+      }
       await mutate();
     } catch (error) {
       toast.error(getErrorMessage(error));

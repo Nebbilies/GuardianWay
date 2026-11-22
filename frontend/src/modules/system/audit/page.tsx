@@ -23,6 +23,7 @@ const actions = [
   "account.activated",
   "vehicle.created",
   "vehicle.update",
+  "stop.created",
   "student.created",
   "student.delete",
   "guardian.created",

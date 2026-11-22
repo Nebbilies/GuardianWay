@@ -29,7 +29,7 @@ export function DriverForm({
       phone: String(form.get("phone") ?? "").trim(),
       status: String(form.get("status") ?? "").trim(),
       notes: String(form.get("notes") ?? "").trim() || null,
-      accountId: accountId || null,
+      ...(!initialData || accountId !== (initialData.accountId ?? "") ? { accountId: accountId || null } : {}),
     });
   }
   return (

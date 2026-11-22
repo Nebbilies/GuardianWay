@@ -13,8 +13,8 @@ export const stopRepository = {
         return database.stop.findMany({ where: { schoolId, id: { in: ids }, deletedAt: null, status: "ACTIVE" } });
     },
     find(schoolId: string, id: string, database: Database = prisma) { return database.stop.findFirst({ where: { schoolId, id } }); },
-    async list(schoolId: string, query: ListQuery & { status?: string }, exportAll = false) {
-        const where: Prisma.StopWhereInput = { schoolId, deletedAt: deletedFilter(query), status: query.status, ...(query.search ? { OR: [{ code: { contains: query.search, mode: "insensitive" } }, { name: { contains: query.search, mode: "insensitive" } }, { address: { contains: query.search, mode: "insensitive" } }] } : {}) };
+    async list(schoolId: string, query: ListQuery & { status?: string; kind?: string }, exportAll = false) {
+        const where: Prisma.StopWhereInput = { schoolId, deletedAt: deletedFilter(query), status: query.status, kind: query.kind, ...(query.search ? { OR: [{ code: { contains: query.search, mode: "insensitive" } }, { name: { contains: query.search, mode: "insensitive" } }, { address: { contains: query.search, mode: "insensitive" } }] } : {}) };
         const [rows, count] = await Promise.all([
             prisma.stop.findMany({ where, ...listOptions(query, ["code", "name", "createdAt", "status"], "-createdAt"), ...(exportAll ? { skip: undefined, take: undefined } : {}) }),
             prisma.stop.count({ where }),

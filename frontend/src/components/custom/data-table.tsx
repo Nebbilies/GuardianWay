@@ -74,7 +74,7 @@ export function DataTable<Row extends { id: string }>({
           </Button>
         </div>
       )}
-      <div className="overflow-x-auto" tabIndex={0} aria-label={label}>
+      <div className="gw-table-scroll overflow-x-auto" tabIndex={0} aria-label={label}>
         <table
           className="gw-table"
           aria-label={label}

@@ -26,7 +26,7 @@ export function PoliciesPage() {
   const [busy, setBusy] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!school) return;
+    if (!school || !data || error) return;
     const element = event.currentTarget,
       form = new FormData(element);
     function instant(name: string) {
@@ -52,6 +52,7 @@ export function PoliciesPage() {
         rideWarningMinutes: number("rideWarningMinutes"),
         pickupWaitMinutes: number("pickupWaitMinutes"),
         gpsStaleSeconds: number("gpsStaleSeconds"),
+        historyRetentionDays: number("historyRetentionDays"),
         approvalBasis: String(form.get("approvalBasis")),
       });
       await mutate();
@@ -80,7 +81,7 @@ export function PoliciesPage() {
         className="space-y-4 rounded-lg border p-5"
       >
         <fieldset
-          disabled={busy || !school}
+          disabled={busy || !school || !data || Boolean(error)}
           className="grid gap-4 sm:grid-cols-2"
         >
           <TemporalField
@@ -134,6 +135,13 @@ export function PoliciesPage() {
               step={1}
             />
           </label>
+          {data && (
+            <label className="space-y-2 text-sm">
+              Thời hạn lưu lịch sử (ngày)
+              <Input name="historyRetentionDays" type="number" min={1} step={1}
+                defaultValue={data[0]?.historyRetentionDays ?? ""} placeholder="Chưa đặt" />
+            </label>
+          )}
           <label className="space-y-2 text-sm sm:col-span-2">
             Căn cứ xác nhận
             <Input
@@ -143,7 +151,7 @@ export function PoliciesPage() {
             />
           </label>
         </fieldset>
-        <Button type="submit" disabled={busy || !school}>
+        <Button type="submit" disabled={busy || !school || !data || Boolean(error)}>
           Xác nhận phiên bản cấu hình
         </Button>
       </form>

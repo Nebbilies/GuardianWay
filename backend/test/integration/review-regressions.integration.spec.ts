@@ -23,7 +23,7 @@ it.each([
         { stopId: test.direction === "PICKUP" ? terminal.body.id : fixture.stopA.id, plannedTime: test.last },
     ] }] });
     expect(plan.status).toBe(201);
-    expect((await request(app).post("/api/route-plans/" + plan.body.id + "/approve").set("Cookie", cookies).send({})).status).toBe(200);
+    expect((await request(app).post("/api/route-plans/" + plan.body.id + "/approve").set("Cookie", cookies).send({ approvalToken: plan.body.approvalToken })).status).toBe(200);
 });
 
 it("rejects restoring a driver whose retained account has changed role", async () => {

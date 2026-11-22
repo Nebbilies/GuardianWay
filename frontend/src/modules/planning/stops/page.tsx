@@ -5,7 +5,7 @@ import { RecordStatus } from "@/components/custom/record-status";
 import { DataTable } from "@/components/custom/data-table";
 import { ChoiceField, Choice } from "@/components/custom/choice-field";
 import { useState } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,24 +15,26 @@ import { FormDialog } from "@/components/custom/form-dialog";
 import { stopApi, type Stop } from "./contracts";
 import { StopForm } from "./form";
 export function StopPage() {
+  const { mutate: mutateCache } = useSWRConfig();
   const { confirm, dialog } = useConfirmAction();
   const [search, setSearch] = useState(""),
     [page, setPage] = useState(1),
     [deleted, setDeleted] = useState<"exclude" | "only">("exclude"),
     [sort, setSort] = useState("-createdAt");
+  const [kind, setKind] = useState<Stop["kind"]>();
   const [editing, setEditing] = useState<Stop>(),
     [open, setOpen] = useState(false),
     [busy, setBusy] = useState(false);
   const { data, error, isValidating, mutate } = useSWR(
-    ["stop", search, page, deleted, sort],
-    () => stopApi.list({ search, page, deleted, sort }),
+    ["stop", search, page, deleted, sort, kind],
+    () => stopApi.list({ search, page, deleted, sort, kind }),
   );
   async function submit(input: unknown) {
     setBusy(true);
     try {
       if (editing) await stopApi.update(editing.id, input);
       else await stopApi.create(input);
-      await mutate();
+      await mutateCache(key => Array.isArray(key) && key[0] === "stop", undefined);
       setOpen(false);
       toast.success("Đã lưu dữ liệu.");
     } catch (error) {
@@ -46,7 +48,7 @@ export function StopPage() {
     try {
       if (row.deletedAt) await stopApi.restore(row.id);
       else await stopApi.remove(row.id);
-      await mutate();
+      await mutateCache(key => Array.isArray(key) && key[0] === "stop", undefined);
       toast.success("Đã cập nhật hồ sơ.");
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -84,6 +86,14 @@ export function StopPage() {
             setPage(1);
           }}
         />
+        <ChoiceField aria-label="Loại điểm" value={kind ?? ""} onValueChange={(value) => {
+          setKind(value === "SCHOOL" || value === "SERVICE_POINT" ? value : undefined);
+          setPage(1);
+        }}>
+          <Choice value="">Tất cả loại điểm</Choice>
+          <Choice value="SCHOOL">Trường</Choice>
+          <Choice value="SERVICE_POINT">Điểm đón/trả</Choice>
+        </ChoiceField>
         <ChoiceField
           aria-label="Hồ sơ đã xóa"
           value={deleted}
@@ -109,9 +119,10 @@ export function StopPage() {
         sort={sort}
         onSort={changeSort}
         clearFilters={
-          search || deleted === "only"
+          search || kind || deleted === "only"
             ? () => {
                 setSearch("");
+                setKind(undefined);
                 setDeleted("exclude");
                 setPage(1);
               }

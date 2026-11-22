@@ -3,7 +3,7 @@ import { DataTable } from "@/components/custom/data-table";
 import { CheckField } from "@/components/custom/check-field";
 import { ChoiceField, Choice } from "@/components/custom/choice-field";
 import { useState, type FormEvent } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
 } from "./contracts";
 
 export function StudentAccessPanel({ studentId, busy, setBusy }: { studentId: string; busy: boolean; setBusy: (value: boolean) => void }) {
+  const { mutate: mutateCache } = useSWRConfig();
   const { data, error, mutate, isValidating } = useSWR(
     ["student-access", studentId],
     () => studentApi.get(studentId),
@@ -38,7 +39,7 @@ export function StudentAccessPanel({ studentId, busy, setBusy }: { studentId: st
     setBusy(true);
     try {
       await action();
-      await mutate();
+      await Promise.all([mutate(), mutateCache(key => Array.isArray(key) && key[0] === "student", undefined)]);
       toast.success("Đã cập nhật liên kết.");
     } catch (error) {
       toast.error(getErrorMessage(error));

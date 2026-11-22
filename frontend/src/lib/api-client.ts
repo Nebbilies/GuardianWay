@@ -96,7 +96,9 @@ async function refreshToken() {
     return refreshPromise;
 }
 
-export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+export function apiRequest(path: string, init: RequestInit, responseMode: "status"): Promise<void>;
+export function apiRequest<T>(path: string, init?: RequestInit): Promise<T>;
+export async function apiRequest<T>(path: string, init: RequestInit = {}, responseMode?: "status"): Promise<T | void> {
     const url = `${getApiBaseUrl()}${path}`;
 
     let response = await requestOnce(url, init);
@@ -110,9 +112,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
         throw await responseError(response);
     }
 
-    if (response.status === 204) {
-        return undefined as T;
-    }
+    if (response.status === 204 || responseMode === "status") return;
 
     try { return await response.json(); } catch { throw new ApiError("INVALID_RESPONSE", response.status); }
 }

@@ -29,6 +29,7 @@
     "PASSWORD_MISMATCH": "The password confirmation does not match.",
     "CARD_ALREADY_ASSIGNED": "This card is already assigned to another student.",
     "TRIP_ALREADY_EXISTS": "A trip already exists for this schedule, date and direction, including cancelled trips.",
+    "PLAN_DRAFT_CHANGED": "The draft has changed. Review the current plan before approving.",
     "TRIP_VERSION_CONFLICT": "The trip has changed. Please reload before continuing.",
     "TRIP_NOT_PLANNED": "Only planned trips can be edited or cancelled.",
     "SCHEDULE_NOT_APPLICABLE": "The schedule does not apply to the selected service date.",
