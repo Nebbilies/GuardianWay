@@ -87,10 +87,4 @@ export type SpacingToken = keyof typeof spacing;
 export type RadiusToken = keyof typeof radius;
 export type TextVariant = keyof typeof typography;
 export type TextTone =
-  | 'default'
-  | 'muted'
-  | 'inverse'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'info';
+  'default' | 'muted' | 'inverse' | 'success' | 'warning' | 'danger' | 'info';

@@ -31,10 +31,14 @@ function response(status: number) {
   return { status, ok: status >= 200 && status < 300 } as Response;
 }
 
-function setup(fetchImpl: NonNullable<Parameters<typeof createApiClient>[0]['fetchImpl']>) {
+function setup(
+  fetchImpl: NonNullable<Parameters<typeof createApiClient>[0]['fetchImpl']>,
+) {
   const api = {
     login: vi.fn().mockResolvedValue(makeSession('access-old', 'refresh-old')),
-    refresh: vi.fn().mockResolvedValue(makeSession('access-new', 'refresh-new')),
+    refresh: vi
+      .fn()
+      .mockResolvedValue(makeSession('access-new', 'refresh-new')),
     logout: vi.fn().mockResolvedValue(undefined),
     me: vi.fn(),
   };
@@ -55,7 +59,8 @@ describe('authenticated API client', () => {
   });
 
   it('refreshes once after 401 and retries with the new access token', async () => {
-    const fetchImpl = vi.fn<typeof fetch>()
+    const fetchImpl = vi
+      .fn<typeof fetch>()
       .mockResolvedValueOnce(response(401))
       .mockResolvedValueOnce(response(200));
     const { api, client, store } = setup(fetchImpl);
@@ -65,12 +70,16 @@ describe('authenticated API client', () => {
 
     expect(result.status).toBe(200);
     expect(api.refresh).toHaveBeenCalledOnce();
-    expect(fetchImpl.mock.calls.map((call) => new Headers(call[1]?.headers).get('Authorization')))
-      .toEqual(['Bearer access-old', 'Bearer access-new']);
+    expect(
+      fetchImpl.mock.calls.map((call) =>
+        new Headers(call[1]?.headers).get('Authorization'),
+      ),
+    ).toEqual(['Bearer access-old', 'Bearer access-new']);
   });
 
   it('shares refresh across concurrent unauthorized requests', async () => {
-    const fetchImpl = vi.fn<typeof fetch>()
+    const fetchImpl = vi
+      .fn<typeof fetch>()
       .mockResolvedValueOnce(response(401))
       .mockResolvedValueOnce(response(401))
       .mockResolvedValueOnce(response(200))
@@ -90,7 +99,8 @@ describe('authenticated API client', () => {
   });
 
   it('does not retry the original request more than once', async () => {
-    const fetchImpl = vi.fn<typeof fetch>()
+    const fetchImpl = vi
+      .fn<typeof fetch>()
       .mockResolvedValueOnce(response(401))
       .mockResolvedValueOnce(response(401));
     const { api, client, store } = setup(fetchImpl);

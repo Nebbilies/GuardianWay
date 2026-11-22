@@ -1,8 +1,11 @@
 const sessionChangeKey = "guardianway.session-change";
 
 export function navigateAfterSessionChange(path: string) {
-    try { window.localStorage.setItem(sessionChangeKey, crypto.randomUUID()); }
-    catch { /* Session navigation also works when storage is unavailable. */ }
+    try {
+        window.localStorage.setItem(sessionChangeKey, crypto.randomUUID());
+    } catch {
+        /* Session navigation also works when storage is unavailable. */
+    }
     window.location.replace(path);
 }
 

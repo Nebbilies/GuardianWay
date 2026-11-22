@@ -1,14 +1,20 @@
-import {ArrowUpDown} from 'lucide-react'
+import { ArrowUpDown } from "lucide-react";
 
 interface SortHeaderProps {
-    label: string
-    sortKeyValue: string
-    sortBy: string
-    sortOrder: 'asc' | 'desc'
-    onSortChange: (sortBy: string) => void
+    label: string;
+    sortKeyValue: string;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (sortBy: string) => void;
 }
 
-export function SortHeader({label, sortKeyValue, sortBy, sortOrder, onSortChange}: SortHeaderProps) {
+export function SortHeader({
+    label,
+    sortKeyValue,
+    sortBy,
+    sortOrder,
+    onSortChange,
+}: SortHeaderProps) {
     return (
         <button
             onClick={() => onSortChange(sortKeyValue)}
@@ -16,8 +22,10 @@ export function SortHeader({label, sortKeyValue, sortBy, sortOrder, onSortChange
         >
             {label}
             {sortBy === sortKeyValue && (
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`}/>
+                <ArrowUpDown
+                    className={`w-4 h-4 transition-transform ${sortOrder === "desc" ? "rotate-180" : ""}`}
+                />
             )}
         </button>
-    )
+    );
 }

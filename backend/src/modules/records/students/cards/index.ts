@@ -1,1 +1,5 @@
-export { cardService, readStudentCards, closeStudentCards } from "./student-card.service";
+export {
+    cardService,
+    readStudentCards,
+    closeStudentCards,
+} from "./student-card.service";

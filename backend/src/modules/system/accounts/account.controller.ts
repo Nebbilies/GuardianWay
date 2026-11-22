@@ -9,31 +9,78 @@ import { accountService } from "./account.service";
 
 function scope(req: Request) {
     const actor = authenticatedActor(req);
-    const schoolId = actor.kind === "school" ? actor.schoolId : z.uuid().parse(req.params.schoolId);
-    if (actor.kind === "school" && req.params.schoolId && req.params.schoolId !== schoolId) throw new AuthorizationError();
+    const schoolId =
+        actor.kind === "school"
+            ? actor.schoolId
+            : z.uuid().parse(req.params.schoolId);
+    if (
+        actor.kind === "school" &&
+        req.params.schoolId &&
+        req.params.schoolId !== schoolId
+    ) {
+        throw new AuthorizationError();
+    }
     return { actor, schoolId };
 }
 export async function listAccounts(req: Request, res: Response) {
     const { actor, schoolId } = scope(req);
     const query = accountQuery.parse(req.query);
-    if (query.schoolId && query.schoolId !== schoolId) throw new AuthorizationError();
-    res.json(await accountService.list(actor, schoolId, query, req.route.path === "/export"));
+    if (query.schoolId && query.schoolId !== schoolId) {
+        throw new AuthorizationError();
+    }
+    res.json(
+        await accountService.list(
+            actor,
+            schoolId,
+            query,
+            req.route.path === "/export",
+        ),
+    );
 }
 export async function getAccount(req: Request, res: Response) {
     const { actor, schoolId } = scope(req);
-    res.json(await accountService.get(actor, schoolId, idParams.parse(req.params).id));
+    res.json(
+        await accountService.get(
+            actor,
+            schoolId,
+            idParams.parse(req.params).id,
+        ),
+    );
 }
 export async function createAccount(req: Request, res: Response) {
     const { actor, schoolId } = scope(req);
-    res.status(201).json(await accountService.create(actor, schoolId, req.body, requestMetadata(req)));
+    res.status(201).json(
+        await accountService.create(
+            actor,
+            schoolId,
+            req.body,
+            requestMetadata(req),
+        ),
+    );
 }
 export function changeAccount(operation: "update" | "delete" | "restore") {
     return async (req: Request, res: Response) => {
         const { actor, schoolId } = scope(req);
-        res.json(await accountService.change(actor, schoolId, idParams.parse(req.params).id, req.body, operation, requestMetadata(req)));
+        res.json(
+            await accountService.change(
+                actor,
+                schoolId,
+                idParams.parse(req.params).id,
+                req.body,
+                operation,
+                requestMetadata(req),
+            ),
+        );
     };
 }
 export async function resendInvite(req: Request, res: Response) {
     const { actor, schoolId } = scope(req);
-    res.json(await accountService.resend(actor, schoolId, idParams.parse(req.params).id, requestMetadata(req)));
+    res.json(
+        await accountService.resend(
+            actor,
+            schoolId,
+            idParams.parse(req.params).id,
+            requestMetadata(req),
+        ),
+    );
 }

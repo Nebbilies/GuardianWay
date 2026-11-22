@@ -6,7 +6,10 @@ type ApiClientOptions = {
   fetchImpl?: (url: string, init?: RequestInit) => Promise<Response>;
 };
 
-export function createApiClient({ store, fetchImpl = fetch }: ApiClientOptions) {
+export function createApiClient({
+  store,
+  fetchImpl = fetch,
+}: ApiClientOptions) {
   return async function apiRequest(path: string, init: RequestInit = {}) {
     const accessToken = store.getState().accessToken;
     if (!accessToken) {
@@ -25,7 +28,9 @@ export function createApiClient({ store, fetchImpl = fetch }: ApiClientOptions) 
     }
 
     try {
-      const refreshedAccessToken = await store.getState().refreshAccessToken(accessToken);
+      const refreshedAccessToken = await store
+        .getState()
+        .refreshAccessToken(accessToken);
       if (!refreshedAccessToken) {
         await store.getState().signOut();
         return response;

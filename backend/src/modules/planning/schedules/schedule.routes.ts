@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { list, get, create, revise, update, transition } from "./schedule.controller";
+import {
+    list,
+    get,
+    create,
+    revise,
+    update,
+    transition,
+} from "./schedule.controller";
 export const scheduleRouter = Router();
 scheduleRouter.get("/", list);
 scheduleRouter.get("/:id", get);

@@ -1,5 +1,14 @@
 import { Router } from "express";
-import { listStudents, getStudent, createStudent, changeStudent, createGuardian, closeGuardian, assignCard, revokeCard } from "./student.controller";
+import {
+    listStudents,
+    getStudent,
+    createStudent,
+    changeStudent,
+    createGuardian,
+    closeGuardian,
+    assignCard,
+    revokeCard,
+} from "./student.controller";
 export const studentRouter = Router();
 studentRouter.get("/", listStudents);
 studentRouter.get("/export", listStudents);

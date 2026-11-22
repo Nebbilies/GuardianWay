@@ -21,7 +21,9 @@ describe("integration harness", () => {
 
     it("authenticates a seeded admin through the real login endpoint", async () => {
         const cookies = await loginAs(app, fx.adminA.email);
-        expect(cookies.some((c) => c.startsWith("gw_access_token="))).toBe(true);
+        expect(cookies.some((c) => c.startsWith("gw_access_token="))).toBe(
+            true,
+        );
     });
 
     it("serves an authenticated request with the returned cookies", async () => {
@@ -63,7 +65,10 @@ describe("integration harness", () => {
         it("readyz reports both dependencies healthy", async () => {
             const res = await request(app).get("/readyz");
             expect(res.status).toBe(200);
-            expect(res.body).toEqual({ status: "ok", checks: { db: "ok", redis: "ok" } });
+            expect(res.body).toEqual({
+                status: "ok",
+                checks: { db: "ok", redis: "ok" },
+            });
         });
     });
 });

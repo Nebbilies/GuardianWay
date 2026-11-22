@@ -8,8 +8,12 @@
 // Anything unparseable falls back to 0, which fails safe — req.ip becomes the
 // socket peer, which may be a proxy address but can never be forged.
 export function resolveTrustProxyHops(raw: string | undefined): number {
-    if (!raw) return 0;
+    if (!raw) {
+        return 0;
+    }
     const parsed = Number(raw);
-    if (!Number.isInteger(parsed) || parsed < 0) return 0;
+    if (!Number.isInteger(parsed) || parsed < 0) {
+        return 0;
+    }
     return parsed;
 }

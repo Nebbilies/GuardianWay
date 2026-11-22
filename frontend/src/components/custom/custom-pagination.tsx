@@ -1,4 +1,4 @@
-import { PaginationMetadata } from "@/lib/http/contracts"
+import { PaginationMetadata } from "@/lib/http/contracts";
 import {
     Pagination,
     PaginationEllipsis,
@@ -14,8 +14,18 @@ interface CustomPaginationProps {
     onPageChange: (page: number) => void;
 }
 
-export default function CustomPagination({ paginationData, onPageChange }: CustomPaginationProps) {
-    const { currentPage, isLastPage, isFirstPage, pageCount, nextPage, previousPage } = paginationData;
+export default function CustomPagination({
+    paginationData,
+    onPageChange,
+}: CustomPaginationProps) {
+    const {
+        currentPage,
+        isLastPage,
+        isFirstPage,
+        pageCount,
+        nextPage,
+        previousPage,
+    } = paginationData;
     return (
         <Pagination>
             <PaginationContent>
@@ -23,28 +33,46 @@ export default function CustomPagination({ paginationData, onPageChange }: Custo
                     aria-disabled={isFirstPage}
                     tabIndex={isFirstPage ? -1 : undefined}
                     className={
-                        isFirstPage ? "pointer-events-none opacity-50" : undefined
+                        isFirstPage
+                            ? "pointer-events-none opacity-50"
+                            : undefined
                     }
-                    onClick={() => !isFirstPage && previousPage && onPageChange(previousPage)}
+                    onClick={() =>
+                        !isFirstPage &&
+                        previousPage &&
+                        onPageChange(previousPage)
+                    }
                 />
                 {generatePageItems(currentPage, pageCount, onPageChange)}
                 <PaginationNext
                     aria-disabled={isLastPage}
                     tabIndex={isLastPage ? -1 : undefined}
                     className={
-                        isLastPage ? "pointer-events-none opacity-50" : undefined
+                        isLastPage
+                            ? "pointer-events-none opacity-50"
+                            : undefined
                     }
-                    onClick={() => !isLastPage && nextPage && onPageChange(nextPage)}
+                    onClick={() =>
+                        !isLastPage && nextPage && onPageChange(nextPage)
+                    }
                 />
             </PaginationContent>
         </Pagination>
-    )
+    );
 }
 
-const generatePageItems = (currentPage: number, pageCount: number, onPageChange: (page: number) => void) => {
+const generatePageItems = (
+    currentPage: number,
+    pageCount: number,
+    onPageChange: (page: number) => void,
+) => {
     const pageItems = [];
     for (let i = 1; i <= pageCount; i++) {
-        if (i === 1 || i === pageCount || (i >= currentPage - 2 && i <= currentPage + 2)) {
+        if (
+            i === 1 ||
+            i === pageCount ||
+            (i >= currentPage - 2 && i <= currentPage + 2)
+        ) {
             pageItems.push(
                 <PaginationItem key={i}>
                     <PaginationLink
@@ -54,13 +82,14 @@ const generatePageItems = (currentPage: number, pageCount: number, onPageChange:
                     >
                         {i}
                     </PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         } else if (
-            (i === currentPage - 3 && currentPage > 4) || (i === currentPage + 3 && currentPage < pageCount - 3)
+            (i === currentPage - 3 && currentPage > 4) ||
+            (i === currentPage + 3 && currentPage < pageCount - 3)
         ) {
             pageItems.push(<PaginationEllipsis key={`ellipsis-${i}`} />);
         }
     }
     return pageItems;
-}
+};

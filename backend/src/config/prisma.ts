@@ -21,4 +21,4 @@ const options: Prisma.PrismaClientOptions = {
 const prisma = new PrismaClient(options);
 
 export default prisma;
-export * from "@prisma/client"
+export * from "@prisma/client";

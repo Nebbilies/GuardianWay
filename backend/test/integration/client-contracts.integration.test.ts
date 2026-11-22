@@ -9,12 +9,24 @@ import { resetAndSeed, TEST_PASSWORD, type Fixture } from "./fixtures";
 import { loadApp, loginAs } from "./helpers/login";
 import { pageResponseSchema } from "../../src/http/contracts/pagination";
 import { problemSchema } from "../../src/http/contracts/problem";
-import { sessionResponseSchema, webResponseSchema, authUserSchema } from "../../src/modules/system/auth/auth.contracts";
-import { schoolViewSchema, schoolContextSchema } from "../../src/modules/system/schools/school.contracts";
+import {
+    sessionResponseSchema,
+    webResponseSchema,
+    authUserSchema,
+} from "../../src/modules/system/auth/auth.contracts";
+import {
+    schoolViewSchema,
+    schoolContextSchema,
+} from "../../src/modules/system/schools/school.contracts";
 import { invitationResponseSchema } from "../../src/modules/system/accounts/account.contracts";
 import { vehicleSchema } from "../../src/modules/records/vehicles/vehicle.responses";
 import { stopSchema } from "../../src/modules/planning/stops/stop.responses";
-import { studentSchema, studentDetailSchema, guardianSchema, cardSchema } from "../../src/modules/records/students/student.responses";
+import {
+    studentSchema,
+    studentDetailSchema,
+    guardianSchema,
+    cardSchema,
+} from "../../src/modules/records/students/student.responses";
 import { driverSchema } from "../../src/modules/records/drivers/driver.responses";
 import { policySchema } from "../../src/modules/system/school-policies/policy.responses";
 import { planSchema } from "../../src/modules/planning/route-plans/plan.responses";
@@ -22,69 +34,467 @@ import { scheduleSchema } from "../../src/modules/planning/schedules/schedule.re
 import { tripDetailSchema } from "../../src/modules/operations/trips/trip.responses";
 import { auditSchema } from "../../src/modules/system/audit/audit.responses";
 import { landingProofSchema } from "../../src/modules/public-reporting/public.contracts";
-const { fingerprint, requiredCases } = require("../../../scripts/contract-cases.cjs");
-type Case = { id: string; request: { path: string; method: string; body?: unknown }; response: { status: number; body: unknown; cookieIssued: boolean } };
+const {
+    fingerprint,
+    requiredCases,
+} = require("../../../scripts/contract-cases.cjs");
+type Case = {
+    id: string;
+    request: { path: string; method: string; body?: unknown };
+    response: { status: number; body: unknown; cookieIssued: boolean };
+};
 function sanitized(value: unknown, key = ""): unknown {
-    if (["password", "accessToken", "refreshToken", "token", "passwordHash"].includes(key)) return "<" + key + ">";
-    if (key === "inviteLink" && typeof value === "string") { const url = new URL(value); url.searchParams.set("token", "contract-placeholder"); return url.toString(); }
-    if (Array.isArray(value)) return value.map(item => sanitized(item));
-    if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([name, item]) => [name, sanitized(item, name)]));
+    if (
+        [
+            "password",
+            "accessToken",
+            "refreshToken",
+            "token",
+            "passwordHash",
+        ].includes(key)
+    ) {
+        return "<" + key + ">";
+    }
+    if (key === "inviteLink" && typeof value === "string") {
+        const url = new URL(value);
+        url.searchParams.set("token", "contract-placeholder");
+        return url.toString();
+    }
+    if (Array.isArray(value)) {
+        return value.map((item) => sanitized(item));
+    }
+    if (value && typeof value === "object") {
+        return Object.fromEntries(
+            Object.entries(value).map(([name, item]) => [
+                name,
+                sanitized(item, name),
+            ]),
+        );
+    }
     return value;
 }
 let app: Express, fx: Fixture;
-beforeAll(async () => { app = await loadApp(); });
-beforeEach(async () => { fx = await resetAndSeed(); await redisClient.flushDb(); });
+beforeAll(async () => {
+    app = await loadApp();
+});
+beforeEach(async () => {
+    fx = await resetAndSeed();
+    await redisClient.flushDb();
+});
 it("publishes fresh sanitized HTTP cases for the independently owned web and mobile contracts", async () => {
-    const cases: Case[] = [], admin = await loginAs(app, fx.adminA.email), platform = await loginAs(app, fx.superAdmin.email);
-    async function capture<T extends z.ZodType>(id: string, method: "get" | "post" | "patch", path: string, body: unknown, schema: T, status = 201, cookies: string[] | null = admin, bearer?: string) {
+    const cases: Case[] = [],
+        admin = await loginAs(app, fx.adminA.email),
+        platform = await loginAs(app, fx.superAdmin.email);
+    async function capture<T extends z.ZodType>(
+        id: string,
+        method: "get" | "post" | "patch",
+        path: string,
+        body: unknown,
+        schema: T,
+        status = 201,
+        cookies: string[] | null = admin,
+        bearer?: string,
+    ) {
         const operation = request(app)[method](path);
-        if (cookies) operation.set("Cookie", cookies);
-        if (bearer) operation.set("Authorization", "Bearer " + bearer);
-        if (body !== undefined) operation.send(body);
+        if (cookies) {
+            operation.set("Cookie", cookies);
+        }
+        if (bearer) {
+            operation.set("Authorization", "Bearer " + bearer);
+        }
+        if (body !== undefined) {
+            operation.send(body);
+        }
         const response = await operation;
         expect(response.status, id + ": " + response.text).toBe(status);
         const parsed = schema.parse(response.body);
-        cases.push({ id, request: { method: method.toUpperCase(), path, ...(body !== undefined ? { body: sanitized(body) } : {}) }, response: { status: response.status, body: sanitized(response.body), cookieIssued: Boolean(response.headers["set-cookie"]) } });
+        cases.push({
+            id,
+            request: {
+                method: method.toUpperCase(),
+                path,
+                ...(body !== undefined ? { body: sanitized(body) } : {}),
+            },
+            response: {
+                status: response.status,
+                body: sanitized(response.body),
+                cookieIssued: Boolean(response.headers["set-cookie"]),
+            },
+        });
         return { body: parsed, response };
     }
-    const web = await capture("auth.web.login", "post", "/api/auth/login", { email: fx.adminA.email, password: TEST_PASSWORD }, webResponseSchema, 200, null);
-    await capture("auth.web.refresh", "post", "/api/auth/refresh", undefined, webResponseSchema, 200, web.response.headers["set-cookie"]);
-    const mobile = await capture("auth.mobile.login", "post", "/api/auth/token/login", { email: fx.driverA.email, password: TEST_PASSWORD }, sessionResponseSchema, 200, null);
-    await capture("auth.me", "get", "/api/auth/me", undefined, z.object({ user: authUserSchema }), 200, null, mobile.body.session.accessToken);
-    const refreshed = await capture("auth.mobile.refresh", "post", "/api/auth/token/refresh", { refreshToken: mobile.body.session.refreshToken }, sessionResponseSchema, 200, null);
-    await capture("auth.mobile.logout", "post", "/api/auth/token/logout", { refreshToken: refreshed.body.session.refreshToken }, z.object({ message: z.string() }), 200, null);
-    const invalid = await capture("problem.credentials", "post", "/api/auth/login", { email: fx.driverA.email, password: "incorrect" }, problemSchema, 401, null);
-    expect(invalid.body.code).toBe("INVALID_CREDENTIALS"); expect(invalid.body.detail).toBe("Invalid email or password");
-    await capture("schools.create", "post", "/api/schools", { code: "CONTRACT", name: "Contract school", address: "Fictional address", timezone: "Asia/Ho_Chi_Minh", status: "ACTIVE" }, schoolViewSchema, 201, platform);
-    await capture("school.context", "get", "/api/school-context", undefined, schoolContextSchema, 200);
-    const account = await capture("accounts.create", "post", "/api/users", { displayName: "Contract parent", email: "contract-parent@gw.test", phone: "0901000000", role: "PARENT" }, invitationResponseSchema);
-    await capture("accounts.activate", "post", "/api/auth/setup-password", { token: new URL(account.body.inviteLink).searchParams.get("token"), password: TEST_PASSWORD }, z.object({ message: z.string() }), 200, null);
-    const vehicle = await capture("vehicles.create", "post", "/api/buses", { code: "BUS002", plateNumber: "51A99999", studentCapacity: 20, status: "AVAILABLE", description: "Contract vehicle" }, vehicleSchema);
-    const point = await capture("stops.create", "post", "/api/bus-stops", { code: "POINT002", name: "Contract point", address: "Fictional pickup address", latitude: 10.78, longitude: 106.69, kind: "SERVICE_POINT", allowsPickup: true, allowsDropoff: true, status: "ACTIVE", accessNote: null }, stopSchema);
-    const terminal = await capture("stops.terminal.create", "post", "/api/bus-stops", { code: "SCHOOL", name: "School terminal", address: "Fictional school address", latitude: 10.8, longitude: 106.7, kind: "SCHOOL", allowsPickup: true, allowsDropoff: true, status: "ACTIVE", accessNote: null }, stopSchema);
-    const student = await capture("students.create", "post", "/api/students", { studentCode: "HS002", fullName: "Contract student", classLabel: "5B", status: "ACTIVE" }, studentSchema);
-    await capture("guardians.create", "post", "/api/students/" + student.body.id + "/guardians", { guardianAccountId: account.body.account.id, relationshipLabel: "Mother", canTrack: true, canRequest: true }, guardianSchema);
-    await capture("cards.assign", "post", "/api/students/" + student.body.id + "/cards", { cardUid: "000abc", technology: "NFC" }, cardSchema);
-    await capture("students.detail", "get", "/api/students/" + student.body.id, undefined, studentDetailSchema, 200);
-    const driver = await capture("drivers.onboard", "post", "/api/drivers/onboarding", { account: { displayName: "Contract driver", email: "contract-driver@gw.test", phone: "0902000000" }, driver: { code: "DRV002", fullName: "Contract driver profile", phone: "0902000000", status: "AVAILABLE", notes: null } }, invitationResponseSchema.extend({ driver: driverSchema }));
-    const policy = await capture("policies.create", "post", "/api/school-policies", { effectiveFrom: "2026-09-02T00:00:00.000Z", pickupArrivalTime: "08:00", dropoffDepartureTime: "16:00", approvalBasis: "Contract fixture approval" }, policySchema);
-    const plan = await capture("plans.create", "post", "/api/route-plans", { referenceDate: "2026-09-03", direction: "PICKUP", policyVersionId: policy.body.id, effectiveFrom: "2026-09-03", effectiveTo: "2026-12-31", routes: [{ routeCode: "CONTRACT", label: "Manual contract route", vehicleId: vehicle.body.id, distanceMetres: 12000, durationSeconds: 3600, stops: [{ stopId: point.body.id, plannedTime: "07:00" }, { stopId: terminal.body.id, plannedTime: "07:30" }] }] }, planSchema);
-    const approved = await capture("plans.approve", "post", "/api/route-plans/" + plan.body.id + "/approve", { approvalToken: plan.body.approvalToken }, planSchema, 200);
-    const schedule = await capture("schedules.create", "post", "/api/recurring-schedules", { routeId: approved.body.routes[0]!.id, effectiveFrom: "2026-09-03", effectiveTo: "2026-12-31", weekdays: [1,2,3,4,5], plannedStartTime: "06:45", defaultVehicleId: vehicle.body.id, defaultDriverId: driver.body.driver.id }, scheduleSchema);
-    await capture("schedules.activate", "post", "/api/recurring-schedules/" + schedule.body.id + "/activate", {}, scheduleSchema, 200);
-    const tripBody = { scheduleId: schedule.body.id, serviceDate: "2026-09-03" };
-    const trip = await capture("trips.create", "post", "/api/bus-trips", tripBody, tripDetailSchema);
-    const changed = await capture("trips.update", "patch", "/api/bus-trips/" + trip.body.id, { expectedDataVersion: 1, plannedStartTime: "06:50" }, tripDetailSchema, 200);
-    await capture("trips.cancel", "post", "/api/bus-trips/" + trip.body.id + "/cancel", { expectedDataVersion: changed.body.dataVersion, reason: "School closed" }, tripDetailSchema, 200);
-    const duplicate = await capture("problem.trip.duplicate", "post", "/api/bus-trips", tripBody, problemSchema, 409);
+    const web = await capture(
+        "auth.web.login",
+        "post",
+        "/api/auth/login",
+        { email: fx.adminA.email, password: TEST_PASSWORD },
+        webResponseSchema,
+        200,
+        null,
+    );
+    await capture(
+        "auth.web.refresh",
+        "post",
+        "/api/auth/refresh",
+        undefined,
+        webResponseSchema,
+        200,
+        web.response.headers["set-cookie"],
+    );
+    const mobile = await capture(
+        "auth.mobile.login",
+        "post",
+        "/api/auth/token/login",
+        { email: fx.driverA.email, password: TEST_PASSWORD },
+        sessionResponseSchema,
+        200,
+        null,
+    );
+    await capture(
+        "auth.me",
+        "get",
+        "/api/auth/me",
+        undefined,
+        z.object({ user: authUserSchema }),
+        200,
+        null,
+        mobile.body.session.accessToken,
+    );
+    const refreshed = await capture(
+        "auth.mobile.refresh",
+        "post",
+        "/api/auth/token/refresh",
+        { refreshToken: mobile.body.session.refreshToken },
+        sessionResponseSchema,
+        200,
+        null,
+    );
+    await capture(
+        "auth.mobile.logout",
+        "post",
+        "/api/auth/token/logout",
+        { refreshToken: refreshed.body.session.refreshToken },
+        z.object({ message: z.string() }),
+        200,
+        null,
+    );
+    const invalid = await capture(
+        "problem.credentials",
+        "post",
+        "/api/auth/login",
+        { email: fx.driverA.email, password: "incorrect" },
+        problemSchema,
+        401,
+        null,
+    );
+    expect(invalid.body.code).toBe("INVALID_CREDENTIALS");
+    expect(invalid.body.detail).toBe("Invalid email or password");
+    await capture(
+        "schools.create",
+        "post",
+        "/api/schools",
+        {
+            code: "CONTRACT",
+            name: "Contract school",
+            address: "Fictional address",
+            timezone: "Asia/Ho_Chi_Minh",
+            status: "ACTIVE",
+        },
+        schoolViewSchema,
+        201,
+        platform,
+    );
+    await capture(
+        "school.context",
+        "get",
+        "/api/school-context",
+        undefined,
+        schoolContextSchema,
+        200,
+    );
+    const account = await capture(
+        "accounts.create",
+        "post",
+        "/api/users",
+        {
+            displayName: "Contract parent",
+            email: "contract-parent@gw.test",
+            phone: "0901000000",
+            role: "PARENT",
+        },
+        invitationResponseSchema,
+    );
+    await capture(
+        "accounts.activate",
+        "post",
+        "/api/auth/setup-password",
+        {
+            token: new URL(account.body.inviteLink).searchParams.get("token"),
+            password: TEST_PASSWORD,
+        },
+        z.object({ message: z.string() }),
+        200,
+        null,
+    );
+    const vehicle = await capture(
+        "vehicles.create",
+        "post",
+        "/api/buses",
+        {
+            code: "BUS002",
+            plateNumber: "51A99999",
+            studentCapacity: 20,
+            status: "AVAILABLE",
+            description: "Contract vehicle",
+        },
+        vehicleSchema,
+    );
+    const point = await capture(
+        "stops.create",
+        "post",
+        "/api/bus-stops",
+        {
+            code: "POINT002",
+            name: "Contract point",
+            address: "Fictional pickup address",
+            latitude: 10.78,
+            longitude: 106.69,
+            kind: "SERVICE_POINT",
+            allowsPickup: true,
+            allowsDropoff: true,
+            status: "ACTIVE",
+            accessNote: null,
+        },
+        stopSchema,
+    );
+    const terminal = await capture(
+        "stops.terminal.create",
+        "post",
+        "/api/bus-stops",
+        {
+            code: "SCHOOL",
+            name: "School terminal",
+            address: "Fictional school address",
+            latitude: 10.8,
+            longitude: 106.7,
+            kind: "SCHOOL",
+            allowsPickup: true,
+            allowsDropoff: true,
+            status: "ACTIVE",
+            accessNote: null,
+        },
+        stopSchema,
+    );
+    const student = await capture(
+        "students.create",
+        "post",
+        "/api/students",
+        {
+            studentCode: "HS002",
+            fullName: "Contract student",
+            classLabel: "5B",
+            status: "ACTIVE",
+        },
+        studentSchema,
+    );
+    await capture(
+        "guardians.create",
+        "post",
+        "/api/students/" + student.body.id + "/guardians",
+        {
+            guardianAccountId: account.body.account.id,
+            relationshipLabel: "Mother",
+            canTrack: true,
+            canRequest: true,
+        },
+        guardianSchema,
+    );
+    await capture(
+        "cards.assign",
+        "post",
+        "/api/students/" + student.body.id + "/cards",
+        { cardUid: "000abc", technology: "NFC" },
+        cardSchema,
+    );
+    await capture(
+        "students.detail",
+        "get",
+        "/api/students/" + student.body.id,
+        undefined,
+        studentDetailSchema,
+        200,
+    );
+    const driver = await capture(
+        "drivers.onboard",
+        "post",
+        "/api/drivers/onboarding",
+        {
+            account: {
+                displayName: "Contract driver",
+                email: "contract-driver@gw.test",
+                phone: "0902000000",
+            },
+            driver: {
+                code: "DRV002",
+                fullName: "Contract driver profile",
+                phone: "0902000000",
+                status: "AVAILABLE",
+                notes: null,
+            },
+        },
+        invitationResponseSchema.extend({ driver: driverSchema }),
+    );
+    const policy = await capture(
+        "policies.create",
+        "post",
+        "/api/school-policies",
+        {
+            effectiveFrom: "2026-09-02T00:00:00.000Z",
+            pickupArrivalTime: "08:00",
+            dropoffDepartureTime: "16:00",
+            approvalBasis: "Contract fixture approval",
+        },
+        policySchema,
+    );
+    const plan = await capture(
+        "plans.create",
+        "post",
+        "/api/route-plans",
+        {
+            referenceDate: "2026-09-03",
+            direction: "PICKUP",
+            policyVersionId: policy.body.id,
+            effectiveFrom: "2026-09-03",
+            effectiveTo: "2026-12-31",
+            routes: [
+                {
+                    routeCode: "CONTRACT",
+                    label: "Manual contract route",
+                    vehicleId: vehicle.body.id,
+                    distanceMetres: 12000,
+                    durationSeconds: 3600,
+                    stops: [
+                        { stopId: point.body.id, plannedTime: "07:00" },
+                        { stopId: terminal.body.id, plannedTime: "07:30" },
+                    ],
+                },
+            ],
+        },
+        planSchema,
+    );
+    const approved = await capture(
+        "plans.approve",
+        "post",
+        "/api/route-plans/" + plan.body.id + "/approve",
+        { approvalToken: plan.body.approvalToken },
+        planSchema,
+        200,
+    );
+    const schedule = await capture(
+        "schedules.create",
+        "post",
+        "/api/recurring-schedules",
+        {
+            routeId: approved.body.routes[0]!.id,
+            effectiveFrom: "2026-09-03",
+            effectiveTo: "2026-12-31",
+            weekdays: [1, 2, 3, 4, 5],
+            plannedStartTime: "06:45",
+            defaultVehicleId: vehicle.body.id,
+            defaultDriverId: driver.body.driver.id,
+        },
+        scheduleSchema,
+    );
+    await capture(
+        "schedules.activate",
+        "post",
+        "/api/recurring-schedules/" + schedule.body.id + "/activate",
+        {},
+        scheduleSchema,
+        200,
+    );
+    const tripBody = {
+        scheduleId: schedule.body.id,
+        serviceDate: "2026-09-03",
+    };
+    const trip = await capture(
+        "trips.create",
+        "post",
+        "/api/bus-trips",
+        tripBody,
+        tripDetailSchema,
+    );
+    const changed = await capture(
+        "trips.update",
+        "patch",
+        "/api/bus-trips/" + trip.body.id,
+        { expectedDataVersion: 1, plannedStartTime: "06:50" },
+        tripDetailSchema,
+        200,
+    );
+    await capture(
+        "trips.cancel",
+        "post",
+        "/api/bus-trips/" + trip.body.id + "/cancel",
+        {
+            expectedDataVersion: changed.body.dataVersion,
+            reason: "School closed",
+        },
+        tripDetailSchema,
+        200,
+    );
+    const duplicate = await capture(
+        "problem.trip.duplicate",
+        "post",
+        "/api/bus-trips",
+        tripBody,
+        problemSchema,
+        409,
+    );
     expect(duplicate.body.code).toBe("TRIP_ALREADY_EXISTS");
-    await capture("audit.list", "get", "/api/audit-logs", undefined, pageResponseSchema(auditSchema), 200);
-    await capture("public.landing", "get", "/api/public/landing-proof", undefined, landingProofSchema, 200, null);
-    expect(new Set(cases.map(item => item.id))).toEqual(new Set(requiredCases));
+    await capture(
+        "audit.list",
+        "get",
+        "/api/audit-logs",
+        undefined,
+        pageResponseSchema(auditSchema),
+        200,
+    );
+    await capture(
+        "public.landing",
+        "get",
+        "/api/public/landing-proof",
+        undefined,
+        landingProofSchema,
+        200,
+        null,
+    );
+    expect(new Set(cases.map((item) => item.id))).toEqual(
+        new Set(requiredCases),
+    );
     if (process.env.CONTRACT_CASES_DIR) {
-        if (!process.env.CONTRACT_RUN_ID) throw new Error("Missing contract run ID");
-        const serialized = JSON.stringify({ formatVersion: 1, runId: process.env.CONTRACT_RUN_ID, providerFingerprint: fingerprint(), generatedAt: new Date().toISOString(), cases });
-        for (const secret of [TEST_PASSWORD, mobile.body.session.accessToken, mobile.body.session.refreshToken, refreshed.body.session.refreshToken, new URL(account.body.inviteLink).searchParams.get("token")!]) expect(serialized).not.toContain(secret);
-        writeFileSync(join(process.env.CONTRACT_CASES_DIR, "provider.json"), serialized);
+        if (!process.env.CONTRACT_RUN_ID) {
+            throw new Error("Missing contract run ID");
+        }
+        const serialized = JSON.stringify({
+            formatVersion: 1,
+            runId: process.env.CONTRACT_RUN_ID,
+            providerFingerprint: fingerprint(),
+            generatedAt: new Date().toISOString(),
+            cases,
+        });
+        for (const secret of [
+            TEST_PASSWORD,
+            mobile.body.session.accessToken,
+            mobile.body.session.refreshToken,
+            refreshed.body.session.refreshToken,
+            new URL(account.body.inviteLink).searchParams.get("token")!,
+        ]) {
+            expect(serialized).not.toContain(secret);
+        }
+        writeFileSync(
+            join(process.env.CONTRACT_CASES_DIR, "provider.json"),
+            serialized,
+        );
     }
 });

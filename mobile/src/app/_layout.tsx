@@ -56,7 +56,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontError && __DEV__) {
-      console.warn('Không thể tải Noto Sans; ứng dụng sẽ dùng font hệ thống.', fontError);
+      console.warn(
+        'Không thể tải Noto Sans; ứng dụng sẽ dùng font hệ thống.',
+        fontError,
+      );
     }
 
     if (fontsLoaded || fontError) {

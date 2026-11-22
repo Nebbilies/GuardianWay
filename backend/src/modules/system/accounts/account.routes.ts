@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { listAccounts, getAccount, createAccount, changeAccount, resendInvite } from "./account.controller";
+import {
+    listAccounts,
+    getAccount,
+    createAccount,
+    changeAccount,
+    resendInvite,
+} from "./account.controller";
 export function accountRouter() {
     const router = Router({ mergeParams: true });
     router.get("/", listAccounts);

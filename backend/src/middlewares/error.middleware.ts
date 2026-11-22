@@ -1,8 +1,12 @@
-import {NextFunction, Request, Response} from "express";
-import {AppError, FieldError} from "../errors/app-error";
-import {InternalError, NotFoundError, ValidationError} from "../errors/http-errors";
+import { NextFunction, Request, Response } from "express";
+import { AppError, FieldError } from "../errors/app-error";
+import {
+    InternalError,
+    NotFoundError,
+    ValidationError,
+} from "../errors/http-errors";
 import { ZodError } from "zod";
-import {logger} from "../utils/logger";
+import { logger } from "../utils/logger";
 import { mapPrismaError } from "../errors/prisma-error.mapper";
 
 interface ProblemDetails {
@@ -42,7 +46,11 @@ function toProblemDetails(req: Request, error: AppError): ProblemDetails {
 // return AppError else generic InternalError to avoid leaking internal details
 function normalizeError(error: unknown): AppError {
     if (error instanceof ZodError) {
-        const errors = error.issues.map(issue => ({ field: issue.path.join("."), message: issue.message, code: issue.code }));
+        const errors = error.issues.map((issue) => ({
+            field: issue.path.join("."),
+            message: issue.message,
+            code: issue.code,
+        }));
         return new ValidationError("Invalid input data", errors);
     }
     const mapped = mapPrismaError(error);
@@ -53,12 +61,21 @@ function normalizeError(error: unknown): AppError {
     return new InternalError();
 }
 
-export function notFoundHandler(req: Request, _res: Response, next: NextFunction) {
+export function notFoundHandler(
+    req: Request,
+    _res: Response,
+    next: NextFunction,
+) {
     next(new NotFoundError(`Route ${req.method} ${req.originalUrl} not found`));
 }
 
 // Global error handler
-export function errorHandler(error: unknown, req: Request, res: Response, _next: NextFunction) {
+export function errorHandler(
+    error: unknown,
+    req: Request,
+    res: Response,
+    _next: NextFunction,
+) {
     const normalized = normalizeError(error);
 
     logger.error("request.failed", {

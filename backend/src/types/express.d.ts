@@ -1,4 +1,4 @@
-import {AuthenticatedRequestUser} from "./auth";
+import { AuthenticatedRequestUser } from "./auth";
 
 declare global {
     namespace Express {

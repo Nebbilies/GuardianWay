@@ -31,7 +31,8 @@ export function StatusBadge({ status, label }: StatusBadgeProps) {
         borderRadius: radius.lg,
         paddingHorizontal: spacing.sm,
         paddingVertical: spacing.xs,
-      }}>
+      }}
+    >
       <AppText variant="label" tone={tone}>
         {label}
       </AppText>

@@ -27,7 +27,10 @@ describe("mobile bearer-token authentication", () => {
     }
 
     it("does not issue a session when the account's school is inactive", async () => {
-        await prisma.school.update({ where: { id: fx.schoolA.id }, data: { status: "INACTIVE" } });
+        await prisma.school.update({
+            where: { id: fx.schoolA.id },
+            data: { status: "INACTIVE" },
+        });
         const res = await tokenLogin();
         expect(res.status).toBe(401);
         expect(res.body.session).toBeUndefined();
@@ -109,7 +112,10 @@ describe("mobile bearer-token authentication", () => {
         const login = await tokenLogin();
         expect(login.status).toBe(200);
 
-        await prisma.userAccount.update({ where: { id: fx.driverA.id }, data: { displayName: "Updated Driver" } });
+        await prisma.userAccount.update({
+            where: { id: fx.driverA.id },
+            data: { displayName: "Updated Driver" },
+        });
 
         const res = await request(app)
             .get("/api/auth/me")
@@ -137,7 +143,11 @@ describe("mobile bearer-token authentication", () => {
             .set("Cookie", login.headers["set-cookie"]);
 
         expect(res.status).toBe(200);
-        expect(res.body.user).toMatchObject({ id: fx.adminA.id, role: "ADMIN", schoolId: fx.schoolA.id });
+        expect(res.body.user).toMatchObject({
+            id: fx.adminA.id,
+            role: "ADMIN",
+            schoolId: fx.schoolA.id,
+        });
     });
 
     it("rotates a mobile refresh token and rejects replay of the old token", async () => {
@@ -192,7 +202,9 @@ describe("mobile bearer-token authentication", () => {
     });
 
     it("treats mobile logout without a refresh token as success", async () => {
-        const logout = await request(app).post("/api/auth/token/logout").send({});
+        const logout = await request(app)
+            .post("/api/auth/token/logout")
+            .send({});
 
         expect(logout.status).toBe(200);
         expect(logout.body).toEqual({ message: "Đăng xuất thành công" });
@@ -202,29 +214,36 @@ describe("mobile bearer-token authentication", () => {
         ["inactive", { status: "LOCKED" }],
         ["soft-deleted", { deletedAt: new Date() }],
         ["password setup required", { activatedAt: null }],
-    ] as const)("rejects /me and revokes sessions for a %s account", async (_state, update) => {
-        const login = await tokenLogin();
-        const accessToken = login.body.session.accessToken as string;
-        const refreshToken = login.body.session.refreshToken as string;
+    ] as const)(
+        "rejects /me and revokes sessions for a %s account",
+        async (_state, update) => {
+            const login = await tokenLogin();
+            const accessToken = login.body.session.accessToken as string;
+            const refreshToken = login.body.session.refreshToken as string;
 
-        await prisma.userAccount.update({
-            where: { id: fx.driverA.id },
-            data: update as Prisma.UserAccountUpdateInput,
-        });
+            await prisma.userAccount.update({
+                where: { id: fx.driverA.id },
+                data: update as Prisma.UserAccountUpdateInput,
+            });
 
-        const me = await request(app)
-            .get("/api/auth/me")
-            .set("Authorization", `Bearer ${accessToken}`);
-        const refresh = await request(app)
-            .post("/api/auth/token/refresh")
-            .send({ refreshToken });
-        const sessions = await prisma.refreshToken.findMany({ where: { accountId: fx.driverA.id } });
+            const me = await request(app)
+                .get("/api/auth/me")
+                .set("Authorization", `Bearer ${accessToken}`);
+            const refresh = await request(app)
+                .post("/api/auth/token/refresh")
+                .send({ refreshToken });
+            const sessions = await prisma.refreshToken.findMany({
+                where: { accountId: fx.driverA.id },
+            });
 
-        expect(me.status).toBe(401);
-        expect(refresh.status).toBe(401);
-        expect(sessions.length).toBeGreaterThan(0);
-        expect(sessions.every((session) => session.revokedAt !== null)).toBe(true);
-    });
+            expect(me.status).toBe(401);
+            expect(refresh.status).toBe(401);
+            expect(sessions.length).toBeGreaterThan(0);
+            expect(
+                sessions.every((session) => session.revokedAt !== null),
+            ).toBe(true);
+        },
+    );
 
     it("shares login rate-limit budget between cookie and token endpoints", async () => {
         for (let attempt = 0; attempt < 5; attempt += 1) {

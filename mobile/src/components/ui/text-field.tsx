@@ -34,7 +34,8 @@ export function TextField({
         {label}
         {optional ? (
           <AppText variant="compact" tone="muted">
-            {' '}(không bắt buộc)
+            {' '}
+            (không bắt buộc)
           </AppText>
         ) : null}
       </AppText>
@@ -60,7 +61,11 @@ export function TextField({
           styles.input,
           {
             minHeight: controlHeight,
-            borderColor: error ? colors.danger : focused ? colors.focus : colors.border,
+            borderColor: error
+              ? colors.danger
+              : focused
+                ? colors.focus
+                : colors.border,
             borderRadius: radius.sm,
             color: editable ? colors.text : colors.textDisabled,
             backgroundColor: editable ? colors.surface : colors.surfaceMuted,
@@ -77,7 +82,8 @@ export function TextField({
           accessibilityLiveRegion={error ? 'polite' : 'none'}
           nativeID={`${inputId}-support`}
           variant="label"
-          tone={error ? 'danger' : 'muted'}>
+          tone={error ? 'danger' : 'muted'}
+        >
           {supportingText}
         </AppText>
       ) : null}

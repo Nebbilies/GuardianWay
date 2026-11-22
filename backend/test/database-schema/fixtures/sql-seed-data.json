@@ -1,1494 +1,1312 @@
 [
-  {
-    "model": "school",
-    "data": {
-      "id": "398b9590-1a9f-4709-8971-a93752043f85",
-      "code": "DEMO_A",
-      "name": "GuardianWay Demo School A",
-      "address": "Fictional school address",
-      "timezone": "Asia/Ho_Chi_Minh",
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "398b9590-1a9f-4709-8971-a93752043f85"
-    }
-  },
-  {
-    "model": "school",
-    "data": {
-      "id": "5bb4561e-9e6f-4ff5-8132-f4ed48ffa722",
-      "code": "DEMO_B",
-      "name": "GuardianWay Demo School B",
-      "address": "Fictional school address",
-      "timezone": "Asia/Ho_Chi_Minh",
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "5bb4561e-9e6f-4ff5-8132-f4ed48ffa722"
-    }
-  },
-  {
-    "model": "userAccount",
-    "data": {
-      "id": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "email": "admin.demo@example.invalid",
-      "displayName": "Demo Admin",
-      "role": "SCHOOL_ADMIN",
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "56d1eb0f-657b-47a2-af34-01d5fda64309"
-    }
-  },
-  {
-    "model": "userAccount",
-    "data": {
-      "id": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7",
-      "email": "driver.demo@example.invalid",
-      "displayName": "Demo driver",
-      "role": "DRIVER",
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7"
-    }
-  },
-  {
-    "model": "userAccount",
-    "data": {
-      "id": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
-      "email": "parent.demo@example.invalid",
-      "displayName": "Demo parent",
-      "role": "PARENT",
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5"
-    }
-  },
-  {
-    "model": "auditLog",
-    "data": {
-      "id": "39834b72-3c63-47e3-9024-1fefe3bd8768",
-      "action": "DEMO_AuditLog_action",
-      "subjectKind": "DEMO_AuditLog_subject_kind",
-      "subjectReference": "DEMO_AuditLog_subject_reference",
-      "occurredAt": "2026-11-16T00:00:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "changeSummary": {
-        "fixture": true,
-        "fields": [
-          "status"
-        ]
-      },
-      "operationKey": "DEMO_AuditLog_operation_key",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "actorId": "56d1eb0f-657b-47a2-af34-01d5fda64309"
-    },
-    "dates": [
-      "occurredAt",
-      "createdAt"
-    ],
-    "where": {
-      "id": "39834b72-3c63-47e3-9024-1fefe3bd8768"
-    }
-  },
-  {
-    "model": "schoolPolicyVersion",
-    "data": {
-      "id": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "versionNo": 1,
-      "effectiveFrom": "2026-11-01T00:00:00.000Z",
-      "status": "APPROVED",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "pickupArrivalTime": "1970-01-01T07:45:00.000Z",
-      "approvedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "approvedAt": "2026-11-16T00:00:00.000Z",
-      "approvalBasis": "Fictional demo settings, not a production default",
-      "rideWarningMinutes": 20,
-      "pickupWaitMinutes": 2.5,
-      "dropoffDepartureTime": "1970-01-01T16:00:00.000Z"
-    },
-    "dates": [
-      "effectiveFrom",
-      "pickupArrivalTime",
-      "createdAt",
-      "updatedAt",
-      "approvedAt",
-      "dropoffDepartureTime"
-    ],
-    "where": {
-      "id": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0"
-    }
-  },
-  {
-    "model": "userInvite",
-    "data": {
-      "id": "5fd14074-769c-492f-971b-1ff5b80925d2",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "accountId": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "invitedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "tokenHash": "fc7cc9a3378282fe2451067851a00377b06cca762f562a8b3d330b1b0bacc15a",
-      "issuedAt": "2026-11-16T00:00:00.000Z",
-      "expiresAt": "2026-12-16T00:00:00.000Z",
-      "status": "ISSUED",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "issuedAt",
-      "expiresAt",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "5fd14074-769c-492f-971b-1ff5b80925d2"
-    }
-  },
-  {
-    "model": "refreshToken",
-    "data": {
-      "id": "401dd010-0057-4846-833d-60d50523b7f9",
-      "accountId": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "tokenHash": "ed359e4222535ccfc29c164cb5d1760c9674b6534956e3d549676a7a4aec52d5",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "expiresAt": "2026-12-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
-    },
-    "dates": [
-      "createdAt",
-      "expiresAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "401dd010-0057-4846-833d-60d50523b7f9"
-    }
-  },
-  {
-    "model": "driverProfile",
-    "data": {
-      "id": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "code": "TX001",
-      "fullName": "Demo Driver",
-      "phone": "DEMO-NOT-A-PHONE",
-      "status": "AVAILABLE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "accountId": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19"
-    }
-  },
-  {
-    "model": "vehicle",
-    "data": {
-      "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "code": "XE001",
-      "plateNumber": "51B12345",
-      "studentCapacity": 30,
-      "status": "AVAILABLE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518"
-    }
-  },
-  {
-    "model": "student",
-    "data": {
-      "id": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "studentCode": "HS001",
-      "fullName": "Demo Student",
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae"
-    }
-  },
-  {
-    "model": "stop",
-    "data": {
-      "id": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "code": "D001",
-      "name": "Demo service point",
-      "address": "Fictional pickup address",
-      "latitude": 10.78,
-      "longitude": 106.69,
-      "kind": "SERVICE_POINT",
-      "allowsPickup": true,
-      "allowsDropoff": true,
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "b3ff357f-7f3d-45a1-9028-00af93924413"
-    }
-  },
-  {
-    "model": "stop",
-    "data": {
-      "id": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "code": "SCHOOL",
-      "name": "Demo school terminal",
-      "address": "Fictional school address",
-      "latitude": 10.78,
-      "longitude": 106.69,
-      "kind": "SCHOOL",
-      "allowsPickup": true,
-      "allowsDropoff": true,
-      "status": "ACTIVE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "d4a8bf8e-7bc4-452b-9889-62a58b323eef"
-    }
-  },
-  {
-    "model": "pushEndpoint",
-    "data": {
-      "id": "bad94e81-ec68-4e9d-a77f-7d15301fee1c",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "accountId": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
-      "deviceKey": "demo-device",
-      "provider": "DEMO",
-      "tokenProtected": "DEMO_NONFUNCTIONAL_TOKEN",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "bad94e81-ec68-4e9d-a77f-7d15301fee1c"
-    }
-  },
-  {
-    "model": "guardianLink",
-    "data": {
-      "id": "4d3f138a-0ed4-4ec9-bb96-42c02348981a",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "guardianAccountId": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
-      "canTrack": true,
-      "canRequest": true,
-      "confirmedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "effectiveFrom": "2026-11-01T00:00:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "4d3f138a-0ed4-4ec9-bb96-42c02348981a"
-    }
-  },
-  {
-    "model": "studentCardAssignment",
-    "data": {
-      "id": "bc409533-622c-482d-8688-e9d26615c741",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "cardUid": "00010203",
-      "technology": "RFID",
-      "assignedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "effectiveFrom": "2026-11-01T00:00:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "bc409533-622c-482d-8688-e9d26615c741"
-    }
-  },
-  {
-    "model": "serviceRegistration",
-    "data": {
-      "id": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "submittedById": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
-      "submittedAt": "2026-11-16T00:00:00.000Z",
-      "status": "APPROVED",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "reviewedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "reviewedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "submittedAt",
-      "reviewedAt",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162"
-    }
-  },
-  {
-    "model": "planVersion",
-    "data": {
-      "id": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "planKey": "cfb3a054-3f71-4347-891c-0d6a15e3e831",
-      "versionNo": 1,
-      "referenceDate": "2026-11-16T00:00:00.000Z",
-      "direction": "PICKUP",
-      "policyVersionId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0",
-      "inputSnapshot": {
-        "fixture": true,
-        "solver": {
-          "name": "DEMO_STATIC_NOT_SOLVED",
-          "objective": "total_distance"
+    {
+        "model": "school",
+        "data": {
+            "id": "398b9590-1a9f-4709-8971-a93752043f85",
+            "code": "DEMO_A",
+            "name": "GuardianWay Demo School A",
+            "address": "Fictional school address",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
         },
-        "distance_unit": "metres",
-        "duration_unit": "seconds",
-        "vehicles": [
-          {
-            "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-            "capacity": 30
-          }
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "398b9590-1a9f-4709-8971-a93752043f85"
+        }
+    },
+    {
+        "model": "school",
+        "data": {
+            "id": "5bb4561e-9e6f-4ff5-8132-f4ed48ffa722",
+            "code": "DEMO_B",
+            "name": "GuardianWay Demo School B",
+            "address": "Fictional school address",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "5bb4561e-9e6f-4ff5-8132-f4ed48ffa722"
+        }
+    },
+    {
+        "model": "userAccount",
+        "data": {
+            "id": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "email": "admin.demo@example.invalid",
+            "displayName": "Demo Admin",
+            "role": "SCHOOL_ADMIN",
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "56d1eb0f-657b-47a2-af34-01d5fda64309"
+        }
+    },
+    {
+        "model": "userAccount",
+        "data": {
+            "id": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7",
+            "email": "driver.demo@example.invalid",
+            "displayName": "Demo driver",
+            "role": "DRIVER",
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7"
+        }
+    },
+    {
+        "model": "userAccount",
+        "data": {
+            "id": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
+            "email": "parent.demo@example.invalid",
+            "displayName": "Demo parent",
+            "role": "PARENT",
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5"
+        }
+    },
+    {
+        "model": "auditLog",
+        "data": {
+            "id": "39834b72-3c63-47e3-9024-1fefe3bd8768",
+            "action": "DEMO_AuditLog_action",
+            "subjectKind": "DEMO_AuditLog_subject_kind",
+            "subjectReference": "DEMO_AuditLog_subject_reference",
+            "occurredAt": "2026-11-16T00:00:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "changeSummary": {
+                "fixture": true,
+                "fields": ["status"]
+            },
+            "operationKey": "DEMO_AuditLog_operation_key",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "actorId": "56d1eb0f-657b-47a2-af34-01d5fda64309"
+        },
+        "dates": ["occurredAt", "createdAt"],
+        "where": {
+            "id": "39834b72-3c63-47e3-9024-1fefe3bd8768"
+        }
+    },
+    {
+        "model": "schoolPolicyVersion",
+        "data": {
+            "id": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "versionNo": 1,
+            "effectiveFrom": "2026-11-01T00:00:00.000Z",
+            "status": "APPROVED",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "pickupArrivalTime": "1970-01-01T07:45:00.000Z",
+            "approvedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "approvedAt": "2026-11-16T00:00:00.000Z",
+            "approvalBasis": "Fictional demo settings, not a production default",
+            "rideWarningMinutes": 20,
+            "pickupWaitMinutes": 2.5,
+            "dropoffDepartureTime": "1970-01-01T16:00:00.000Z"
+        },
+        "dates": [
+            "effectiveFrom",
+            "pickupArrivalTime",
+            "createdAt",
+            "updatedAt",
+            "approvedAt",
+            "dropoffDepartureTime"
         ],
-        "stops": [
-          {
+        "where": {
+            "id": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0"
+        }
+    },
+    {
+        "model": "userInvite",
+        "data": {
+            "id": "5fd14074-769c-492f-971b-1ff5b80925d2",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "accountId": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "invitedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "tokenHash": "fc7cc9a3378282fe2451067851a00377b06cca762f562a8b3d330b1b0bacc15a",
+            "issuedAt": "2026-11-16T00:00:00.000Z",
+            "expiresAt": "2026-12-16T00:00:00.000Z",
+            "status": "ISSUED",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["issuedAt", "expiresAt", "createdAt", "updatedAt"],
+        "where": {
+            "id": "5fd14074-769c-492f-971b-1ff5b80925d2"
+        }
+    },
+    {
+        "model": "refreshToken",
+        "data": {
+            "id": "401dd010-0057-4846-833d-60d50523b7f9",
+            "accountId": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "tokenHash": "ed359e4222535ccfc29c164cb5d1760c9674b6534956e3d549676a7a4aec52d5",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "expiresAt": "2026-12-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85"
+        },
+        "dates": ["createdAt", "expiresAt", "updatedAt"],
+        "where": {
+            "id": "401dd010-0057-4846-833d-60d50523b7f9"
+        }
+    },
+    {
+        "model": "driverProfile",
+        "data": {
+            "id": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "code": "TX001",
+            "fullName": "Demo Driver",
+            "phone": "DEMO-NOT-A-PHONE",
+            "status": "AVAILABLE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "accountId": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19"
+        }
+    },
+    {
+        "model": "vehicle",
+        "data": {
+            "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "code": "XE001",
+            "plateNumber": "51B12345",
+            "studentCapacity": 30,
+            "status": "AVAILABLE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518"
+        }
+    },
+    {
+        "model": "student",
+        "data": {
+            "id": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "studentCode": "HS001",
+            "fullName": "Demo Student",
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae"
+        }
+    },
+    {
+        "model": "stop",
+        "data": {
+            "id": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "code": "D001",
             "name": "Demo service point",
             "address": "Fictional pickup address",
             "latitude": 10.78,
             "longitude": 106.69,
-            "service_seconds": 30
-          }
-        ],
-        "matrix": {
-          "source": "FICTIONAL_SEED",
-          "distance_unit": "metres",
-          "duration_unit": "seconds"
-        }
-      },
-      "status": "APPROVED",
-      "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "approvedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "approvedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "referenceDate",
-      "createdAt",
-      "approvedAt",
-      "effectiveFrom",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "02373dfb-ab71-4124-9c43-6a69a961bc7e"
-    }
-  },
-  {
-    "model": "registrationDay",
-    "data": {
-      "id": "ddae0bd5-21bf-431b-a909-692c7517842f",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "registrationId": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162",
-      "serviceDate": "2026-11-16T00:00:00.000Z",
-      "direction": "PICKUP",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "approvedStopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "approvalStopSnapshot": {
-        "name": "Demo service point",
-        "address": "Fictional pickup address",
-        "latitude": 10.78,
-        "longitude": 106.69,
-        "service_seconds": 30
-      }
-    },
-    "dates": [
-      "serviceDate",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "ddae0bd5-21bf-431b-a909-692c7517842f"
-    }
-  },
-  {
-    "model": "plannedRoute",
-    "data": {
-      "id": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
-      "routeCode": "T001",
-      "label": "Demo route",
-      "vehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "capacitySnapshot": 30,
-      "distanceMetres": 1000,
-      "durationSeconds": 1800,
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "444d0c84-d8a3-4d04-80fb-dd47df5ee189"
-    }
-  },
-  {
-    "model": "planFinding",
-    "data": {
-      "id": "e2a59a2f-13f1-4b39-b53b-0c4b1d72b82e",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
-      "severity": "WARNING",
-      "code": "DEMO_WARNING",
-      "description": "DEMO_PlanFinding_description",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "measuredValue": 30,
-      "limitValue": 20,
-      "unit": "minutes",
-      "acceptedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "acceptedAt": "2026-11-16T00:00:00.000Z",
-      "acceptanceReason": "Fictional accepted ride-duration warning"
-    },
-    "dates": [
-      "acceptedAt",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "e2a59a2f-13f1-4b39-b53b-0c4b1d72b82e"
-    }
-  },
-  {
-    "model": "planDemand",
-    "data": {
-      "id": "1202ca75-5c84-4cf0-a27b-e509fa26cd99",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
-      "registrationDayId": "ddae0bd5-21bf-431b-a909-692c7517842f",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "demandSnapshot": {
-        "service_date": "2026-11-16",
-        "direction": "PICKUP",
-        "stop": {
-          "name": "Demo service point",
-          "address": "Fictional pickup address",
-          "latitude": 10.78,
-          "longitude": 106.69,
-          "service_seconds": 30
-        }
-      },
-      "createdAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt"
-    ],
-    "where": {
-      "id": "1202ca75-5c84-4cf0-a27b-e509fa26cd99"
-    }
-  },
-  {
-    "model": "plannedStop",
-    "data": {
-      "id": "2921e2bb-0f3d-466f-9f06-4ee5b0bf5b93",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
-      "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "sequenceNo": 1,
-      "plannedTime": "1970-01-01T07:00:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo service point",
-        "address": "Fictional pickup address",
-        "latitude": 10.78,
-        "longitude": 106.69,
-        "service_seconds": 30
-      },
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "plannedTime",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "2921e2bb-0f3d-466f-9f06-4ee5b0bf5b93"
-    }
-  },
-  {
-    "model": "plannedStop",
-    "data": {
-      "id": "b242a7cd-642a-438f-89ea-b65f3dd1947f",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
-      "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
-      "sequenceNo": 2,
-      "plannedTime": "1970-01-01T07:25:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo school terminal",
-        "address": "Fictional school address",
-        "latitude": 10.78,
-        "longitude": 106.69
-      },
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "plannedTime",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "b242a7cd-642a-438f-89ea-b65f3dd1947f"
-    }
-  },
-  {
-    "model": "recurringSchedule",
-    "data": {
-      "id": "c0e40f2c-ff25-4dd2-9846-b68e8e693625",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "scheduleKey": "18bbafc6-8dc8-4f30-92a5-9e6fb1f9e7a4",
-      "versionNo": 1,
-      "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "direction": "PICKUP",
-      "plannedStartTime": "1970-01-01T07:00:00.000Z",
-      "status": "ACTIVE",
-      "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "defaultVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "defaultDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19"
-    },
-    "dates": [
-      "effectiveFrom",
-      "plannedStartTime",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "c0e40f2c-ff25-4dd2-9846-b68e8e693625"
-    }
-  },
-  {
-    "model": "plannedPassenger",
-    "data": {
-      "id": "0a3376df-ac15-4fde-bfaf-c5f5ec10627e",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "plannedStopId": "2921e2bb-0f3d-466f-9f06-4ee5b0bf5b93",
-      "estimatedRideSeconds": 1800,
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "0a3376df-ac15-4fde-bfaf-c5f5ec10627e"
-    }
-  },
-  {
-    "model": "scheduleWeekday",
-    "data": {
-      "id": "cfec507e-42cb-4837-bb73-e91b57bb3713",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "scheduleId": "c0e40f2c-ff25-4dd2-9846-b68e8e693625",
-      "isoWeekday": 1,
-      "createdAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt"
-    ],
-    "where": {
-      "id": "cfec507e-42cb-4837-bb73-e91b57bb3713"
-    }
-  },
-  {
-    "model": "trip",
-    "data": {
-      "id": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "scheduleId": "c0e40f2c-ff25-4dd2-9846-b68e8e693625",
-      "serviceDate": "2026-11-16T00:00:00.000Z",
-      "direction": "PICKUP",
-      "plannedStartAt": "2026-11-16T00:00:00.000Z",
-      "status": "OPEN",
-      "dataVersion": 1,
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "scheduleKey": "18bbafc6-8dc8-4f30-92a5-9e6fb1f9e7a4",
-      "startedAt": "2026-11-16T00:00:00.000Z",
-      "initialVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "initialDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
-      "operatingPolicyId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0"
-    },
-    "dates": [
-      "serviceDate",
-      "plannedStartAt",
-      "startedAt",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "72b3f6c5-d7da-47ce-aab9-decb6f56c264"
-    }
-  },
-  {
-    "model": "tripStop",
-    "data": {
-      "id": "470032c2-666f-4ac0-be3b-2818245ea31b",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "logicalStopKey": "c8aeb214-cc5a-4ca5-8780-c534146e4349",
-      "versionNo": 1,
-      "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "sequenceNo": 1,
-      "plannedAt": "2026-11-16T00:00:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo service point",
-        "address": "Fictional pickup address",
-        "latitude": 10.78,
-        "longitude": 106.69,
-        "service_seconds": 30
-      },
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "plannedAt",
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "470032c2-666f-4ac0-be3b-2818245ea31b"
-    }
-  },
-  {
-    "model": "tripStop",
-    "data": {
-      "id": "19b2a9e9-6da6-4f32-9a59-cb130c5a317a",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "logicalStopKey": "feb3f964-faa2-4574-abc2-086ac540e301",
-      "versionNo": 1,
-      "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
-      "sequenceNo": 2,
-      "plannedAt": "2026-11-16T00:25:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo school terminal",
-        "address": "Fictional school address",
-        "latitude": 10.78,
-        "longitude": 106.69
-      },
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "plannedStopId": "b242a7cd-642a-438f-89ea-b65f3dd1947f"
-    },
-    "dates": [
-      "plannedAt",
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "19b2a9e9-6da6-4f32-9a59-cb130c5a317a"
-    }
-  },
-  {
-    "model": "tripAssignment",
-    "data": {
-      "id": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "vehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "driverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "assignedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "effectiveTo": "2026-11-16T00:35:00.000Z"
-    },
-    "dates": [
-      "effectiveFrom",
-      "effectiveTo",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "d8f216cc-e765-4418-a9fd-d21732e4f7e3"
-    }
-  },
-  {
-    "model": "tripReconciliation",
-    "data": {
-      "id": "def864ba-e919-4af1-a6a8-f863cf5ed8e6",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "purpose": "CLOSE_CHECK",
-      "evaluatedDataVersion": 1,
-      "evaluatedAt": "2026-11-16T00:35:00.000Z",
-      "performedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "result": "ELIGIBLE",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "vehicleCheckById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "vehicleCheckConfirmedAt": "2026-11-16T00:34:00.000Z",
-      "vehicleCheckScope": {
-        "aggregate_confirmation": true,
-        "vehicle_ids": [
-          "19a48364-a97d-4e87-bb69-fa2f10c7e518"
-        ]
-      }
-    },
-    "dates": [
-      "evaluatedAt",
-      "vehicleCheckConfirmedAt",
-      "createdAt"
-    ],
-    "where": {
-      "id": "def864ba-e919-4af1-a6a8-f863cf5ed8e6"
-    }
-  },
-  {
-    "model": "tripPassenger",
-    "data": {
-      "id": "bcf8ed28-9e1c-47f9-a84f-db7080022306",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "versionNo": 1,
-      "registrationDayId": "ddae0bd5-21bf-431b-a909-692c7517842f",
-      "tripStopId": "470032c2-666f-4ac0-be3b-2818245ea31b",
-      "disposition": "EXPECTED",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "bcf8ed28-9e1c-47f9-a84f-db7080022306"
-    }
-  },
-  {
-    "model": "attendanceEvent",
-    "data": {
-      "id": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "assignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
-      "eventKind": "BOARD",
-      "method": "MANUAL_ONLINE",
-      "occurredAt": "2026-11-16T00:01:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "recordedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "outsideManifest": false,
-      "operationKey": "DEMO_AttendanceEvent_operation_key",
-      "reason": "Fictional manual boarding",
-      "tripPassengerId": "bcf8ed28-9e1c-47f9-a84f-db7080022306",
-      "tripStopId": "470032c2-666f-4ac0-be3b-2818245ea31b"
-    },
-    "dates": [
-      "occurredAt",
-      "createdAt"
-    ],
-    "where": {
-      "id": "42cdc227-36ad-4f2a-9c88-80b48428c35d"
-    }
-  },
-  {
-    "model": "attendanceEvent",
-    "data": {
-      "id": "9ba85f48-6d93-4b54-9f81-eaab20eeb79f",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "assignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
-      "eventKind": "ALIGHT",
-      "method": "MANUAL_ONLINE",
-      "occurredAt": "2026-11-16T00:25:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "recordedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "outsideManifest": false,
-      "operationKey": "DEMO_ALIGHT",
-      "reason": "Fictional manual alighting",
-      "tripPassengerId": "bcf8ed28-9e1c-47f9-a84f-db7080022306",
-      "tripStopId": "19b2a9e9-6da6-4f32-9a59-cb130c5a317a"
-    },
-    "dates": [
-      "occurredAt",
-      "createdAt"
-    ],
-    "where": {
-      "id": "9ba85f48-6d93-4b54-9f81-eaab20eeb79f"
-    }
-  },
-  {
-    "model": "reconciliationItem",
-    "data": {
-      "id": "0d81c925-2700-4907-94f2-f8b55b5367cc",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "reconciliationId": "def864ba-e919-4af1-a6a8-f863cf5ed8e6",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "result": "RECONCILED",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "tripPassengerId": "bcf8ed28-9e1c-47f9-a84f-db7080022306"
-    },
-    "dates": [
-      "createdAt"
-    ],
-    "where": {
-      "id": "0d81c925-2700-4907-94f2-f8b55b5367cc"
-    }
-  },
-  {
-    "model": "trackingSession",
-    "data": {
-      "id": "601d1f9e-ba40-458b-a712-41e98ebf011d",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "assignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
-      "sourceAccountId": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7",
-      "sourceDeviceKey": "DEMO_TrackingSession_source_device_key",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "startedAt": "2026-11-16T00:00:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "endedAt": "2026-11-16T00:30:00.000Z",
-      "effectiveTo": "2026-11-16T00:30:00.000Z"
-    },
-    "dates": [
-      "effectiveFrom",
-      "effectiveTo",
-      "startedAt",
-      "endedAt",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "601d1f9e-ba40-458b-a712-41e98ebf011d"
-    }
-  },
-  {
-    "model": "attendanceRevision",
-    "data": {
-      "id": "8ffe7fa5-cfff-4313-8477-8a9e89c26112",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "attendanceEventId": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
-      "revisionNo": 1,
-      "action": "REPLACE",
-      "correctedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "reason": "Fictional correction of boarding time",
-      "operationKey": "DEMO_AttendanceRevision_operation_key",
-      "effectiveStudentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "effectiveAssignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
-      "effectiveEventKind": "BOARD",
-      "effectiveOccurredAt": "2026-11-16T00:02:00.000Z"
-    },
-    "dates": [
-      "effectiveOccurredAt",
-      "createdAt"
-    ],
-    "where": {
-      "id": "8ffe7fa5-cfff-4313-8477-8a9e89c26112"
-    }
-  },
-  {
-    "model": "gpsPosition",
-    "data": {
-      "id": "c70c5988-0fa4-4bbe-b3b7-ee3c55989367",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "trackingSessionId": "601d1f9e-ba40-458b-a712-41e98ebf011d",
-      "measuredAt": "2026-11-16T00:05:00.000Z",
-      "receivedAt": "2026-11-16T00:05:01.000Z",
-      "latitude": 10.78,
-      "longitude": 106.69,
-      "sourceMessageKey": "c70c5988-0fa4-4bbe-b3b7-ee3c55989367",
-      "qualityStatus": "ACCEPTED",
-      "createdAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "measuredAt",
-      "receivedAt",
-      "createdAt"
-    ],
-    "where": {
-      "measuredAt_id": {
-        "measuredAt": "2026-11-16T00:05:00.000Z",
-        "id": "c70c5988-0fa4-4bbe-b3b7-ee3c55989367"
-      }
-    }
-  },
-  {
-    "model": "notification",
-    "data": {
-      "id": "adb7b7fd-9670-46c2-8f4f-1a1acbdc7e90",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "title": "Demo boarding recorded",
-      "body": "Fictional notification; never sent",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "eventKind": "ATTENDANCE_RECORDED",
-      "occurredAt": "2026-11-16T00:00:00.000Z",
-      "occurrenceKey": "DEMO_Notification_occurrence_key",
-      "actionSnapshot": {
-        "event_kind": "BOARD"
-      },
-      "originAttendanceEventId": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
-      "contextTripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
-      "contextStudentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae"
-    },
-    "dates": [
-      "createdAt",
-      "occurredAt"
-    ],
-    "where": {
-      "id": "adb7b7fd-9670-46c2-8f4f-1a1acbdc7e90"
-    }
-  },
-  {
-    "model": "notificationRecipient",
-    "data": {
-      "id": "62c3cfb2-c587-4535-9332-d520b29d36c7",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "notificationId": "adb7b7fd-9670-46c2-8f4f-1a1acbdc7e90",
-      "accountId": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "62c3cfb2-c587-4535-9332-d520b29d36c7"
-    }
-  },
-  {
-    "model": "reconciliationEvidence",
-    "data": {
-      "id": "25185e0d-aecb-45b6-9990-67a23ae94a16",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "itemId": "0d81c925-2700-4907-94f2-f8b55b5367cc",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "attendanceEventId": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
-      "attendanceRevisionId": "8ffe7fa5-cfff-4313-8477-8a9e89c26112"
-    },
-    "dates": [
-      "createdAt"
-    ],
-    "where": {
-      "id": "25185e0d-aecb-45b6-9990-67a23ae94a16"
-    }
-  },
-  {
-    "model": "pushDelivery",
-    "data": {
-      "id": "3280ce56-ce9c-4b7a-8cf3-09017be18674",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "recipientId": "62c3cfb2-c587-4535-9332-d520b29d36c7",
-      "endpointId": "bad94e81-ec68-4e9d-a77f-7d15301fee1c",
-      "attemptNo": 1,
-      "attemptedAt": "2026-11-16T00:00:00.000Z",
-      "status": "SKIPPED_NO_PERMISSION",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
-    },
-    "dates": [
-      "attemptedAt",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "3280ce56-ce9c-4b7a-8cf3-09017be18674"
-    }
-  },
-  {
-    "model": "reconciliationEvidence",
-    "data": {
-      "id": "7e1340fb-a3c5-4815-928b-3618a9c44ffe",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "itemId": "0d81c925-2700-4907-94f2-f8b55b5367cc",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "attendanceEventId": "9ba85f48-6d93-4b54-9f81-eaab20eeb79f",
-      "attendanceRevisionId": null
-    },
-    "dates": [
-      "createdAt"
-    ],
-    "where": {
-      "id": "7e1340fb-a3c5-4815-928b-3618a9c44ffe"
-    }
-  },
-  {
-    "model": "registrationDay",
-    "data": {
-      "id": "91f1006f-2379-4c79-8ad6-87f98cbf66e4",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "registrationId": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162",
-      "serviceDate": "2026-11-16T00:00:00.000Z",
-      "direction": "DROPOFF",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "approvedStopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "approvalStopSnapshot": {
-        "name": "Demo service point",
-        "address": "Fictional pickup address",
-        "latitude": 10.78,
-        "longitude": 106.69,
-        "service_seconds": 30
-      }
-    },
-    "dates": [
-      "serviceDate",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "91f1006f-2379-4c79-8ad6-87f98cbf66e4"
-    }
-  },
-  {
-    "model": "planVersion",
-    "data": {
-      "id": "a5704541-15f6-4d7b-9e51-360f4db9911b",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "planKey": "c9510be5-f5a3-4bff-b81b-6dce3c2e20d2",
-      "versionNo": 1,
-      "referenceDate": "2026-11-16T00:00:00.000Z",
-      "direction": "DROPOFF",
-      "policyVersionId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0",
-      "inputSnapshot": {
-        "fixture": true,
-        "solver": {
-          "name": "DEMO_STATIC_NOT_SOLVED",
-          "objective": "total_distance"
+            "kind": "SERVICE_POINT",
+            "allowsPickup": true,
+            "allowsDropoff": true,
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
         },
-        "distance_unit": "metres",
-        "duration_unit": "seconds",
-        "vehicles": [
-          {
-            "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-            "capacity": 30
-          }
-        ],
-        "stops": [
-          {
-            "name": "Demo service point",
-            "address": "Fictional pickup address",
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "b3ff357f-7f3d-45a1-9028-00af93924413"
+        }
+    },
+    {
+        "model": "stop",
+        "data": {
+            "id": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "code": "SCHOOL",
+            "name": "Demo school terminal",
+            "address": "Fictional school address",
             "latitude": 10.78,
             "longitude": 106.69,
-            "service_seconds": 30
-          }
+            "kind": "SCHOOL",
+            "allowsPickup": true,
+            "allowsDropoff": true,
+            "status": "ACTIVE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "d4a8bf8e-7bc4-452b-9889-62a58b323eef"
+        }
+    },
+    {
+        "model": "pushEndpoint",
+        "data": {
+            "id": "bad94e81-ec68-4e9d-a77f-7d15301fee1c",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "accountId": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
+            "deviceKey": "demo-device",
+            "provider": "DEMO",
+            "tokenProtected": "DEMO_NONFUNCTIONAL_TOKEN",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "bad94e81-ec68-4e9d-a77f-7d15301fee1c"
+        }
+    },
+    {
+        "model": "guardianLink",
+        "data": {
+            "id": "4d3f138a-0ed4-4ec9-bb96-42c02348981a",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "guardianAccountId": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
+            "canTrack": true,
+            "canRequest": true,
+            "confirmedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "effectiveFrom": "2026-11-01T00:00:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "4d3f138a-0ed4-4ec9-bb96-42c02348981a"
+        }
+    },
+    {
+        "model": "studentCardAssignment",
+        "data": {
+            "id": "bc409533-622c-482d-8688-e9d26615c741",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "cardUid": "00010203",
+            "technology": "RFID",
+            "assignedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "effectiveFrom": "2026-11-01T00:00:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "bc409533-622c-482d-8688-e9d26615c741"
+        }
+    },
+    {
+        "model": "serviceRegistration",
+        "data": {
+            "id": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "submittedById": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
+            "submittedAt": "2026-11-16T00:00:00.000Z",
+            "status": "APPROVED",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "reviewedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "reviewedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["submittedAt", "reviewedAt", "createdAt", "updatedAt"],
+        "where": {
+            "id": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162"
+        }
+    },
+    {
+        "model": "planVersion",
+        "data": {
+            "id": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "planKey": "cfb3a054-3f71-4347-891c-0d6a15e3e831",
+            "versionNo": 1,
+            "referenceDate": "2026-11-16T00:00:00.000Z",
+            "direction": "PICKUP",
+            "policyVersionId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0",
+            "inputSnapshot": {
+                "fixture": true,
+                "solver": {
+                    "name": "DEMO_STATIC_NOT_SOLVED",
+                    "objective": "total_distance"
+                },
+                "distance_unit": "metres",
+                "duration_unit": "seconds",
+                "vehicles": [
+                    {
+                        "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+                        "capacity": 30
+                    }
+                ],
+                "stops": [
+                    {
+                        "name": "Demo service point",
+                        "address": "Fictional pickup address",
+                        "latitude": 10.78,
+                        "longitude": 106.69,
+                        "service_seconds": 30
+                    }
+                ],
+                "matrix": {
+                    "source": "FICTIONAL_SEED",
+                    "distance_unit": "metres",
+                    "duration_unit": "seconds"
+                }
+            },
+            "status": "APPROVED",
+            "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "approvedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "approvedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": [
+            "referenceDate",
+            "createdAt",
+            "approvedAt",
+            "effectiveFrom",
+            "updatedAt"
         ],
-        "matrix": {
-          "source": "FICTIONAL_SEED",
-          "distance_unit": "metres",
-          "duration_unit": "seconds"
+        "where": {
+            "id": "02373dfb-ab71-4124-9c43-6a69a961bc7e"
         }
-      },
-      "status": "APPROVED",
-      "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "approvedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "approvedAt": "2026-11-16T00:00:00.000Z",
-      "dropoffDepartureTime": "1970-01-01T16:00:00.000Z"
     },
-    "dates": [
-      "referenceDate",
-      "createdAt",
-      "approvedAt",
-      "effectiveFrom",
-      "updatedAt",
-      "dropoffDepartureTime"
-    ],
-    "where": {
-      "id": "a5704541-15f6-4d7b-9e51-360f4db9911b"
-    }
-  },
-  {
-    "model": "planDemand",
-    "data": {
-      "id": "214f03f3-8d91-4932-b170-4c3e617d6f91",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "planVersionId": "a5704541-15f6-4d7b-9e51-360f4db9911b",
-      "registrationDayId": "91f1006f-2379-4c79-8ad6-87f98cbf66e4",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "demandSnapshot": {
-        "service_date": "2026-11-16",
-        "direction": "DROPOFF",
-        "stop": {
-          "name": "Demo service point",
-          "address": "Fictional pickup address",
-          "latitude": 10.78,
-          "longitude": 106.69,
-          "service_seconds": 30
+    {
+        "model": "registrationDay",
+        "data": {
+            "id": "ddae0bd5-21bf-431b-a909-692c7517842f",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "registrationId": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162",
+            "serviceDate": "2026-11-16T00:00:00.000Z",
+            "direction": "PICKUP",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "approvedStopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "approvalStopSnapshot": {
+                "name": "Demo service point",
+                "address": "Fictional pickup address",
+                "latitude": 10.78,
+                "longitude": 106.69,
+                "service_seconds": 30
+            }
+        },
+        "dates": ["serviceDate", "createdAt", "updatedAt"],
+        "where": {
+            "id": "ddae0bd5-21bf-431b-a909-692c7517842f"
         }
-      },
-      "createdAt": "2026-11-16T00:00:00.000Z"
     },
-    "dates": [
-      "createdAt"
-    ],
-    "where": {
-      "id": "214f03f3-8d91-4932-b170-4c3e617d6f91"
-    }
-  },
-  {
-    "model": "plannedRoute",
-    "data": {
-      "id": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "planVersionId": "a5704541-15f6-4d7b-9e51-360f4db9911b",
-      "routeCode": "T001",
-      "label": "Demo afternoon route",
-      "vehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "capacitySnapshot": 30,
-      "distanceMetres": 1000,
-      "durationSeconds": 1200,
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
+    {
+        "model": "plannedRoute",
+        "data": {
+            "id": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
+            "routeCode": "T001",
+            "label": "Demo route",
+            "vehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "capacitySnapshot": 30,
+            "distanceMetres": 1000,
+            "durationSeconds": 1800,
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "444d0c84-d8a3-4d04-80fb-dd47df5ee189"
+        }
     },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "50887bb2-ea5c-456e-89bc-85f95379a1b4"
-    }
-  },
-  {
-    "model": "plannedStop",
-    "data": {
-      "id": "4277e0bc-eaa6-4808-a421-4f1f89eff481",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
-      "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "sequenceNo": 2,
-      "plannedTime": "1970-01-01T16:20:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo service point",
-        "address": "Fictional pickup address",
-        "latitude": 10.78,
-        "longitude": 106.69,
-        "service_seconds": 30
-      },
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
+    {
+        "model": "planFinding",
+        "data": {
+            "id": "e2a59a2f-13f1-4b39-b53b-0c4b1d72b82e",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
+            "severity": "WARNING",
+            "code": "DEMO_WARNING",
+            "description": "DEMO_PlanFinding_description",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "measuredValue": 30,
+            "limitValue": 20,
+            "unit": "minutes",
+            "acceptedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "acceptedAt": "2026-11-16T00:00:00.000Z",
+            "acceptanceReason": "Fictional accepted ride-duration warning"
+        },
+        "dates": ["acceptedAt", "createdAt", "updatedAt"],
+        "where": {
+            "id": "e2a59a2f-13f1-4b39-b53b-0c4b1d72b82e"
+        }
     },
-    "dates": [
-      "plannedTime",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "4277e0bc-eaa6-4808-a421-4f1f89eff481"
-    }
-  },
-  {
-    "model": "plannedStop",
-    "data": {
-      "id": "7f52cfc0-08b7-4595-aca6-148a095cc607",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
-      "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
-      "sequenceNo": 1,
-      "plannedTime": "1970-01-01T16:00:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo school terminal",
-        "address": "Fictional school address",
-        "latitude": 10.78,
-        "longitude": 106.69
-      },
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z"
+    {
+        "model": "planDemand",
+        "data": {
+            "id": "1202ca75-5c84-4cf0-a27b-e509fa26cd99",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e",
+            "registrationDayId": "ddae0bd5-21bf-431b-a909-692c7517842f",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "demandSnapshot": {
+                "service_date": "2026-11-16",
+                "direction": "PICKUP",
+                "stop": {
+                    "name": "Demo service point",
+                    "address": "Fictional pickup address",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "service_seconds": 30
+                }
+            },
+            "createdAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt"],
+        "where": {
+            "id": "1202ca75-5c84-4cf0-a27b-e509fa26cd99"
+        }
     },
-    "dates": [
-      "plannedTime",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "7f52cfc0-08b7-4595-aca6-148a095cc607"
-    }
-  },
-  {
-    "model": "plannedPassenger",
-    "data": {
-      "id": "415be9ad-4fca-438a-a9a4-597bfc4c37bc",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "plannedStopId": "4277e0bc-eaa6-4808-a421-4f1f89eff481",
-      "estimatedRideSeconds": 1200,
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "planVersionId": "a5704541-15f6-4d7b-9e51-360f4db9911b",
-      "sourceDemandId": "214f03f3-8d91-4932-b170-4c3e617d6f91"
+    {
+        "model": "plannedStop",
+        "data": {
+            "id": "2921e2bb-0f3d-466f-9f06-4ee5b0bf5b93",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
+            "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "sequenceNo": 1,
+            "plannedTime": "1970-01-01T07:00:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo service point",
+                "address": "Fictional pickup address",
+                "latitude": 10.78,
+                "longitude": 106.69,
+                "service_seconds": 30
+            },
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["plannedTime", "createdAt", "updatedAt"],
+        "where": {
+            "id": "2921e2bb-0f3d-466f-9f06-4ee5b0bf5b93"
+        }
     },
-    "dates": [
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "415be9ad-4fca-438a-a9a4-597bfc4c37bc"
-    }
-  },
-  {
-    "model": "recurringSchedule",
-    "data": {
-      "id": "0a81127e-7bd3-4a1b-8826-21d82e04e36a",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "scheduleKey": "4eba8233-81b5-4daf-aef3-eace91a46347",
-      "versionNo": 1,
-      "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "direction": "DROPOFF",
-      "plannedStartTime": "1970-01-01T16:00:00.000Z",
-      "status": "ACTIVE",
-      "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "defaultVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "defaultDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19"
+    {
+        "model": "plannedStop",
+        "data": {
+            "id": "b242a7cd-642a-438f-89ea-b65f3dd1947f",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
+            "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
+            "sequenceNo": 2,
+            "plannedTime": "1970-01-01T07:25:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo school terminal",
+                "address": "Fictional school address",
+                "latitude": 10.78,
+                "longitude": 106.69
+            },
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["plannedTime", "createdAt", "updatedAt"],
+        "where": {
+            "id": "b242a7cd-642a-438f-89ea-b65f3dd1947f"
+        }
     },
-    "dates": [
-      "effectiveFrom",
-      "plannedStartTime",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "0a81127e-7bd3-4a1b-8826-21d82e04e36a"
-    }
-  },
-  {
-    "model": "scheduleWeekday",
-    "data": {
-      "id": "d6e571c5-4a85-40f5-9826-d72e9022a05a",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "scheduleId": "0a81127e-7bd3-4a1b-8826-21d82e04e36a",
-      "isoWeekday": 1,
-      "createdAt": "2026-11-16T00:00:00.000Z"
+    {
+        "model": "recurringSchedule",
+        "data": {
+            "id": "c0e40f2c-ff25-4dd2-9846-b68e8e693625",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "scheduleKey": "18bbafc6-8dc8-4f30-92a5-9e6fb1f9e7a4",
+            "versionNo": 1,
+            "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "direction": "PICKUP",
+            "plannedStartTime": "1970-01-01T07:00:00.000Z",
+            "status": "ACTIVE",
+            "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "defaultVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "defaultDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19"
+        },
+        "dates": [
+            "effectiveFrom",
+            "plannedStartTime",
+            "createdAt",
+            "updatedAt"
+        ],
+        "where": {
+            "id": "c0e40f2c-ff25-4dd2-9846-b68e8e693625"
+        }
     },
-    "dates": [
-      "createdAt"
-    ],
-    "where": {
-      "id": "d6e571c5-4a85-40f5-9826-d72e9022a05a"
-    }
-  },
-  {
-    "model": "trip",
-    "data": {
-      "id": "773ce574-df92-4293-bd28-788e089d969a",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "scheduleId": "0a81127e-7bd3-4a1b-8826-21d82e04e36a",
-      "serviceDate": "2026-11-16T00:00:00.000Z",
-      "direction": "DROPOFF",
-      "plannedStartAt": "2026-11-16T09:00:00.000Z",
-      "status": "PLANNED",
-      "dataVersion": 0,
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "scheduleKey": "4eba8233-81b5-4daf-aef3-eace91a46347",
-      "initialVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
-      "initialDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
-      "operatingPolicyId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0"
+    {
+        "model": "plannedPassenger",
+        "data": {
+            "id": "0a3376df-ac15-4fde-bfaf-c5f5ec10627e",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "routeId": "444d0c84-d8a3-4d04-80fb-dd47df5ee189",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "plannedStopId": "2921e2bb-0f3d-466f-9f06-4ee5b0bf5b93",
+            "estimatedRideSeconds": 1800,
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "planVersionId": "02373dfb-ab71-4124-9c43-6a69a961bc7e"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "0a3376df-ac15-4fde-bfaf-c5f5ec10627e"
+        }
     },
-    "dates": [
-      "serviceDate",
-      "plannedStartAt",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "773ce574-df92-4293-bd28-788e089d969a"
-    }
-  },
-  {
-    "model": "tripStop",
-    "data": {
-      "id": "803cdcd2-2d20-476b-acbc-a1d365b39952",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "773ce574-df92-4293-bd28-788e089d969a",
-      "logicalStopKey": "70e6f172-4ccb-4b22-a8db-8ff07e15f48d",
-      "versionNo": 1,
-      "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
-      "sequenceNo": 2,
-      "plannedAt": "2026-11-16T09:20:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo service point",
-        "address": "Fictional pickup address",
-        "latitude": 10.78,
-        "longitude": 106.69,
-        "service_seconds": 30
-      },
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "plannedStopId": "4277e0bc-eaa6-4808-a421-4f1f89eff481"
+    {
+        "model": "scheduleWeekday",
+        "data": {
+            "id": "cfec507e-42cb-4837-bb73-e91b57bb3713",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "scheduleId": "c0e40f2c-ff25-4dd2-9846-b68e8e693625",
+            "isoWeekday": 1,
+            "createdAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt"],
+        "where": {
+            "id": "cfec507e-42cb-4837-bb73-e91b57bb3713"
+        }
     },
-    "dates": [
-      "plannedAt",
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "803cdcd2-2d20-476b-acbc-a1d365b39952"
-    }
-  },
-  {
-    "model": "tripStop",
-    "data": {
-      "id": "61cd613e-84c0-4103-9d6c-7ed108a8a37a",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "773ce574-df92-4293-bd28-788e089d969a",
-      "logicalStopKey": "238cdaa6-659d-42ff-a792-f4ad13916ddc",
-      "versionNo": 1,
-      "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
-      "sequenceNo": 1,
-      "plannedAt": "2026-11-16T09:00:00.000Z",
-      "stopSnapshot": {
-        "name": "Demo school terminal",
-        "address": "Fictional school address",
-        "latitude": 10.78,
-        "longitude": 106.69
-      },
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "plannedStopId": "7f52cfc0-08b7-4595-aca6-148a095cc607"
+    {
+        "model": "trip",
+        "data": {
+            "id": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "scheduleId": "c0e40f2c-ff25-4dd2-9846-b68e8e693625",
+            "serviceDate": "2026-11-16T00:00:00.000Z",
+            "direction": "PICKUP",
+            "plannedStartAt": "2026-11-16T00:00:00.000Z",
+            "status": "OPEN",
+            "dataVersion": 1,
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "scheduleKey": "18bbafc6-8dc8-4f30-92a5-9e6fb1f9e7a4",
+            "startedAt": "2026-11-16T00:00:00.000Z",
+            "initialVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "initialDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
+            "operatingPolicyId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0"
+        },
+        "dates": [
+            "serviceDate",
+            "plannedStartAt",
+            "startedAt",
+            "createdAt",
+            "updatedAt"
+        ],
+        "where": {
+            "id": "72b3f6c5-d7da-47ce-aab9-decb6f56c264"
+        }
     },
-    "dates": [
-      "plannedAt",
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "61cd613e-84c0-4103-9d6c-7ed108a8a37a"
-    }
-  },
-  {
-    "model": "tripPassenger",
-    "data": {
-      "id": "fda61c61-9bde-4127-943b-0e2e58f76c85",
-      "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
-      "tripId": "773ce574-df92-4293-bd28-788e089d969a",
-      "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
-      "versionNo": 1,
-      "registrationDayId": "91f1006f-2379-4c79-8ad6-87f98cbf66e4",
-      "tripStopId": "803cdcd2-2d20-476b-acbc-a1d365b39952",
-      "disposition": "EXPECTED",
-      "effectiveFrom": "2026-11-16T00:00:00.000Z",
-      "createdAt": "2026-11-16T00:00:00.000Z",
-      "updatedAt": "2026-11-16T00:00:00.000Z",
-      "plannedPassengerId": "415be9ad-4fca-438a-a9a4-597bfc4c37bc"
+    {
+        "model": "tripStop",
+        "data": {
+            "id": "470032c2-666f-4ac0-be3b-2818245ea31b",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "logicalStopKey": "c8aeb214-cc5a-4ca5-8780-c534146e4349",
+            "versionNo": 1,
+            "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "sequenceNo": 1,
+            "plannedAt": "2026-11-16T00:00:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo service point",
+                "address": "Fictional pickup address",
+                "latitude": 10.78,
+                "longitude": 106.69,
+                "service_seconds": 30
+            },
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["plannedAt", "effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "470032c2-666f-4ac0-be3b-2818245ea31b"
+        }
     },
-    "dates": [
-      "effectiveFrom",
-      "createdAt",
-      "updatedAt"
-    ],
-    "where": {
-      "id": "fda61c61-9bde-4127-943b-0e2e58f76c85"
+    {
+        "model": "tripStop",
+        "data": {
+            "id": "19b2a9e9-6da6-4f32-9a59-cb130c5a317a",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "logicalStopKey": "feb3f964-faa2-4574-abc2-086ac540e301",
+            "versionNo": 1,
+            "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
+            "sequenceNo": 2,
+            "plannedAt": "2026-11-16T00:25:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo school terminal",
+                "address": "Fictional school address",
+                "latitude": 10.78,
+                "longitude": 106.69
+            },
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "plannedStopId": "b242a7cd-642a-438f-89ea-b65f3dd1947f"
+        },
+        "dates": ["plannedAt", "effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "19b2a9e9-6da6-4f32-9a59-cb130c5a317a"
+        }
+    },
+    {
+        "model": "tripAssignment",
+        "data": {
+            "id": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "vehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "driverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "assignedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "effectiveTo": "2026-11-16T00:35:00.000Z"
+        },
+        "dates": ["effectiveFrom", "effectiveTo", "createdAt", "updatedAt"],
+        "where": {
+            "id": "d8f216cc-e765-4418-a9fd-d21732e4f7e3"
+        }
+    },
+    {
+        "model": "tripReconciliation",
+        "data": {
+            "id": "def864ba-e919-4af1-a6a8-f863cf5ed8e6",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "purpose": "CLOSE_CHECK",
+            "evaluatedDataVersion": 1,
+            "evaluatedAt": "2026-11-16T00:35:00.000Z",
+            "performedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "result": "ELIGIBLE",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "vehicleCheckById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "vehicleCheckConfirmedAt": "2026-11-16T00:34:00.000Z",
+            "vehicleCheckScope": {
+                "aggregate_confirmation": true,
+                "vehicle_ids": ["19a48364-a97d-4e87-bb69-fa2f10c7e518"]
+            }
+        },
+        "dates": ["evaluatedAt", "vehicleCheckConfirmedAt", "createdAt"],
+        "where": {
+            "id": "def864ba-e919-4af1-a6a8-f863cf5ed8e6"
+        }
+    },
+    {
+        "model": "tripPassenger",
+        "data": {
+            "id": "bcf8ed28-9e1c-47f9-a84f-db7080022306",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "versionNo": 1,
+            "registrationDayId": "ddae0bd5-21bf-431b-a909-692c7517842f",
+            "tripStopId": "470032c2-666f-4ac0-be3b-2818245ea31b",
+            "disposition": "EXPECTED",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "bcf8ed28-9e1c-47f9-a84f-db7080022306"
+        }
+    },
+    {
+        "model": "attendanceEvent",
+        "data": {
+            "id": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "assignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
+            "eventKind": "BOARD",
+            "method": "MANUAL_ONLINE",
+            "occurredAt": "2026-11-16T00:01:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "recordedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "outsideManifest": false,
+            "operationKey": "DEMO_AttendanceEvent_operation_key",
+            "reason": "Fictional manual boarding",
+            "tripPassengerId": "bcf8ed28-9e1c-47f9-a84f-db7080022306",
+            "tripStopId": "470032c2-666f-4ac0-be3b-2818245ea31b"
+        },
+        "dates": ["occurredAt", "createdAt"],
+        "where": {
+            "id": "42cdc227-36ad-4f2a-9c88-80b48428c35d"
+        }
+    },
+    {
+        "model": "attendanceEvent",
+        "data": {
+            "id": "9ba85f48-6d93-4b54-9f81-eaab20eeb79f",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "assignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
+            "eventKind": "ALIGHT",
+            "method": "MANUAL_ONLINE",
+            "occurredAt": "2026-11-16T00:25:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "recordedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "outsideManifest": false,
+            "operationKey": "DEMO_ALIGHT",
+            "reason": "Fictional manual alighting",
+            "tripPassengerId": "bcf8ed28-9e1c-47f9-a84f-db7080022306",
+            "tripStopId": "19b2a9e9-6da6-4f32-9a59-cb130c5a317a"
+        },
+        "dates": ["occurredAt", "createdAt"],
+        "where": {
+            "id": "9ba85f48-6d93-4b54-9f81-eaab20eeb79f"
+        }
+    },
+    {
+        "model": "reconciliationItem",
+        "data": {
+            "id": "0d81c925-2700-4907-94f2-f8b55b5367cc",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "reconciliationId": "def864ba-e919-4af1-a6a8-f863cf5ed8e6",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "result": "RECONCILED",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "tripPassengerId": "bcf8ed28-9e1c-47f9-a84f-db7080022306"
+        },
+        "dates": ["createdAt"],
+        "where": {
+            "id": "0d81c925-2700-4907-94f2-f8b55b5367cc"
+        }
+    },
+    {
+        "model": "trackingSession",
+        "data": {
+            "id": "601d1f9e-ba40-458b-a712-41e98ebf011d",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "assignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
+            "sourceAccountId": "4ff3c7be-9dab-4884-a8ce-1c79919e20c7",
+            "sourceDeviceKey": "DEMO_TrackingSession_source_device_key",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "startedAt": "2026-11-16T00:00:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "endedAt": "2026-11-16T00:30:00.000Z",
+            "effectiveTo": "2026-11-16T00:30:00.000Z"
+        },
+        "dates": [
+            "effectiveFrom",
+            "effectiveTo",
+            "startedAt",
+            "endedAt",
+            "createdAt",
+            "updatedAt"
+        ],
+        "where": {
+            "id": "601d1f9e-ba40-458b-a712-41e98ebf011d"
+        }
+    },
+    {
+        "model": "attendanceRevision",
+        "data": {
+            "id": "8ffe7fa5-cfff-4313-8477-8a9e89c26112",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "attendanceEventId": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
+            "revisionNo": 1,
+            "action": "REPLACE",
+            "correctedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "reason": "Fictional correction of boarding time",
+            "operationKey": "DEMO_AttendanceRevision_operation_key",
+            "effectiveStudentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "effectiveAssignmentId": "d8f216cc-e765-4418-a9fd-d21732e4f7e3",
+            "effectiveEventKind": "BOARD",
+            "effectiveOccurredAt": "2026-11-16T00:02:00.000Z"
+        },
+        "dates": ["effectiveOccurredAt", "createdAt"],
+        "where": {
+            "id": "8ffe7fa5-cfff-4313-8477-8a9e89c26112"
+        }
+    },
+    {
+        "model": "gpsPosition",
+        "data": {
+            "id": "c70c5988-0fa4-4bbe-b3b7-ee3c55989367",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "trackingSessionId": "601d1f9e-ba40-458b-a712-41e98ebf011d",
+            "measuredAt": "2026-11-16T00:05:00.000Z",
+            "receivedAt": "2026-11-16T00:05:01.000Z",
+            "latitude": 10.78,
+            "longitude": 106.69,
+            "sourceMessageKey": "c70c5988-0fa4-4bbe-b3b7-ee3c55989367",
+            "qualityStatus": "ACCEPTED",
+            "createdAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["measuredAt", "receivedAt", "createdAt"],
+        "where": {
+            "measuredAt_id": {
+                "measuredAt": "2026-11-16T00:05:00.000Z",
+                "id": "c70c5988-0fa4-4bbe-b3b7-ee3c55989367"
+            }
+        }
+    },
+    {
+        "model": "notification",
+        "data": {
+            "id": "adb7b7fd-9670-46c2-8f4f-1a1acbdc7e90",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "title": "Demo boarding recorded",
+            "body": "Fictional notification; never sent",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "eventKind": "ATTENDANCE_RECORDED",
+            "occurredAt": "2026-11-16T00:00:00.000Z",
+            "occurrenceKey": "DEMO_Notification_occurrence_key",
+            "actionSnapshot": {
+                "event_kind": "BOARD"
+            },
+            "originAttendanceEventId": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
+            "contextTripId": "72b3f6c5-d7da-47ce-aab9-decb6f56c264",
+            "contextStudentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae"
+        },
+        "dates": ["createdAt", "occurredAt"],
+        "where": {
+            "id": "adb7b7fd-9670-46c2-8f4f-1a1acbdc7e90"
+        }
+    },
+    {
+        "model": "notificationRecipient",
+        "data": {
+            "id": "62c3cfb2-c587-4535-9332-d520b29d36c7",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "notificationId": "adb7b7fd-9670-46c2-8f4f-1a1acbdc7e90",
+            "accountId": "b7ee238b-e5d9-49f7-a4ff-e4f44f4d62b5",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "62c3cfb2-c587-4535-9332-d520b29d36c7"
+        }
+    },
+    {
+        "model": "reconciliationEvidence",
+        "data": {
+            "id": "25185e0d-aecb-45b6-9990-67a23ae94a16",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "itemId": "0d81c925-2700-4907-94f2-f8b55b5367cc",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "attendanceEventId": "42cdc227-36ad-4f2a-9c88-80b48428c35d",
+            "attendanceRevisionId": "8ffe7fa5-cfff-4313-8477-8a9e89c26112"
+        },
+        "dates": ["createdAt"],
+        "where": {
+            "id": "25185e0d-aecb-45b6-9990-67a23ae94a16"
+        }
+    },
+    {
+        "model": "pushDelivery",
+        "data": {
+            "id": "3280ce56-ce9c-4b7a-8cf3-09017be18674",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "recipientId": "62c3cfb2-c587-4535-9332-d520b29d36c7",
+            "endpointId": "bad94e81-ec68-4e9d-a77f-7d15301fee1c",
+            "attemptNo": 1,
+            "attemptedAt": "2026-11-16T00:00:00.000Z",
+            "status": "SKIPPED_NO_PERMISSION",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["attemptedAt", "createdAt", "updatedAt"],
+        "where": {
+            "id": "3280ce56-ce9c-4b7a-8cf3-09017be18674"
+        }
+    },
+    {
+        "model": "reconciliationEvidence",
+        "data": {
+            "id": "7e1340fb-a3c5-4815-928b-3618a9c44ffe",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "itemId": "0d81c925-2700-4907-94f2-f8b55b5367cc",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "attendanceEventId": "9ba85f48-6d93-4b54-9f81-eaab20eeb79f",
+            "attendanceRevisionId": null
+        },
+        "dates": ["createdAt"],
+        "where": {
+            "id": "7e1340fb-a3c5-4815-928b-3618a9c44ffe"
+        }
+    },
+    {
+        "model": "registrationDay",
+        "data": {
+            "id": "91f1006f-2379-4c79-8ad6-87f98cbf66e4",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "registrationId": "3d8d6a59-19fd-49d0-9a7e-e08d0dfc3162",
+            "serviceDate": "2026-11-16T00:00:00.000Z",
+            "direction": "DROPOFF",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "approvedStopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "approvalStopSnapshot": {
+                "name": "Demo service point",
+                "address": "Fictional pickup address",
+                "latitude": 10.78,
+                "longitude": 106.69,
+                "service_seconds": 30
+            }
+        },
+        "dates": ["serviceDate", "createdAt", "updatedAt"],
+        "where": {
+            "id": "91f1006f-2379-4c79-8ad6-87f98cbf66e4"
+        }
+    },
+    {
+        "model": "planVersion",
+        "data": {
+            "id": "a5704541-15f6-4d7b-9e51-360f4db9911b",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "planKey": "c9510be5-f5a3-4bff-b81b-6dce3c2e20d2",
+            "versionNo": 1,
+            "referenceDate": "2026-11-16T00:00:00.000Z",
+            "direction": "DROPOFF",
+            "policyVersionId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0",
+            "inputSnapshot": {
+                "fixture": true,
+                "solver": {
+                    "name": "DEMO_STATIC_NOT_SOLVED",
+                    "objective": "total_distance"
+                },
+                "distance_unit": "metres",
+                "duration_unit": "seconds",
+                "vehicles": [
+                    {
+                        "id": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+                        "capacity": 30
+                    }
+                ],
+                "stops": [
+                    {
+                        "name": "Demo service point",
+                        "address": "Fictional pickup address",
+                        "latitude": 10.78,
+                        "longitude": 106.69,
+                        "service_seconds": 30
+                    }
+                ],
+                "matrix": {
+                    "source": "FICTIONAL_SEED",
+                    "distance_unit": "metres",
+                    "duration_unit": "seconds"
+                }
+            },
+            "status": "APPROVED",
+            "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "approvedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "approvedAt": "2026-11-16T00:00:00.000Z",
+            "dropoffDepartureTime": "1970-01-01T16:00:00.000Z"
+        },
+        "dates": [
+            "referenceDate",
+            "createdAt",
+            "approvedAt",
+            "effectiveFrom",
+            "updatedAt",
+            "dropoffDepartureTime"
+        ],
+        "where": {
+            "id": "a5704541-15f6-4d7b-9e51-360f4db9911b"
+        }
+    },
+    {
+        "model": "planDemand",
+        "data": {
+            "id": "214f03f3-8d91-4932-b170-4c3e617d6f91",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "planVersionId": "a5704541-15f6-4d7b-9e51-360f4db9911b",
+            "registrationDayId": "91f1006f-2379-4c79-8ad6-87f98cbf66e4",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "demandSnapshot": {
+                "service_date": "2026-11-16",
+                "direction": "DROPOFF",
+                "stop": {
+                    "name": "Demo service point",
+                    "address": "Fictional pickup address",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "service_seconds": 30
+                }
+            },
+            "createdAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt"],
+        "where": {
+            "id": "214f03f3-8d91-4932-b170-4c3e617d6f91"
+        }
+    },
+    {
+        "model": "plannedRoute",
+        "data": {
+            "id": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "planVersionId": "a5704541-15f6-4d7b-9e51-360f4db9911b",
+            "routeCode": "T001",
+            "label": "Demo afternoon route",
+            "vehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "capacitySnapshot": 30,
+            "distanceMetres": 1000,
+            "durationSeconds": 1200,
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "50887bb2-ea5c-456e-89bc-85f95379a1b4"
+        }
+    },
+    {
+        "model": "plannedStop",
+        "data": {
+            "id": "4277e0bc-eaa6-4808-a421-4f1f89eff481",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
+            "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "sequenceNo": 2,
+            "plannedTime": "1970-01-01T16:20:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo service point",
+                "address": "Fictional pickup address",
+                "latitude": 10.78,
+                "longitude": 106.69,
+                "service_seconds": 30
+            },
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["plannedTime", "createdAt", "updatedAt"],
+        "where": {
+            "id": "4277e0bc-eaa6-4808-a421-4f1f89eff481"
+        }
+    },
+    {
+        "model": "plannedStop",
+        "data": {
+            "id": "7f52cfc0-08b7-4595-aca6-148a095cc607",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
+            "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
+            "sequenceNo": 1,
+            "plannedTime": "1970-01-01T16:00:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo school terminal",
+                "address": "Fictional school address",
+                "latitude": 10.78,
+                "longitude": 106.69
+            },
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["plannedTime", "createdAt", "updatedAt"],
+        "where": {
+            "id": "7f52cfc0-08b7-4595-aca6-148a095cc607"
+        }
+    },
+    {
+        "model": "plannedPassenger",
+        "data": {
+            "id": "415be9ad-4fca-438a-a9a4-597bfc4c37bc",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "plannedStopId": "4277e0bc-eaa6-4808-a421-4f1f89eff481",
+            "estimatedRideSeconds": 1200,
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "planVersionId": "a5704541-15f6-4d7b-9e51-360f4db9911b",
+            "sourceDemandId": "214f03f3-8d91-4932-b170-4c3e617d6f91"
+        },
+        "dates": ["createdAt", "updatedAt"],
+        "where": {
+            "id": "415be9ad-4fca-438a-a9a4-597bfc4c37bc"
+        }
+    },
+    {
+        "model": "recurringSchedule",
+        "data": {
+            "id": "0a81127e-7bd3-4a1b-8826-21d82e04e36a",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "scheduleKey": "4eba8233-81b5-4daf-aef3-eace91a46347",
+            "versionNo": 1,
+            "routeId": "50887bb2-ea5c-456e-89bc-85f95379a1b4",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "direction": "DROPOFF",
+            "plannedStartTime": "1970-01-01T16:00:00.000Z",
+            "status": "ACTIVE",
+            "createdById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "defaultVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "defaultDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19"
+        },
+        "dates": [
+            "effectiveFrom",
+            "plannedStartTime",
+            "createdAt",
+            "updatedAt"
+        ],
+        "where": {
+            "id": "0a81127e-7bd3-4a1b-8826-21d82e04e36a"
+        }
+    },
+    {
+        "model": "scheduleWeekday",
+        "data": {
+            "id": "d6e571c5-4a85-40f5-9826-d72e9022a05a",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "scheduleId": "0a81127e-7bd3-4a1b-8826-21d82e04e36a",
+            "isoWeekday": 1,
+            "createdAt": "2026-11-16T00:00:00.000Z"
+        },
+        "dates": ["createdAt"],
+        "where": {
+            "id": "d6e571c5-4a85-40f5-9826-d72e9022a05a"
+        }
+    },
+    {
+        "model": "trip",
+        "data": {
+            "id": "773ce574-df92-4293-bd28-788e089d969a",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "scheduleId": "0a81127e-7bd3-4a1b-8826-21d82e04e36a",
+            "serviceDate": "2026-11-16T00:00:00.000Z",
+            "direction": "DROPOFF",
+            "plannedStartAt": "2026-11-16T09:00:00.000Z",
+            "status": "PLANNED",
+            "dataVersion": 0,
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "scheduleKey": "4eba8233-81b5-4daf-aef3-eace91a46347",
+            "initialVehicleId": "19a48364-a97d-4e87-bb69-fa2f10c7e518",
+            "initialDriverId": "f3f540a6-9cd3-4a3a-87f1-409e0d24fc19",
+            "operatingPolicyId": "4f5b5fa7-77e9-4657-95e1-3a39ff7485f0"
+        },
+        "dates": ["serviceDate", "plannedStartAt", "createdAt", "updatedAt"],
+        "where": {
+            "id": "773ce574-df92-4293-bd28-788e089d969a"
+        }
+    },
+    {
+        "model": "tripStop",
+        "data": {
+            "id": "803cdcd2-2d20-476b-acbc-a1d365b39952",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "773ce574-df92-4293-bd28-788e089d969a",
+            "logicalStopKey": "70e6f172-4ccb-4b22-a8db-8ff07e15f48d",
+            "versionNo": 1,
+            "stopId": "b3ff357f-7f3d-45a1-9028-00af93924413",
+            "sequenceNo": 2,
+            "plannedAt": "2026-11-16T09:20:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo service point",
+                "address": "Fictional pickup address",
+                "latitude": 10.78,
+                "longitude": 106.69,
+                "service_seconds": 30
+            },
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "plannedStopId": "4277e0bc-eaa6-4808-a421-4f1f89eff481"
+        },
+        "dates": ["plannedAt", "effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "803cdcd2-2d20-476b-acbc-a1d365b39952"
+        }
+    },
+    {
+        "model": "tripStop",
+        "data": {
+            "id": "61cd613e-84c0-4103-9d6c-7ed108a8a37a",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "773ce574-df92-4293-bd28-788e089d969a",
+            "logicalStopKey": "238cdaa6-659d-42ff-a792-f4ad13916ddc",
+            "versionNo": 1,
+            "stopId": "d4a8bf8e-7bc4-452b-9889-62a58b323eef",
+            "sequenceNo": 1,
+            "plannedAt": "2026-11-16T09:00:00.000Z",
+            "stopSnapshot": {
+                "name": "Demo school terminal",
+                "address": "Fictional school address",
+                "latitude": 10.78,
+                "longitude": 106.69
+            },
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "changedById": "56d1eb0f-657b-47a2-af34-01d5fda64309",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "plannedStopId": "7f52cfc0-08b7-4595-aca6-148a095cc607"
+        },
+        "dates": ["plannedAt", "effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "61cd613e-84c0-4103-9d6c-7ed108a8a37a"
+        }
+    },
+    {
+        "model": "tripPassenger",
+        "data": {
+            "id": "fda61c61-9bde-4127-943b-0e2e58f76c85",
+            "schoolId": "398b9590-1a9f-4709-8971-a93752043f85",
+            "tripId": "773ce574-df92-4293-bd28-788e089d969a",
+            "studentId": "629e2ac6-9e89-46a2-8e68-e4246d4ca8ae",
+            "versionNo": 1,
+            "registrationDayId": "91f1006f-2379-4c79-8ad6-87f98cbf66e4",
+            "tripStopId": "803cdcd2-2d20-476b-acbc-a1d365b39952",
+            "disposition": "EXPECTED",
+            "effectiveFrom": "2026-11-16T00:00:00.000Z",
+            "createdAt": "2026-11-16T00:00:00.000Z",
+            "updatedAt": "2026-11-16T00:00:00.000Z",
+            "plannedPassengerId": "415be9ad-4fca-438a-a9a4-597bfc4c37bc"
+        },
+        "dates": ["effectiveFrom", "createdAt", "updatedAt"],
+        "where": {
+            "id": "fda61c61-9bde-4127-943b-0e2e58f76c85"
+        }
     }
-  }
 ]

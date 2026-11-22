@@ -1,7 +1,7 @@
-import {describe, it, expect} from "vitest";
-import {Prisma} from "@prisma/client";
-import {mapPrismaError} from "./prisma-error.mapper";
-import {ConflictError, NotFoundError, ValidationError} from "./http-errors";
+import { describe, it, expect } from "vitest";
+import { Prisma } from "@prisma/client";
+import { mapPrismaError } from "./prisma-error.mapper";
+import { ConflictError, NotFoundError, ValidationError } from "./http-errors";
 
 function knownError(code: string, meta?: Record<string, unknown>) {
     return new Prisma.PrismaClientKnownRequestError("boom", {
@@ -18,25 +18,41 @@ describe("mapPrismaError", () => {
     });
 
     it("maps P2002 to ConflictError including the field name", () => {
-        const result = mapPrismaError(knownError("P2002", {target: ["email"]}));
+        const result = mapPrismaError(
+            knownError("P2002", { target: ["email"] }),
+        );
         expect(result).toBeInstanceOf(ConflictError);
         expect(result.message).toContain("email");
     });
 
     it("maps P2025 to NotFoundError", () => {
-        expect(mapPrismaError(knownError("P2025"))).toBeInstanceOf(NotFoundError);
+        expect(mapPrismaError(knownError("P2025"))).toBeInstanceOf(
+            NotFoundError,
+        );
     });
     it("maps the PostgreSQL adapter constraint metadata to a stable email error code", () => {
-        const error = knownError("P2002", { modelName: "UserAccount", driverAdapterError: { cause: { constraint: { fields: ["email"] } } } });
-        expect(mapPrismaError(error)).toMatchObject({ code: "ACCOUNT_EMAIL_EXISTS", status: 409 });
+        const error = knownError("P2002", {
+            modelName: "UserAccount",
+            driverAdapterError: {
+                cause: { constraint: { fields: ["email"] } },
+            },
+        });
+        expect(mapPrismaError(error)).toMatchObject({
+            code: "ACCOUNT_EMAIL_EXISTS",
+            status: 409,
+        });
     });
 
     it("maps P2000 to ValidationError", () => {
-        expect(mapPrismaError(knownError("P2000"))).toBeInstanceOf(ValidationError);
+        expect(mapPrismaError(knownError("P2000"))).toBeInstanceOf(
+            ValidationError,
+        );
     });
 
     it("maps PrismaClientValidationError to ValidationError", () => {
-        const err = new Prisma.PrismaClientValidationError("bad", {clientVersion: "7.0.0"});
+        const err = new Prisma.PrismaClientValidationError("bad", {
+            clientVersion: "7.0.0",
+        });
         expect(mapPrismaError(err)).toBeInstanceOf(ValidationError);
     });
 

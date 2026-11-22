@@ -13,7 +13,9 @@ vi.mock("../config/redis", () => ({
     default: { sendCommand: vi.fn().mockResolvedValue("0".repeat(40)) },
     isRedisReady: vi.fn(() => true),
 }));
-vi.mock("../modules/system/audit", () => ({ recordAuthAudit: vi.fn().mockResolvedValue(undefined) }));
+vi.mock("../modules/system/audit", () => ({
+    recordAuthAudit: vi.fn().mockResolvedValue(undefined),
+}));
 
 import {
     failClosed,
@@ -22,14 +24,18 @@ import {
     setupPasswordRateLimiter,
 } from "./rate-limit.middleware";
 import { isRedisReady } from "../config/redis";
-import { ServiceUnavailableError, TooManyRequestsError } from "../errors/http-errors";
+import {
+    ServiceUnavailableError,
+    TooManyRequestsError,
+} from "../errors/http-errors";
 
 const fakeReq = {} as Request;
 const fakeRes = {} as Response;
 
 describe("failClosed", () => {
     it("converts a raw store error into a ServiceUnavailableError (503)", () => {
-        const stub: RequestHandler = (_req, _res, next) => next(new Error("redis exploded"));
+        const stub: RequestHandler = (_req, _res, next) =>
+            next(new Error("redis exploded"));
         const next = vi.fn();
 
         failClosed(stub)(fakeReq, fakeRes, next);
@@ -38,7 +44,9 @@ describe("failClosed", () => {
         const err = next.mock.calls[0][0];
         expect(err).toBeInstanceOf(ServiceUnavailableError);
         expect(err.status).toBe(503);
-        expect(err.detail).toBe("Authentication is temporarily unavailable. Please try again later");
+        expect(err.detail).toBe(
+            "Authentication is temporarily unavailable. Please try again later",
+        );
     });
 
     it("passes a TooManyRequestsError through unchanged, not relabelled as 503", () => {

@@ -33,6 +33,7 @@
   "devDependencies": {
     "@types/react": "~19.2.2",
     "eslint-config-expo": "~57.0.2",
+    "prettier": "3.10.1",
     "typescript": "~6.0.3",
     "vitest": "^3.2.6"
   },
@@ -42,6 +43,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "format": "prettier --write src test \"*.{js,cjs,mjs,ts}\"",
+    "format:check": "prettier --check src test \"*.{js,cjs,mjs,ts}\"",
     "test": "vitest run",
     "test:contract-consumer": "vitest run --config vitest.contracts.config.ts"
   },

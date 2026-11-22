@@ -1,7 +1,11 @@
-import {AppError, FieldError} from "./app-error";
+import { AppError, FieldError } from "./app-error";
 
 export class ValidationError extends AppError {
-    constructor(detail = "Validation failed", errors?: FieldError[], code = "VALIDATION_ERROR") {
+    constructor(
+        detail = "Validation failed",
+        errors?: FieldError[],
+        code = "VALIDATION_ERROR",
+    ) {
         super({
             code,
             status: 400,
@@ -13,7 +17,10 @@ export class ValidationError extends AppError {
 }
 
 export class AuthenticationError extends AppError {
-    constructor(detail = "Authentication required", code = "AUTHENTICATION_ERROR") {
+    constructor(
+        detail = "Authentication required",
+        code = "AUTHENTICATION_ERROR",
+    ) {
         super({
             code,
             status: 401,
@@ -91,7 +98,9 @@ export class TooManyRequestsError extends AppError {
 }
 
 export class ServiceUnavailableError extends AppError {
-    constructor(detail = "Service is temporarily unavailable. Please try again later") {
+    constructor(
+        detail = "Service is temporarily unavailable. Please try again later",
+    ) {
         super({
             code: "SERVICE_UNAVAILABLE",
             status: 503,

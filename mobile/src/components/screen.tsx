@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import type { SpacingToken } from '@/constants/theme';
@@ -35,18 +41,18 @@ export function Screen({
     <SafeAreaView
       edges={edges}
       style={[styles.screen, { backgroundColor: colors.background }, style]}
-      testID={testID}>
+      testID={testID}
+    >
       {scroll ? (
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+        >
           <View style={contentStyle}>{children}</View>
         </ScrollView>
       ) : (
-        <View style={contentStyle}>
-          {children}
-        </View>
+        <View style={contentStyle}>{children}</View>
       )}
     </SafeAreaView>
   );

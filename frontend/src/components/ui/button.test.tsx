@@ -1,20 +1,20 @@
-import {describe, it, expect} from "vitest";
-import {render, screen} from "@testing-library/react";
-import {Button} from "./button";
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { Button } from "./button";
 
 describe("Button", () => {
     it("renders its children as an accessible button", () => {
         render(<Button>Save changes</Button>);
         expect(
-            screen.getByRole("button", {name: "Save changes"})
+            screen.getByRole("button", { name: "Save changes" }),
         ).toBeInTheDocument();
     });
 
     it("reflects the variant via data-variant", () => {
         render(<Button variant="destructive">Delete</Button>);
-        expect(screen.getByRole("button", {name: "Delete"})).toHaveAttribute(
+        expect(screen.getByRole("button", { name: "Delete" })).toHaveAttribute(
             "data-variant",
-            "destructive"
+            "destructive",
         );
     });
 
@@ -22,8 +22,8 @@ describe("Button", () => {
         render(
             <Button asChild>
                 <a href="/home">Home</a>
-            </Button>
+            </Button>,
         );
-        expect(screen.getByRole("link", {name: "Home"})).toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
     });
 });

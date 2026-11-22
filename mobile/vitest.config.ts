@@ -2,7 +2,16 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   resolve: {
-    extensions: ['.native.ts', '.web.ts', '.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'],
+    extensions: [
+      '.native.ts',
+      '.web.ts',
+      '.ts',
+      '.tsx',
+      '.mjs',
+      '.js',
+      '.jsx',
+      '.json',
+    ],
   },
   test: {
     environment: 'node',

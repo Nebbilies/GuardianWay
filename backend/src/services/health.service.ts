@@ -23,10 +23,19 @@ const DEFAULT_TIMEOUT_MS = 1000;
 // leaves the orchestrator with no signal at all.
 export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms);
+        const timer = setTimeout(
+            () => reject(new Error(`timed out after ${ms}ms`)),
+            ms,
+        );
         promise.then(
-            (value) => { clearTimeout(timer); resolve(value); },
-            (error) => { clearTimeout(timer); reject(error); },
+            (value) => {
+                clearTimeout(timer);
+                resolve(value);
+            },
+            (error) => {
+                clearTimeout(timer);
+                reject(error);
+            },
         );
     });
 }
@@ -35,7 +44,11 @@ export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 // seconds) doesn't flood the request log — but that also means nothing else
 // ever records a failing dependency. Log here instead, and only on failure, so
 // a healthy replica stays as silent as the routing already intends.
-async function run(name: "db" | "redis", check: () => Promise<unknown>, ms: number): Promise<CheckResult> {
+async function run(
+    name: "db" | "redis",
+    check: () => Promise<unknown>,
+    ms: number,
+): Promise<CheckResult> {
     try {
         await withTimeout(check(), ms);
         return "ok";
@@ -48,12 +61,16 @@ async function run(name: "db" | "redis", check: () => Promise<unknown>, ms: numb
     }
 }
 
-export async function checkReadiness(deps: ReadinessDeps): Promise<ReadinessReport> {
+export async function checkReadiness(
+    deps: ReadinessDeps,
+): Promise<ReadinessReport> {
     const ms = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
     const [db, redis] = await Promise.all([
         run("db", deps.pingDb, ms),
-        deps.redisEnabled === false ? Promise.resolve("disabled" as const) : run("redis", deps.pingRedis, ms),
+        deps.redisEnabled === false
+            ? Promise.resolve("disabled" as const)
+            : run("redis", deps.pingRedis, ms),
     ]);
 
     return {

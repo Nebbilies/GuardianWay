@@ -18,13 +18,20 @@ describe('token storage adapters', () => {
   it('uses SecureStore for the native refresh token', async () => {
     secureStore.getItemAsync.mockResolvedValue('refresh-native');
 
-    await expect(nativeStorage.getRefreshToken()).resolves.toBe('refresh-native');
+    await expect(nativeStorage.getRefreshToken()).resolves.toBe(
+      'refresh-native',
+    );
     await nativeStorage.setRefreshToken('refresh-next');
     await nativeStorage.clearRefreshToken();
 
     expect(secureStore.getItemAsync).toHaveBeenCalledOnce();
-    expect(secureStore.setItemAsync).toHaveBeenCalledWith('guardianway.refresh-token', 'refresh-next');
-    expect(secureStore.deleteItemAsync).toHaveBeenCalledWith('guardianway.refresh-token');
+    expect(secureStore.setItemAsync).toHaveBeenCalledWith(
+      'guardianway.refresh-token',
+      'refresh-next',
+    );
+    expect(secureStore.deleteItemAsync).toHaveBeenCalledWith(
+      'guardianway.refresh-token',
+    );
   });
 
   it('keeps web smoke-test tokens in memory only', async () => {
