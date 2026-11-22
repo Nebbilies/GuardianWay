@@ -197,6 +197,17 @@
                 "allowsPickup": true,
                 "allowsDropoff": true,
                 "status": "ACTIVE"
+            },
+            "stop-2": {
+                "code": "CV",
+                "name": "Điểm trả Công viên",
+                "address": "Cổng Công viên (demo)",
+                "latitude": 10.785,
+                "longitude": 106.695,
+                "kind": "SERVICE_POINT",
+                "allowsPickup": false,
+                "allowsDropoff": true,
+                "status": "ACTIVE"
             }
         },
         "schoolPolicyVersion": {

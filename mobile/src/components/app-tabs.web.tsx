@@ -9,8 +9,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { colors, radius, spacing, theme } from '@/constants/theme';
+import { useRegistrationAccess } from '@/transport/registrations/registration-provider';
 
 export default function AppTabs() {
+  const registrationsEnabled = useRegistrationAccess();
   return (
     <Tabs>
       <TabSlot style={styles.slot} />
@@ -19,6 +21,11 @@ export default function AppTabs() {
           <TabTrigger name="home" href="/" asChild>
             <TabButton>Trang chủ</TabButton>
           </TabTrigger>
+          {registrationsEnabled ? (
+            <TabTrigger name="registrations" href="/registrations" asChild>
+              <TabButton>Đăng ký xe</TabButton>
+            </TabTrigger>
+          ) : null}
           {__DEV__ ? (
             <TabTrigger name="design-system" href="/design-system" asChild>
               <TabButton>Thành phần</TabButton>

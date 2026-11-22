@@ -19,6 +19,10 @@ import { Screen } from '@/components/screen';
 import { Stack as LayoutStack } from '@/components/stack';
 import { colors } from '@/constants/theme';
 import { useAuthStore } from '@/auth/auth-store';
+import {
+  RegistrationProvider,
+  useRegistrationAccess,
+} from '@/transport/registrations/registration-provider';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,6 +52,7 @@ export default function RootLayout() {
     NotoSans_700Bold,
   });
   const status = useAuthStore((state) => state.status);
+  const registrationsEnabled = useRegistrationAccess();
   const fixturePreview = usePathname() === '/fixtures' && __DEV__;
   const restoreSession = useAuthStore((state) => state.restoreSession);
 
@@ -93,17 +98,22 @@ export default function RootLayout() {
           </LayoutStack>
         </Screen>
       ) : (
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Protected guard={status === 'signedOut'}>
-            <Stack.Screen name="sign-in" />
-          </Stack.Protected>
-          <Stack.Protected guard={status === 'signedIn'}>
-            <Stack.Screen name="(app)" />
-          </Stack.Protected>
-          <Stack.Protected guard={__DEV__}>
-            <Stack.Screen name="fixtures" />
-          </Stack.Protected>
-        </Stack>
+        <RegistrationProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={status === 'signedOut'}>
+              <Stack.Screen name="sign-in" />
+            </Stack.Protected>
+            <Stack.Protected guard={status === 'signedIn'}>
+              <Stack.Screen name="(app)" />
+            </Stack.Protected>
+            <Stack.Protected guard={registrationsEnabled}>
+              <Stack.Screen name="(registration-flow)" />
+            </Stack.Protected>
+            <Stack.Protected guard={__DEV__}>
+              <Stack.Screen name="fixtures" />
+            </Stack.Protected>
+          </Stack>
+        </RegistrationProvider>
       )}
     </ThemeProvider>
   );

@@ -17,6 +17,12 @@ Sao chép `.env.example` thành `.env`, rồi đặt `EXPO_PUBLIC_API_URL` thàn
 
 Đăng nhập hỗ trợ tài khoản `DRIVER` và `PARENT`. Refresh token được lưu qua SecureStore trên iOS/Android; access token chỉ giữ trong memory. Bản web chỉ dùng để kiểm tra giao diện và build, không lưu session bền vững.
 
+## Demo đăng ký xe
+
+Nạp dữ liệu bằng `npm run database:seed:demo --workspace backend` từ gốc. Đặt `DEMO_USER_PASSWORD` trước lần seed đầu để đăng nhập bằng tài khoản demo. Trong Expo dev, đăng nhập bằng `parent-1.<schoolId>@demo.invalid` để mở **Đăng ký xe**. `parent-4.<schoolId>@demo.invalid` dùng để xem trường hợp chưa có học sinh được cấp quyền gửi.
+
+Đặt `EXPO_PUBLIC_REGISTRATION_FIXTURE_FAIL_ONCE=1` trước khi chạy Expo để lần gửi hợp lệ đầu tiên trong mỗi phiên báo lỗi. Bấm **Thử gửi lại** để tiếp tục. Đơn mô phỏng được lưu đến khi đăng xuất hoặc khởi động lại app.
+
 ## Quy tắc UI
 
 - Nguồn thiết kế: [`../DESIGN.md`](../DESIGN.md).

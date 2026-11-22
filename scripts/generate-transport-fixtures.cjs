@@ -1,7 +1,10 @@
 // Project the database demo into the two proposed read contracts.
 const fs = require("node:fs");
 const path = require("node:path");
-const { records } = require("../backend/prisma/seed-demo-data.json");
+const {
+    records,
+    school: demoSchool,
+} = require("../backend/prisma/seed-demo-data.json");
 const { recordId } = require("../backend/prisma/demo-record-id.cjs");
 const school = "76a75c7a-a9cc-4e50-a556-b1847746d6c2";
 const key = (ref) => ref.slice(1);
@@ -71,16 +74,39 @@ const manifests = Object.fromEntries(
     }),
 );
 const guardians = {};
+const studentsByActor = Object.fromEntries(
+    Object.entries(records.userAccount)
+        .filter(([, account]) => account.role === "PARENT")
+        .map(([actor]) => [actor, []]),
+);
 for (const link of Object.values(records.guardianLink)) {
+    const actor = key(link.guardianAccountId);
     if (link.canTrack || link.canRequest) {
-        (guardians[key(link.guardianAccountId)] ??= []).push(
-            id(link.studentId),
-        );
+        (guardians[actor] ??= []).push(id(link.studentId));
     }
+    if (link.canRequest) studentsByActor[actor]?.push(student(link.studentId));
 }
+const registrationForm = {
+    schoolName: demoSchool.name,
+    studentsByActor,
+    points: Object.entries(records.stop)
+        .filter(
+            ([, row]) => row.kind === "SERVICE_POINT" && row.status === "ACTIVE",
+        )
+        .map(([name, row]) => ({
+            ...stop("$" + name),
+            address: row.address,
+            allowsPickup: row.allowsPickup,
+            allowsDropoff: row.allowsDropoff,
+        })),
+};
 const file = path.join(__dirname, "../fixtures/transport/demo.json");
 const json =
-    JSON.stringify({ registrations, guardians, manifests }, null, 2) + "\n";
+    JSON.stringify(
+        { registrations, guardians, manifests, registrationForm },
+        null,
+        2,
+    ) + "\n";
 if (process.argv.includes("--check")) {
     if (fs.readFileSync(file, "utf8").replaceAll("\r\n", "\n") !== json)
         throw Error("Regenerate transport fixtures from the demo seed");
