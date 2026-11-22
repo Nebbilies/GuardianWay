@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { transaction } from "../../../config/database";
 import { AuthenticationError, InternalError } from "../../../errors/http-errors";
 import { principalFromClaims, toWireRole, type Principal } from "../../../http/principal";
-import { readAuthenticationAccount, readAuthenticationAccountById } from "../accounts";
+import { readAuthenticationAccount, readAuthenticationAccountById, lockAuthenticationAccountById, revokeAuthenticationSessions } from "../accounts";
 import { readSchool } from "../schools";
 import { recordAuthAudit, type RequestMetadata } from "../audit";
 import { authRepository } from "./auth.repository";
@@ -66,15 +66,22 @@ export const authService = {
     async login(email: string, password: string, metadata: RequestMetadata = {}): Promise<AuthSessionResult> {
         const input = loginBody.parse({ email, password });
         const account = await eligible(await readAuthenticationAccount(input.email));
-        if (!account || !await bcrypt.compare(input.password, account.passwordHash ?? "")) {
+        const result = account && await bcrypt.compare(input.password, account.passwordHash ?? "")
+            ? await transaction(async database => {
+                const current = await eligible(await lockAuthenticationAccountById(database, account.id), database);
+                if (!current || current.passwordHash !== account.passwordHash || current.email !== input.email) return null;
+                const sessionId = randomUUID();
+                const session = sessionFor(current, sessionId);
+                await saveSession(database, sessionId, current, session, metadata);
+                return { session, actor: actorOf(current) };
+            })
+            : null;
+        if (!result) {
             await recordAuthAudit(null, { action: "auth.login_failed", subjectKind: "AUTH_ATTEMPT", subjectReference: hash(input.email) }, metadata);
             throw new AuthenticationError("Invalid email or password", "INVALID_CREDENTIALS");
         }
-        const sessionId = randomUUID();
-        const session = sessionFor(account, sessionId);
-        await transaction(database => saveSession(database, sessionId, account, session, metadata));
-        await recordAuthAudit(actorOf(account), { action: "auth.login", subjectKind: "USER_ACCOUNT", subjectReference: account.id }, metadata);
-        return session;
+        await recordAuthAudit(result.actor, { action: "auth.login", subjectKind: "USER_ACCOUNT", subjectReference: result.actor.accountId }, metadata);
+        return result.session;
     },
     async refresh(rawToken: string, metadata: RequestMetadata = {}): Promise<AuthSessionResult> {
         const claims = verify(rawToken, "refresh");
@@ -84,7 +91,7 @@ export const authService = {
             if (!stored || stored.accountId !== claims.userId || stored.revokedAt || stored.expiresAt <= now) throw new AuthenticationError("Invalid authentication session");
             const account = await eligible(await readAuthenticationAccountById(stored.accountId, database), database);
             if (!account || account.schoolId !== stored.schoolId) {
-                await authRepository.revokeAccount(stored.accountId, database);
+                await revokeAuthenticationSessions(stored.accountId, database);
                 return null;
             }
             const session = sessionFor(account, stored.id);
@@ -101,7 +108,7 @@ export const authService = {
     async getCurrentUser(actor: Principal): Promise<AuthUser> {
         const account = await readAuthenticationAccountById(actor.accountId);
         if (!account || account.deletedAt || account.status !== "ACTIVE" || !account.activatedAt) {
-            await authRepository.revokeAccount(actor.accountId);
+            await revokeAuthenticationSessions(actor.accountId);
             throw new AuthenticationError("Account is not active");
         }
         return userOf(account);

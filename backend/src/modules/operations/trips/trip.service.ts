@@ -10,7 +10,7 @@ import { requireActiveSchedule } from "../../planning/schedules";
 import { requireApprovedRoute } from "../../planning/route-plans";
 import { requireVehicle } from "../../records/vehicles";
 import { requireDriver } from "../../records/drivers";
-import { requireStop } from "../../planning/stops";
+import { requireActiveStops } from "../../planning/stops";
 import { recordAudit, type RequestMetadata } from "../../system/audit";
 import { tripRepository } from "./trip.repository";
 import { tripBody, tripPatch, cancelBody, tripQuery } from "./trip.contracts";
@@ -47,7 +47,7 @@ export const tripService = {
             const driverId = data.driverId ?? schedule.defaultDriverId;
             if (!driverId) throw new ValidationError("Assign a driver before preparing this trip");
             const driver = await requireDriver(schoolId, driverId, database);
-            for (const stop of stops) await requireStop(schoolId, stop.stopId, database);
+            await requireActiveStops(database, schoolId, stops.map(stop => stop.stopId), true);
             const row = await tripRepository.create(database, { schoolId, scheduleId: schedule.id, scheduleKey: schedule.scheduleKey, serviceDate: date, direction: schedule.direction, plannedStartAt, initialVehicleId: vehicle.id, initialDriverId: driver.id, operatingPolicyId: plan.policyVersionId, status: "PLANNED", dataVersion: 1 });
             for (const [index, stop] of stops.entries()) await tripRepository.createStop(database, { schoolId, tripId: row.id, logicalStopKey: randomUUID(), versionNo: 1, plannedStopId: stop.id, stopId: stop.stopId, sequenceNo: stop.sequenceNo, plannedAt: times[index]!, stopSnapshot: stop.stopSnapshot!, effectiveFrom: row.createdAt, changedById: actor.accountId });
             const after = (await tripRepository.find(schoolId, row.id, database))!;

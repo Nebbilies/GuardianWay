@@ -20,7 +20,9 @@ describe("account, school and stateless auth boundaries", () => {
         const token = new URL(created.body.inviteLink).searchParams.get("token");
         const results = await Promise.all([1,2].map(() => request(app).post("/api/auth/setup-password").send({ token, password: TEST_PASSWORD })));
         expect(results.filter(result => result.status === 200)).toHaveLength(1);
-        expect(results.filter(result => result.status >= 400)).toHaveLength(1);
+        const rejected = results.find(result => result.status !== 200);
+        expect([400, 409]).toContain(rejected?.status);
+        expect(rejected?.body.code).toBe("INVITATION_INVALID");
         expect((await request(app).post("/api/auth/token/login").send({ email: "new-parent@gw.test", password: TEST_PASSWORD })).status).toBe(200);
         expect((await request(app).delete("/api/users/" + created.body.account.id).set("Cookie", cookies)).status).toBe(200);
         const duplicate = await request(app).post("/api/users").set("Cookie", cookies).send({ displayName: "Another parent", email: "new-parent@gw.test", role: "PARENT" });
@@ -34,7 +36,22 @@ describe("account, school and stateless auth boundaries", () => {
         const update = await request(app).patch("/api/users/" + created.body.account.id).set("Cookie", cookies).send({ email: "current@gw.test" });
         expect(update.status).toBe(200);
         const token = new URL(created.body.inviteLink).searchParams.get("token");
-        expect((await request(app).post("/api/auth/setup-password").send({ token, password: TEST_PASSWORD })).status).toBeGreaterThanOrEqual(400);
+        const rejected = await request(app).post("/api/auth/setup-password").send({ token, password: TEST_PASSWORD });
+        expect(rejected.status).toBe(400);
+        expect(rejected.body.code).toBe("INVITATION_INVALID");
+    });
+    it("ends previous refresh sessions when an account completes password replacement", async () => {
+        const cookies = await loginAs(app, fx.adminA.email);
+        const login = await request(app).post("/api/auth/token/login").send({ email: fx.driverA.email, password: TEST_PASSWORD });
+        expect(login.status).toBe(200);
+        const invite = await request(app).post("/api/users/" + fx.driverA.id + "/invite").set("Cookie", cookies);
+        expect(invite.status).toBe(200);
+        const token = new URL(invite.body.inviteLink).searchParams.get("token");
+        const password = "ReplacementPassword123!";
+        expect((await request(app).post("/api/auth/setup-password").send({ token, password })).status).toBe(200);
+        const prior = await request(app).post("/api/auth/token/refresh").send({ refreshToken: login.body.session.refreshToken });
+        expect(prior.status).toBe(401);
+        expect((await request(app).post("/api/auth/token/login").send({ email: fx.driverA.email, password })).status).toBe(200);
     });
     it("revokes the rotated refresh session when logout uses its previous token", async () => {
         const login = await request(app).post("/api/auth/token/login").send({ email: fx.adminA.email, password: TEST_PASSWORD });

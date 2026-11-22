@@ -4,7 +4,14 @@ import type { Database } from "../../../config/database";
 import { deletedFilter, listOptions, pageResult, type ListQuery } from "../../../http/contracts/pagination";
 export const stopRepository = {
     async lock(database: Database, schoolId: string, id: string) { await database.$queryRaw`SELECT id FROM stop WHERE school_id = ${schoolId}::uuid AND id = ${id}::uuid FOR UPDATE`; },
-    async lockForRead(database: Database, schoolId: string, id: string) { await database.$queryRaw`SELECT id FROM stop WHERE school_id = ${schoolId}::uuid AND id = ${id}::uuid FOR SHARE`; },
+    async findForPlan(database: Database, schoolId: string, ids: string[], lock: boolean) {
+        if (!ids.length) return [];
+        if (lock) {
+            await database.$queryRaw`SELECT id FROM stop WHERE school_id = ${schoolId}::uuid
+                AND id IN (${Prisma.join(ids.map(id => Prisma.sql`${id}::uuid`))}) ORDER BY id FOR SHARE`;
+        }
+        return database.stop.findMany({ where: { schoolId, id: { in: ids }, deletedAt: null, status: "ACTIVE" } });
+    },
     find(schoolId: string, id: string, database: Database = prisma) { return database.stop.findFirst({ where: { schoolId, id } }); },
     async list(schoolId: string, query: ListQuery & { status?: string }, exportAll = false) {
         const where: Prisma.StopWhereInput = { schoolId, deletedAt: deletedFilter(query), status: query.status, ...(query.search ? { OR: [{ code: { contains: query.search, mode: "insensitive" } }, { name: { contains: query.search, mode: "insensitive" } }, { address: { contains: query.search, mode: "insensitive" } }] } : {}) };

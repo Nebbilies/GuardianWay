@@ -13,6 +13,13 @@ export const accountRepository = {
     credentials(email: string, database: Database = prisma) {
         return database.userAccount.findUnique({ where: { email }, omit: { passwordHash: false } });
     },
+    async lockForAuthentication(database: Database, id: string) {
+        await database.$queryRaw`SELECT id FROM user_account WHERE id = ${id}::uuid FOR SHARE`;
+        return accountRepository.authById(id, database);
+    },
+    revokeAuthenticationSessions(accountId: string, database: Database = prisma) {
+        return database.refreshToken.updateMany({ where: { accountId, revokedAt: null }, data: { revokedAt: new Date() } });
+    },
     authById(id: string, database: Database = prisma) {
         return database.userAccount.findUnique({ where: { id }, omit: { passwordHash: false } });
     },

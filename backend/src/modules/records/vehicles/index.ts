@@ -1,1 +1,1 @@
-export { requireVehicle } from "./vehicle.service";
+export { requireVehicle, requireVehiclesForPlan } from "./vehicle.service";

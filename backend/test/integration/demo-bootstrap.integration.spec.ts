@@ -27,3 +27,9 @@ it("refuses a second platform identity during Compose provisioning", async () =>
         .rejects.toThrow("A platform administrator already exists");
     expect(await prisma.userAccount.count({ where: { email: "second@gw.test" } })).toBe(0);
 });
+
+it("does not add a demo administrator to a pre-existing school with the same code", async () => {
+    const environment = { BOOTSTRAP_PLATFORM_EMAIL: "bootstrap-platform@gw.test", BOOTSTRAP_PLATFORM_PASSWORD: TEST_PASSWORD, DEMO_ADMIN_EMAIL: "unexpected-admin@gw.test", DEMO_ADMIN_PASSWORD: TEST_PASSWORD, DEMO_SCHOOL_CODE: "A" };
+    await expect(seedDemo(prisma, environment)).rejects.toThrow("Demo school code belongs to a different school");
+    expect(await prisma.userAccount.count({ where: { email: environment.DEMO_ADMIN_EMAIL } })).toBe(0);
+});

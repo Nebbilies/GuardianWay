@@ -18,7 +18,4 @@ export const authRepository = {
     revokeHash(tokenHash: string) {
         return prisma.refreshToken.updateMany({ where: { tokenHash, revokedAt: null }, data: { revokedAt: new Date() } });
     },
-    revokeAccount(accountId: string, database: Database = prisma) {
-        return database.refreshToken.updateMany({ where: { accountId, revokedAt: null }, data: { revokedAt: new Date() } });
-    },
 };

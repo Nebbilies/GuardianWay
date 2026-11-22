@@ -2,7 +2,7 @@
 
 `schema.prisma`, `migrations/` and `../prisma.config.ts` are the sole application schema and migration history. The generated application client is `@prisma/client`; there is no second client or Prisma config.
 
-The baseline has 41 domain tables, 530 SQL columns and 182 foreign keys. Its SQL is unchanged from PR #7 (SHA-256 FE2C43461B6AFD95A1031EC6C51075DED466C6E48D001580B244274D39B5DA87). Status/domain columns are text; backend modules validate values and transitions. SQL retains integrity constraints, partial indexes, generated PostGIS geography and the measured_at GPS hypertable. This application PR does not implement GPS ingestion or trip execution.
+The baseline has 41 domain tables, 530 SQL columns and 182 foreign keys. Its SQL retains SHA-256 FE2C43461B6AFD95A1031EC6C51075DED466C6E48D001580B244274D39B5DA87. A follow-up migration scopes six foreign keys by their route, trip, or attendance event. Status/domain columns are text; backend modules validate values and transitions. SQL retains integrity constraints, partial indexes, generated PostGIS geography and the measured_at GPS hypertable. This application PR does not implement GPS ingestion or trip execution.
 
 ## Generate, validate and test
 
@@ -20,7 +20,7 @@ Docker must run for database and HTTP tests. They create disposable PostgreSQL/T
 
 ## Guarded local demo commands
 
-Use `database/.env` for SCHEMA_DATABASE_URL and `backend/.env` for app configuration. Ignored files are not copied into worktrees. Set GUARDIANWAY_APP_ENV_FILE and GUARDIANWAY_SCHEMA_ENV_FILE when using files from a chosen checkout; the runner never searches parent directories. It overrides DATABASE_URL and DIRECT_URL with the validated target before starting the child process.
+Use `database/.env` for SCHEMA_DATABASE_URL and `backend/.env` for app configuration. Ignored files are not copied into worktrees. Set GUARDIANWAY_APP_ENV_FILE and GUARDIANWAY_SCHEMA_ENV_FILE in your shell before running npm when using files from a chosen checkout; the runner never searches parent directories. It overrides DATABASE_URL and DIRECT_URL with the validated target before starting the child process.
 
 For local development without Redis, set `REDIS_ENABLED=false` in the app environment or PowerShell session. Authentication still uses rate limits backed by the installed library's in-memory store; counters and audit deduplication are local to the process and reset on restart. `/readyz` checks PostgreSQL and reports Redis as `disabled`. Redis remains enabled by default. Production rejects disabling Redis; an enabled but unavailable Redis still blocks authentication and fails readiness. Refresh tokens remain in PostgreSQL in both modes.
 
@@ -34,7 +34,7 @@ Migrate uses `migrate deploy`, never reset/db push. The local guard permits only
 
 ## Application bootstrap
 
-Set BOOTSTRAP_PLATFORM_EMAIL and BOOTSTRAP_PLATFORM_PASSWORD (at least 12 characters). Optionally set both DEMO_ADMIN_EMAIL and DEMO_ADMIN_PASSWORD, plus DEMO_SCHOOL_CODE (default DEMO). The demo school is explicitly fictional, uses Asia/Ho_Chi_Minh, and starts without plans, thresholds, students or invented operational metrics.
+Set BOOTSTRAP_PLATFORM_EMAIL and BOOTSTRAP_PLATFORM_PASSWORD (at least 12 characters and at most 72 UTF-8 bytes for either bootstrap password). Optionally set both DEMO_ADMIN_EMAIL and DEMO_ADMIN_PASSWORD, plus DEMO_SCHOOL_CODE (default DEMO). The demo school is explicitly fictional, uses Asia/Ho_Chi_Minh, and starts without plans, thresholds, students or invented operational metrics. A code already in use can be reused only if the active school retains the demo name and address.
 
 Passwords are bcrypt hashes. Re-running bootstrap preserves existing passwords, ownership and history. A conflicting owner or deleted account fails rather than being reassigned. Invitation mail requires configured EMAIL_USERNAME/EMAIL_PASSWORD; account creation reports SENT, FAILED or NOT_CONFIGURED after its transaction commits.
 

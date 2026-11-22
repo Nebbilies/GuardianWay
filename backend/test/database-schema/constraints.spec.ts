@@ -48,8 +48,14 @@ describe("schema-next data integrity", () => {
 
     it("prevents assigning one student to two routes of the same plan", async () => {
         const route = await clone(db, "planned_route", data("plannedRoute").id, { route_code: `T_${randomUUID()}` });
-        await expect(clone(db, "planned_passenger", data("plannedPassenger").id, { route_id: route.id }))
+        const stop = await clone(db, "planned_stop", data("plannedStop").id, { route_id: route.id });
+        const passenger = data("plannedPassenger");
+        await expect(clone(db, "planned_passenger", passenger.id, { route_id: route.id, planned_stop_id: stop.id }))
             .rejects.toMatchObject({ code: "23505" });
+        const otherPlan = await clone(db, "plan_version", data("planVersion").id, { plan_key: randomUUID() });
+        const otherRoute = await clone(db, "planned_route", route.id, { plan_version_id: otherPlan.id });
+        await expect(clone(db, "planned_passenger", passenger.id, { plan_version_id: otherPlan.id, route_id: otherRoute.id }))
+            .rejects.toMatchObject({ code: "23503", constraint: "fk_planned_passenger_planned_stop_id" });
     });
 
     it("cannot bypass plan/student uniqueness by lying about route context", async () => {

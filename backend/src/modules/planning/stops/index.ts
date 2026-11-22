@@ -1,1 +1,1 @@
-export { requireStop } from "./stop.service";
+export { requireActiveStops } from "./stop.service";

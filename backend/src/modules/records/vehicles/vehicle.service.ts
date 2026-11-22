@@ -11,6 +11,12 @@ export async function requireVehicle(schoolId: string, id: string, database?: Da
     if (!row || row.deletedAt || row.status !== "AVAILABLE") throw new ValidationError("Vehicle is unavailable or does not belong to this school");
     return row;
 }
+export async function requireVehiclesForPlan(database: Database, schoolId: string, ids: string[], lock: boolean) {
+    const uniqueIds = [...new Set(ids)];
+    const rows = await vehicleRepository.findForPlan(database, schoolId, uniqueIds, lock);
+    if (rows.length !== uniqueIds.length) throw new ValidationError("Vehicle is unavailable or does not belong to this school");
+    return new Map(rows.map(row => [row.id, row]));
+}
 export const vehicleService = {
     list(actor: Principal, query: ListQuery, exportAll = false) { return vehicleRepository.list(requireSchoolAdmin(actor).schoolId, query, exportAll); },
     async get(actor: Principal, id: string) {
@@ -30,9 +36,9 @@ export const vehicleService = {
     async change(actor: Principal, id: string, input: unknown, operation: "update" | "delete" | "restore", metadata: RequestMetadata) {
         const { schoolId } = requireSchoolAdmin(actor), patch = operation === "update" ? vehiclePatch.parse(input) : {};
         return transaction(async database => {
+            await vehicleRepository.lock(database, schoolId, id);
             const before = await vehicleRepository.find(schoolId, id, database);
             if (!before || (operation === "restore" ? !before.deletedAt : before.deletedAt)) throw new NotFoundError("Vehicle not found");
-            const data = { ...before, ...patch };
 
             const after = await vehicleRepository.update(database, schoolId, id, { ...patch, ...(operation === "delete" ? { deletedAt: new Date() } : operation === "restore" ? { deletedAt: null } : {}) });
             await recordAudit(database, actor, { action: "vehicle." + operation, subjectKind: "VEHICLE", subjectReference: id, before, after }, metadata);

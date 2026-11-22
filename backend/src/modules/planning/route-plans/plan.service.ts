@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util";
 import { randomUUID } from "node:crypto";
 import type { Prisma } from "@prisma/client";
 import { transaction, type Database } from "../../../config/database";
@@ -6,8 +7,8 @@ import { requireSchoolAdmin, type Principal } from "../../../http/principal";
 import { dateValue, dateText, timeValue, timeText, schoolInstant } from "../../../utils/school-time";
 import { readSchool } from "../../system/schools";
 import { requirePolicy } from "../../system/school-policies";
-import { requireVehicle } from "../../records/vehicles";
-import { requireStop } from "../stops";
+import { requireVehiclesForPlan } from "../../records/vehicles";
+import { requireActiveStops } from "../stops";
 import { recordAudit, type RequestMetadata } from "../../system/audit";
 import { planRepository } from "./plan.repository";
 import { planBody, type PlanInput, type planQuery } from "./plan.contracts";
@@ -18,19 +19,21 @@ function view(plan: Plan) { return { ...plan, referenceDate: dateText(plan.refer
     pickupArrivalDeadline: plan.pickupArrivalDeadline ? timeText(plan.pickupArrivalDeadline) : null, dropoffDepartureTime: plan.dropoffDepartureTime ? timeText(plan.dropoffDepartureTime) : null,
     source: "MANUAL", passengerPlanningComplete: false, routes: plan.routes.map(route => ({ ...route, stops: route.stops.map(stop => ({ ...stop, plannedTime: timeText(stop.plannedTime) })) })),
 }; }
-async function draftData(database: Database, schoolId: string, input: PlanInput) {
+async function draftData(database: Database, schoolId: string, input: PlanInput, lockResources = false) {
     const policy = await requirePolicy(schoolId, input.policyVersionId, database), school = await readSchool(schoolId, database);
     if (!school) throw new NotFoundError("School not found");
     if (input.referenceDate < input.effectiveFrom || (input.effectiveTo && input.referenceDate > input.effectiveTo)) throw new ValidationError("Reference date must fall within the plan validity interval");
     const boundary = input.direction === "PICKUP" ? policy.pickupArrivalTime : policy.dropoffDepartureTime;
     if (!boundary) throw new ValidationError("Configure the school arrival/departure time before creating this plan");
     if (new Set(input.routes.map(row => row.routeCode)).size !== input.routes.length || new Set(input.routes.map(row => row.vehicleId)).size !== input.routes.length) throw new ValidationError("Route codes and vehicles must be distinct within the plan");
+    const vehicles = await requireVehiclesForPlan(database, schoolId, input.routes.map(route => route.vehicleId), lockResources);
+    const activeStops = await requireActiveStops(database, schoolId, input.routes.flatMap(route => route.stops.map(stop => stop.stopId)), lockResources);
     const routes = [];
     for (const route of input.routes) {
-        const vehicle = await requireVehicle(schoolId, route.vehicleId, database), stops = [];
+        const vehicle = vehicles.get(route.vehicleId)!, stops = [];
         let previous = -1;
         for (const [index, point] of route.stops.entries()) {
-            const stop = await requireStop(schoolId, point.stopId, database), plannedTime = timeValue(point.plannedTime);
+            const stop = activeStops.get(point.stopId)!, plannedTime = timeValue(point.plannedTime);
             schoolInstant(input.referenceDate, point.plannedTime, school.timezone);
             if (plannedTime.getTime() <= previous) throw new ValidationError("Stop times must increase within the same service day");
             previous = plannedTime.getTime();
@@ -51,10 +54,12 @@ async function draftData(database: Database, schoolId: string, input: PlanInput)
     return { policy, routes };
 }
 async function writeRoutes(database: Database, schoolId: string, planVersionId: string, routes: Awaited<ReturnType<typeof draftData>>["routes"]) {
-    for (const { stops, ...data } of routes) {
-        const route = await planRepository.createRoute(database, { ...data, schoolId, planVersionId });
-        for (const stop of stops) await planRepository.createStop(database, { ...stop, schoolId, routeId: route.id });
-    }
+    const saved = await planRepository.createRoutes(database, routes.map(({ stops: _stops, ...route }) => ({ ...route, schoolId, planVersionId })));
+    const routeIds = new Map(saved.map(route => [route.routeCode, route.id]));
+    await planRepository.createStops(database, routes.flatMap(route => {
+        const routeId = routeIds.get(route.routeCode)!;
+        return route.stops.map(stop => ({ ...stop, schoolId, routeId }));
+    }));
 }
 function header(input: PlanInput, policy: Awaited<ReturnType<typeof requirePolicy>>) {
     return { referenceDate: dateValue(input.referenceDate), direction: input.direction, policyVersionId: policy.id,
@@ -114,16 +119,18 @@ export const planService = {
             if (!before) throw new NotFoundError("Plan not found");
             if (before.status !== "DRAFT") throw new ConflictError("Only draft plans can be approved");
             const snapshot = before.inputSnapshot as { input?: unknown };
-            await draftData(database, schoolId, planBody.parse(snapshot.input));
-            // Persisted snapshots must still match the resources that were reviewed.
+            const current = await draftData(database, schoolId, planBody.parse(snapshot.input), true);
+            const routes = new Map(current.routes.map(route => [route.routeCode, route]));
             for (const route of before.routes) {
-                const vehicle = await requireVehicle(schoolId, route.vehicleId, database, true);
-                if (vehicle.studentCapacity !== route.capacitySnapshot) throw new ConflictError("Vehicle capacity changed; save the draft again before approval");
-                for (const point of route.stops) {
-                    const stop = await requireStop(schoolId, point.stopId, database, true);
-                    if (before.direction === "PICKUP" ? !stop.allowsPickup : !stop.allowsDropoff) throw new ConflictError("Stop no longer supports the route direction");
-                    const snapshot = point.stopSnapshot as { code?: string; name?: string; address?: string; latitude?: number; longitude?: number; kind?: string; accessNote?: string | null };
-                    if (["code", "name", "address", "latitude", "longitude", "kind", "accessNote"].some(key => stop[key as keyof typeof stop] !== snapshot[key as keyof typeof snapshot])) throw new ConflictError("Stop changed; save the draft again before approval");
+                const refreshed = routes.get(route.routeCode);
+                if (!refreshed || refreshed.vehicleId !== route.vehicleId || refreshed.capacitySnapshot !== route.capacitySnapshot) {
+                    throw new ConflictError("Vehicle capacity changed; save the draft again before approval");
+                }
+                if (route.stops.length !== refreshed.stops.length || route.stops.some((point, i) => {
+                    const stop = refreshed.stops[i];
+                    return !stop || point.stopId !== stop.stopId || !isDeepStrictEqual(point.stopSnapshot, stop.stopSnapshot);
+                })) {
+                    throw new ConflictError("Stop changed; save the draft again before approval");
                 }
             }
             await planRepository.update(database, schoolId, id, { status: "APPROVED", approvedAt: new Date(), approvedById: actor.accountId });

@@ -5,11 +5,11 @@ import type { ListQuery } from "../../../http/contracts/pagination";
 import { recordAudit, type RequestMetadata } from "../../system/audit";
 import { stopRepository } from "./stop.repository";
 import { stopBody, stopPatch } from "./stop.contracts";
-export async function requireStop(schoolId: string, id: string, database?: Database, lock = false) {
-    if (database && lock) await stopRepository.lockForRead(database, schoolId, id);
-    const row = await stopRepository.find(schoolId, id, database);
-    if (!row || row.deletedAt || row.status !== "ACTIVE") throw new ValidationError("Stop is unavailable or does not belong to this school");
-    return row;
+export async function requireActiveStops(database: Database, schoolId: string, ids: string[], lock: boolean) {
+    const uniqueIds = [...new Set(ids)];
+    const rows = await stopRepository.findForPlan(database, schoolId, uniqueIds, lock);
+    if (rows.length !== uniqueIds.length) throw new ValidationError("Stop is unavailable or does not belong to this school");
+    return new Map(rows.map(row => [row.id, row]));
 }
 export const stopService = {
     list(actor: Principal, query: ListQuery, exportAll = false) { return stopRepository.list(requireSchoolAdmin(actor).schoolId, query, exportAll); },

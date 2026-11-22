@@ -28,6 +28,6 @@ export const planRepository = {
         await database.plannedStop.deleteMany({ where: { schoolId, routeId: { in: routes.map(row => row.id) } } });
         await database.plannedRoute.deleteMany({ where: { schoolId, planVersionId } });
     },
-    createRoute(database: Database, data: Prisma.PlannedRouteUncheckedCreateInput) { return database.plannedRoute.create({ data }); },
-    createStop(database: Database, data: Prisma.PlannedStopUncheckedCreateInput) { return database.plannedStop.create({ data }); },
+    createRoutes(database: Database, data: Prisma.PlannedRouteCreateManyInput[]) { return database.plannedRoute.createManyAndReturn({ data, select: { id: true, routeCode: true } }); },
+    createStops(database: Database, data: Prisma.PlannedStopCreateManyInput[]) { return database.plannedStop.createMany({ data }); },
 };

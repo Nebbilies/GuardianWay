@@ -34,6 +34,23 @@ describe("approved schema-next database contract", () => {
         expect(fks.rows.every(row => row.confdeltype === "r" && row.confupdtype === "r")).toBe(true);
     });
 
+    it.each([
+        ["fk_planned_passenger_planned_stop_id", "planned_passenger", "planned_stop", "school_id, planned_stop_id, route_id", "school_id, id, route_id"],
+        ["fk_trip_closed_reconciliation_id", "trip", "trip_reconciliation", "school_id, closed_reconciliation_id, id", "school_id, id, trip_id"],
+        ["fk_trip_stop_previous_stop_id", "trip_stop", "trip_stop", "school_id, previous_stop_id, trip_id, logical_stop_key", "school_id, id, trip_id, logical_stop_key"],
+        ["fk_trip_passenger_trip_stop_id", "trip_passenger", "trip_stop", "school_id, trip_stop_id, trip_id", "school_id, id, trip_id"],
+        ["fk_attendance_revision_previous_revision_id", "attendance_revision", "attendance_revision", "school_id, previous_revision_id, attendance_event_id", "school_id, id, attendance_event_id"],
+        ["fk_reconciliation_evidence_attendance_revision_id", "reconciliation_evidence", "attendance_revision", "school_id, attendance_revision_id, attendance_event_id", "school_id, id, attendance_event_id"],
+    ])("scopes %s to the matching operational context", async (name, table, referenced, keys, referencedKeys) => {
+        const result = await db.query(
+            "SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conrelid = $1::regclass AND conname = $2",
+            [table, name],
+        );
+        expect(result.rows).toEqual([{
+            definition: `FOREIGN KEY (${keys}) REFERENCES ${referenced}(${referencedKeys}) ON UPDATE RESTRICT ON DELETE RESTRICT`,
+        }]);
+    });
+
     it("stores domain values as text and has only the approved timestamp columns", async () => {
         const result = await db.query(`SELECT column_name, data_type FROM information_schema.columns
             WHERE table_schema='public' AND column_name IN ('status','role','direction','created_at','updated_at','deleted_at')`);

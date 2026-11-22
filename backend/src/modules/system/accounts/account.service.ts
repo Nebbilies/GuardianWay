@@ -29,6 +29,13 @@ export async function readAuthenticationAccountById(id: string, database?: Datab
     return accountRepository.authById(id, database);
 }
 
+export function lockAuthenticationAccountById(database: Database, id: string) {
+    return accountRepository.lockForAuthentication(database, id);
+}
+export function revokeAuthenticationSessions(id: string, database?: Database) {
+    return accountRepository.revokeAuthenticationSessions(id, database);
+}
+
 export async function requireLinkedAccount(database: Database, schoolId: string, id: string, role: "PARENT" | "DRIVER") {
     const account = await accountRepository.lockAndFind(database, schoolId, id);
     if (!account || account.deletedAt || account.role !== role || account.status === "LOCKED") {
@@ -170,6 +177,7 @@ export const accountService = {
             await activeSchool(invite.schoolId, database);
             if ((await accountRepository.consumeInvite(database, invite.id, now)).count !== 1) throw new ConflictError("Invitation has already been used", "INVITATION_INVALID");
             await accountRepository.update(database, invite.schoolId, account.id, { passwordHash, status: "ACTIVE", activatedAt: account.activatedAt ?? now });
+            if (account.activatedAt) await revokeAuthenticationSessions(account.id, database);
             const actor = principalFromClaims({ userId: account.id, schoolId: invite.schoolId, role: account.role, contractVersion: 2 });
             await recordAudit(database, actor, { action: "account.activated", subjectKind: "USER_ACCOUNT", subjectReference: account.id, after: { activatedAt: now } }, metadata);
             return { success: true };

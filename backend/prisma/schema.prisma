@@ -585,6 +585,7 @@ model PlannedStop {
 
   @@unique([routeId, sequenceNo], map: "uq_planned_stop_route_id_sequence_no")
   @@unique([schoolId, id], map: "uq_planned_stop_school_id_id")
+  @@unique([schoolId, id, routeId], map: "uq_planned_stop_school_id_route")
   @@map("planned_stop")
 }
 
@@ -602,7 +603,7 @@ model PlannedPassenger {
   schoolIdRef                       School          @relation("PlannedPassenger_schoolId", fields: [schoolId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_planned_passenger_school_id")
   routeIdRef                        PlannedRoute    @relation("PlannedPassenger_routeId", fields: [schoolId, planVersionId, routeId], references: [schoolId, planVersionId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_planned_passenger_route_id")
   studentIdRef                      Student         @relation("PlannedPassenger_studentId", fields: [schoolId, studentId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_planned_passenger_student_id")
-  plannedStopIdRef                  PlannedStop     @relation("PlannedPassenger_plannedStopId", fields: [schoolId, plannedStopId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_planned_passenger_planned_stop_id")
+  plannedStopIdRef                  PlannedStop     @relation("PlannedPassenger_plannedStopId", fields: [schoolId, plannedStopId, routeId], references: [schoolId, id, routeId], onDelete: Restrict, onUpdate: Restrict, map: "fk_planned_passenger_planned_stop_id")
   sourceDemandIdRef                 PlanDemand?     @relation("PlannedPassenger_sourceDemandId", fields: [schoolId, sourceDemandId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_planned_passenger_source_demand_id")
   planVersionIdRef                  PlanVersion     @relation("PlannedPassenger_planVersionId", fields: [schoolId, planVersionId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_planned_passenger_plan_version_id")
   TripPassengerByPlannedPassengerId TripPassenger[] @relation("TripPassenger_plannedPassengerId")
@@ -720,7 +721,7 @@ model Trip {
   initialDriverIdRef            DriverProfile?          @relation("Trip_initialDriverId", fields: [schoolId, initialDriverId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_initial_driver_id")
   operatingPolicyIdRef          SchoolPolicyVersion?    @relation("Trip_operatingPolicyId", fields: [schoolId, operatingPolicyId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_operating_policy_id")
   startedByIdRef                UserAccount?            @relation("Trip_startedById", fields: [startedById], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_started_by_id")
-  closedReconciliationIdRef     TripReconciliation?     @relation("Trip_closedReconciliationId", fields: [schoolId, closedReconciliationId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_closed_reconciliation_id")
+  closedReconciliationIdRef     TripReconciliation?     @relation("Trip_closedReconciliationId", fields: [schoolId, closedReconciliationId, id], references: [schoolId, id, tripId], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_closed_reconciliation_id")
   cancelledByIdRef              UserAccount?            @relation("Trip_cancelledById", fields: [cancelledById], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_cancelled_by_id")
   TripStopByTripId              TripStop[]              @relation("TripStop_tripId")
   TripPassengerByTripId         TripPassenger[]         @relation("TripPassenger_tripId")
@@ -758,7 +759,7 @@ model TripStop {
   updatedAt                               DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
   schoolIdRef                             School               @relation("TripStop_schoolId", fields: [schoolId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_stop_school_id")
   tripIdRef                               Trip                 @relation("TripStop_tripId", fields: [schoolId, tripId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_stop_trip_id")
-  previousStopIdRef                       TripStop?            @relation("TripStop_previousStopId", fields: [schoolId, previousStopId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_stop_previous_stop_id")
+  previousStopIdRef                       TripStop?            @relation("TripStop_previousStopId", fields: [schoolId, previousStopId, tripId, logicalStopKey], references: [schoolId, id, tripId, logicalStopKey], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_stop_previous_stop_id")
   TripStopByPreviousStopId                TripStop[]           @relation("TripStop_previousStopId")
   plannedStopIdRef                        PlannedStop?         @relation("TripStop_plannedStopId", fields: [schoolId, plannedStopId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_stop_planned_stop_id")
   stopIdRef                               Stop                 @relation("TripStop_stopId", fields: [schoolId, stopId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_stop_stop_id")
@@ -770,6 +771,8 @@ model TripStop {
 
   @@unique([tripId, logicalStopKey, versionNo], map: "uq_trip_stop_trip_id_logical_stop_key_version_no")
   @@unique([schoolId, id], map: "uq_trip_stop_school_id_id")
+  @@unique([schoolId, id, tripId, logicalStopKey], map: "uq_trip_stop_school_id_history")
+  @@unique([schoolId, id, tripId], map: "uq_trip_stop_school_id_trip")
   @@map("trip_stop")
 }
 
@@ -799,7 +802,7 @@ model TripPassenger {
   TripPassengerByPreviousPassengerId     TripPassenger[]         @relation("TripPassenger_previousPassengerId")
   registrationDayIdRef                   RegistrationDay         @relation("TripPassenger_registrationDayId", fields: [schoolId, registrationDayId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_passenger_registration_day_id")
   plannedPassengerIdRef                  PlannedPassenger?       @relation("TripPassenger_plannedPassengerId", fields: [schoolId, plannedPassengerId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_passenger_planned_passenger_id")
-  tripStopIdRef                          TripStop                @relation("TripPassenger_tripStopId", fields: [schoolId, tripStopId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_passenger_trip_stop_id")
+  tripStopIdRef                          TripStop                @relation("TripPassenger_tripStopId", fields: [schoolId, tripStopId, tripId], references: [schoolId, id, tripId], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_passenger_trip_stop_id")
   absenceRequestIdRef                    AbsenceRequest?         @relation("TripPassenger_absenceRequestId", fields: [schoolId, absenceRequestId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_passenger_absence_request_id")
   stopChangeRequestIdRef                 StopChangeRequest?      @relation("TripPassenger_stopChangeRequestId", fields: [schoolId, stopChangeRequestId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_passenger_stop_change_request_id")
   changedByIdRef                         UserAccount?            @relation("TripPassenger_changedById", fields: [changedById], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_trip_passenger_changed_by_id")
@@ -931,7 +934,7 @@ model AttendanceRevision {
   operationKey                                 String                   @map("operation_key") @db.Text
   schoolIdRef                                  School                   @relation("AttendanceRevision_schoolId", fields: [schoolId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_attendance_revision_school_id")
   attendanceEventIdRef                         AttendanceEvent          @relation("AttendanceRevision_attendanceEventId", fields: [schoolId, attendanceEventId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_attendance_revision_attendance_event_id")
-  previousRevisionIdRef                        AttendanceRevision?      @relation("AttendanceRevision_previousRevisionId", fields: [schoolId, previousRevisionId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_attendance_revision_previous_revision_id")
+  previousRevisionIdRef                        AttendanceRevision?      @relation("AttendanceRevision_previousRevisionId", fields: [schoolId, previousRevisionId, attendanceEventId], references: [schoolId, id, attendanceEventId], onDelete: Restrict, onUpdate: Restrict, map: "fk_attendance_revision_previous_revision_id")
   AttendanceRevisionByPreviousRevisionId       AttendanceRevision[]     @relation("AttendanceRevision_previousRevisionId")
   effectiveStudentIdRef                        Student?                 @relation("AttendanceRevision_effectiveStudentId", fields: [schoolId, effectiveStudentId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_attendance_revision_effective_student_id")
   effectiveAssignmentIdRef                     TripAssignment?          @relation("AttendanceRevision_effectiveAssignmentId", fields: [schoolId, effectiveAssignmentId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_attendance_revision_effective_assignment_id")
@@ -943,6 +946,7 @@ model AttendanceRevision {
   @@unique([attendanceEventId, revisionNo], map: "uq_attendance_revision_attendance_event_id_revision_no")
   @@unique([schoolId, operationKey], map: "uq_attendance_revision_school_id_operation_key")
   @@unique([schoolId, id], map: "uq_attendance_revision_school_id_id")
+  @@unique([schoolId, id, attendanceEventId], map: "uq_attendance_revision_school_id_event")
   @@map("attendance_revision")
 }
 
@@ -1005,6 +1009,7 @@ model TripReconciliation {
 
   @@unique([schoolId, id], map: "uq_trip_reconciliation_school_id_id")
   @@index([schoolId, tripId, evaluatedAt(sort: Desc)], map: "ix_trip_reconciliation_1")
+  @@unique([schoolId, id, tripId], map: "uq_trip_reconciliation_school_id_trip")
   @@map("trip_reconciliation")
 }
 
@@ -1196,7 +1201,7 @@ model ReconciliationEvidence {
   schoolIdRef             School              @relation("ReconciliationEvidence_schoolId", fields: [schoolId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_reconciliation_evidence_school_id")
   itemIdRef               ReconciliationItem  @relation("ReconciliationEvidence_itemId", fields: [schoolId, itemId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_reconciliation_evidence_item_id")
   attendanceEventIdRef    AttendanceEvent?    @relation("ReconciliationEvidence_attendanceEventId", fields: [schoolId, attendanceEventId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_reconciliation_evidence_attendance_event_id")
-  attendanceRevisionIdRef AttendanceRevision? @relation("ReconciliationEvidence_attendanceRevisionId", fields: [schoolId, attendanceRevisionId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_reconciliation_evidence_attendance_revision_id")
+  attendanceRevisionIdRef AttendanceRevision? @relation("ReconciliationEvidence_attendanceRevisionId", fields: [schoolId, attendanceRevisionId, attendanceEventId], references: [schoolId, id, attendanceEventId], onDelete: Restrict, onUpdate: Restrict, map: "fk_reconciliation_evidence_attendance_revision_id")
   transferIdRef           StudentTransfer?    @relation("ReconciliationEvidence_transferId", fields: [schoolId, transferId], references: [schoolId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_reconciliation_evidence_transfer_id")
 
   @@unique([schoolId, id], map: "uq_reconciliation_evidence_school_id_id")
