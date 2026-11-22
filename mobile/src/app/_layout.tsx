@@ -5,7 +5,7 @@ import {
   NotoSans_700Bold,
 } from '@expo-google-fonts/noto-sans';
 import { useFonts } from 'expo-font';
-import { Stack, ThemeProvider, type Theme } from 'expo-router';
+import { Stack, ThemeProvider, usePathname, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -48,6 +48,7 @@ export default function RootLayout() {
     NotoSans_700Bold,
   });
   const status = useAuthStore((state) => state.status);
+  const fixturePreview = usePathname() === '/fixtures' && __DEV__;
   const restoreSession = useAuthStore((state) => state.restoreSession);
 
   useEffect(() => {
@@ -74,14 +75,14 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={navigationTheme}>
       <StatusBar style="dark" />
-      {status === 'restoring' ? (
+      {status === 'restoring' && !fixturePreview ? (
         <Screen contentContainerStyle={styles.statusScreen}>
           <LayoutStack gap="lg" align="center">
             <ActivityIndicator color={colors.primary} />
             <AppText tone="muted">Đang khôi phục phiên đăng nhập…</AppText>
           </LayoutStack>
         </Screen>
-      ) : status === 'unavailable' ? (
+      ) : status === 'unavailable' && !fixturePreview ? (
         <Screen contentContainerStyle={styles.statusScreen}>
           <LayoutStack gap="lg" align="center">
             <AppText variant="sectionTitle">Chưa thể kết nối</AppText>
@@ -98,6 +99,9 @@ export default function RootLayout() {
           </Stack.Protected>
           <Stack.Protected guard={status === 'signedIn'}>
             <Stack.Screen name="(app)" />
+          </Stack.Protected>
+          <Stack.Protected guard={__DEV__}>
+            <Stack.Screen name="fixtures" />
           </Stack.Protected>
         </Stack>
       )}

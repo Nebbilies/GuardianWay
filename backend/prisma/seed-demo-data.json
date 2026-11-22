@@ -1,0 +1,990 @@
+{
+    "school": {
+        "name": "GuardianWay demonstration school",
+        "address": "Fictional school address",
+        "timezone": "Asia/Ho_Chi_Minh"
+    },
+    "records": {
+        "userAccount": {
+            "parent-1": {
+                "displayName": "Mai Nguyễn",
+                "role": "PARENT",
+                "status": "INVITED"
+            },
+            "parent-2": {
+                "displayName": "Lan Trần",
+                "role": "PARENT",
+                "status": "INVITED"
+            },
+            "parent-3": {
+                "displayName": "Hoa Lê",
+                "role": "PARENT",
+                "status": "INVITED"
+            },
+            "parent-4": {
+                "displayName": "Sơn Phạm",
+                "role": "PARENT",
+                "status": "INVITED"
+            },
+            "driver-account-1": {
+                "displayName": "Tùng Võ",
+                "role": "DRIVER",
+                "status": "INVITED"
+            },
+            "driver-account-2": {
+                "displayName": "Quân Đỗ",
+                "role": "DRIVER",
+                "status": "INVITED"
+            }
+        },
+        "driverProfile": {
+            "driver-1": {
+                "code": "TX01",
+                "fullName": "Tùng Võ",
+                "phone": "0900000001",
+                "accountId": "$driver-account-1",
+                "status": "AVAILABLE"
+            },
+            "driver-2": {
+                "code": "TX02",
+                "fullName": "Quân Đỗ",
+                "phone": "0900000002",
+                "accountId": "$driver-account-2",
+                "status": "AVAILABLE"
+            }
+        },
+        "vehicle": {
+            "bus-1": {
+                "code": "XE01",
+                "plateNumber": "51B00121",
+                "studentCapacity": 16,
+                "status": "AVAILABLE"
+            },
+            "bus-2": {
+                "code": "XE02",
+                "plateNumber": "51B00122",
+                "studentCapacity": 16,
+                "status": "AVAILABLE"
+            }
+        },
+        "student": {
+            "student-1": {
+                "studentCode": "HS01",
+                "fullName": "An Nguyễn",
+                "status": "ACTIVE"
+            },
+            "student-2": {
+                "studentCode": "HS02",
+                "fullName": "Bình Nguyễn",
+                "status": "ACTIVE"
+            },
+            "student-3": {
+                "studentCode": "HS03",
+                "fullName": "Chi Trần",
+                "status": "ACTIVE"
+            },
+            "student-4": {
+                "studentCode": "HS04",
+                "fullName": "Duy Trần",
+                "status": "ACTIVE"
+            },
+            "student-5": {
+                "studentCode": "HS05",
+                "fullName": "Hà Lê",
+                "status": "ACTIVE"
+            },
+            "student-6": {
+                "studentCode": "HS06",
+                "fullName": "Huy Lê",
+                "status": "ACTIVE"
+            },
+            "student-7": {
+                "studentCode": "HS07",
+                "fullName": "Linh Phạm",
+                "status": "ACTIVE"
+            },
+            "student-8": {
+                "studentCode": "HS08",
+                "fullName": "Minh Phạm",
+                "status": "ACTIVE"
+            }
+        },
+        "guardianLink": {
+            "guardian-1": {
+                "studentId": "$student-1",
+                "guardianAccountId": "$parent-1",
+                "canTrack": true,
+                "canRequest": true,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            },
+            "guardian-2": {
+                "studentId": "$student-2",
+                "guardianAccountId": "$parent-1",
+                "canTrack": true,
+                "canRequest": true,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            },
+            "guardian-3": {
+                "studentId": "$student-3",
+                "guardianAccountId": "$parent-2",
+                "canTrack": true,
+                "canRequest": true,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            },
+            "guardian-4": {
+                "studentId": "$student-4",
+                "guardianAccountId": "$parent-2",
+                "canTrack": true,
+                "canRequest": true,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            },
+            "guardian-5": {
+                "studentId": "$student-5",
+                "guardianAccountId": "$parent-3",
+                "canTrack": true,
+                "canRequest": true,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            },
+            "guardian-6": {
+                "studentId": "$student-6",
+                "guardianAccountId": "$parent-3",
+                "canTrack": true,
+                "canRequest": true,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            },
+            "guardian-7": {
+                "studentId": "$student-7",
+                "guardianAccountId": "$parent-4",
+                "canTrack": true,
+                "canRequest": false,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            },
+            "guardian-8": {
+                "studentId": "$student-8",
+                "guardianAccountId": "$parent-4",
+                "canTrack": true,
+                "canRequest": false,
+                "confirmedById": "$admin",
+                "effectiveFrom": "2026-11-01T00:00:00Z"
+            }
+        },
+        "stop": {
+            "stop-0": {
+                "code": "BEN",
+                "name": "Điểm đón Bến An",
+                "address": "12 đường Bến An (demo)",
+                "latitude": 10.78,
+                "longitude": 106.69,
+                "kind": "SERVICE_POINT",
+                "allowsPickup": true,
+                "allowsDropoff": true,
+                "status": "ACTIVE"
+            },
+            "stop-1": {
+                "code": "TRUONG",
+                "name": "Cổng trường demo",
+                "address": "Fictional school address",
+                "latitude": 10.79,
+                "longitude": 106.7,
+                "kind": "SCHOOL",
+                "allowsPickup": true,
+                "allowsDropoff": true,
+                "status": "ACTIVE"
+            }
+        },
+        "schoolPolicyVersion": {
+            "policy": {
+                "versionNo": 1,
+                "status": "APPROVED",
+                "effectiveFrom": "2026-11-01T00:00:00Z",
+                "approvedAt": "2026-11-01T00:00:00Z",
+                "approvedById": "$admin",
+                "pickupArrivalTime": "1970-01-01T07:45:00Z",
+                "dropoffDepartureTime": "1970-01-01T16:00:00Z",
+                "approvalBasis": "Chính sách hư cấu cho bộ demo."
+            }
+        },
+        "serviceRegistration": {
+            "registration-1": {
+                "studentId": "$student-1",
+                "submittedById": "$parent-1",
+                "submittedAt": "2026-11-10T01:00:00Z",
+                "status": "APPROVED",
+                "reviewedAt": "2026-11-11T01:00:00Z",
+                "reviewedById": "$admin"
+            },
+            "registration-2": {
+                "studentId": "$student-2",
+                "submittedById": "$parent-1",
+                "submittedAt": "2026-11-10T01:00:00Z",
+                "status": "APPROVED",
+                "reviewedAt": "2026-11-11T01:00:00Z",
+                "reviewedById": "$admin"
+            },
+            "registration-3": {
+                "studentId": "$student-3",
+                "submittedById": "$parent-2",
+                "submittedAt": "2026-11-10T01:00:00Z",
+                "status": "APPROVED",
+                "reviewedAt": "2026-11-11T01:00:00Z",
+                "reviewedById": "$admin"
+            },
+            "registration-4": {
+                "studentId": "$student-4",
+                "submittedById": "$parent-2",
+                "submittedAt": "2026-11-10T01:00:00Z",
+                "status": "APPROVED",
+                "reviewedAt": "2026-11-11T01:00:00Z",
+                "reviewedById": "$admin"
+            },
+            "registration-5": {
+                "studentId": "$student-5",
+                "submittedById": "$parent-3",
+                "submittedAt": "2026-11-10T01:00:00Z",
+                "status": "PENDING"
+            },
+            "registration-6": {
+                "studentId": "$student-6",
+                "submittedById": "$parent-3",
+                "submittedAt": "2026-11-10T01:00:00Z",
+                "status": "REJECTED",
+                "reviewedAt": "2026-11-11T01:00:00Z",
+                "reviewedById": "$admin",
+                "reviewNote": "Địa chỉ nằm ngoài phạm vi tuyến demo."
+            }
+        },
+        "registrationDay": {
+            "day-5-23-PICKUP": {
+                "registrationId": "$registration-5",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0"
+            },
+            "day-6-23-PICKUP": {
+                "registrationId": "$registration-6",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0"
+            },
+            "day-1-16-PICKUP": {
+                "registrationId": "$registration-1",
+                "serviceDate": "2026-11-16T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0",
+                "approvedStopId": "$stop-0",
+                "approvalStopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            },
+            "day-2-16-PICKUP": {
+                "registrationId": "$registration-2",
+                "serviceDate": "2026-11-16T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0",
+                "approvedStopId": "$stop-0",
+                "approvalStopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            },
+            "day-1-23-PICKUP": {
+                "registrationId": "$registration-1",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0",
+                "approvedStopId": "$stop-0",
+                "approvalStopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            },
+            "day-2-23-PICKUP": {
+                "registrationId": "$registration-2",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0",
+                "approvedStopId": "$stop-0",
+                "approvalStopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            },
+            "day-3-23-PICKUP": {
+                "registrationId": "$registration-3",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0",
+                "approvedStopId": "$stop-0",
+                "approvalStopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            },
+            "day-4-23-PICKUP": {
+                "registrationId": "$registration-4",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "PICKUP",
+                "requestedStopId": "$stop-0",
+                "approvedStopId": "$stop-0",
+                "approvalStopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            }
+        },
+        "planVersion": {
+            "plan-am": {
+                "planKey": "$plan-am",
+                "versionNo": 1,
+                "referenceDate": "2026-11-16T00:00:00Z",
+                "direction": "PICKUP",
+                "policyVersionId": "$policy",
+                "inputSnapshot": {
+                    "schemaVersion": 1,
+                    "source": "MANUAL",
+                    "input": {
+                        "referenceDate": "2026-11-16",
+                        "direction": "PICKUP",
+                        "policyVersionId": "$policy",
+                        "effectiveFrom": "2026-11-16",
+                        "routes": [
+                            {
+                                "routeCode": "DON01",
+                                "label": "Đón sáng",
+                                "vehicleId": "$bus-1",
+                                "distanceMetres": 5200,
+                                "durationSeconds": 1500,
+                                "stops": [
+                                    {
+                                        "stopId": "$stop-0",
+                                        "plannedTime": "07:00"
+                                    },
+                                    {
+                                        "stopId": "$stop-1",
+                                        "plannedTime": "07:25"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "status": "APPROVED",
+                "createdById": "$admin",
+                "effectiveFrom": "2026-11-16T00:00:00Z",
+                "approvedAt": "2026-11-12T02:00:00Z",
+                "approvedById": "$admin",
+                "pickupArrivalDeadline": "1970-01-01T07:45:00Z"
+            },
+            "plan-pm": {
+                "planKey": "$plan-pm",
+                "versionNo": 1,
+                "referenceDate": "2026-11-16T00:00:00Z",
+                "direction": "DROPOFF",
+                "policyVersionId": "$policy",
+                "inputSnapshot": {
+                    "schemaVersion": 1,
+                    "source": "MANUAL",
+                    "input": {
+                        "referenceDate": "2026-11-16",
+                        "direction": "DROPOFF",
+                        "policyVersionId": "$policy",
+                        "effectiveFrom": "2026-11-16",
+                        "routes": [
+                            {
+                                "routeCode": "TRA01",
+                                "label": "Trả chiều",
+                                "vehicleId": "$bus-2",
+                                "distanceMetres": 5200,
+                                "durationSeconds": 1500,
+                                "stops": [
+                                    {
+                                        "stopId": "$stop-1",
+                                        "plannedTime": "16:00"
+                                    },
+                                    {
+                                        "stopId": "$stop-0",
+                                        "plannedTime": "16:25"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "status": "APPROVED",
+                "createdById": "$admin",
+                "effectiveFrom": "2026-11-16T00:00:00Z",
+                "approvedAt": "2026-11-12T02:00:00Z",
+                "approvedById": "$admin",
+                "dropoffDepartureTime": "1970-01-01T16:00:00Z"
+            }
+        },
+        "plannedRoute": {
+            "route-am": {
+                "routeCode": "DON01",
+                "label": "Đón sáng",
+                "vehicleId": "$bus-1",
+                "distanceMetres": 5200,
+                "durationSeconds": 1500,
+                "capacitySnapshot": 16,
+                "planVersionId": "$plan-am"
+            },
+            "route-pm": {
+                "routeCode": "TRA01",
+                "label": "Trả chiều",
+                "vehicleId": "$bus-2",
+                "distanceMetres": 5200,
+                "durationSeconds": 1500,
+                "capacitySnapshot": 16,
+                "planVersionId": "$plan-pm"
+            }
+        },
+        "plannedStop": {
+            "route-am-0": {
+                "routeId": "$route-am",
+                "stopId": "$stop-0",
+                "sequenceNo": 1,
+                "plannedTime": "1970-01-01T07:00:00Z",
+                "stopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            },
+            "route-am-1": {
+                "routeId": "$route-am",
+                "stopId": "$stop-1",
+                "sequenceNo": 2,
+                "plannedTime": "1970-01-01T07:25:00Z",
+                "stopSnapshot": {
+                    "code": "TRUONG",
+                    "name": "Cổng trường demo",
+                    "address": "Fictional school address",
+                    "latitude": 10.79,
+                    "longitude": 106.7,
+                    "kind": "SCHOOL"
+                }
+            },
+            "route-pm-1": {
+                "routeId": "$route-pm",
+                "stopId": "$stop-1",
+                "sequenceNo": 1,
+                "plannedTime": "1970-01-01T16:00:00Z",
+                "stopSnapshot": {
+                    "code": "TRUONG",
+                    "name": "Cổng trường demo",
+                    "address": "Fictional school address",
+                    "latitude": 10.79,
+                    "longitude": 106.7,
+                    "kind": "SCHOOL"
+                }
+            },
+            "route-pm-0": {
+                "routeId": "$route-pm",
+                "stopId": "$stop-0",
+                "sequenceNo": 2,
+                "plannedTime": "1970-01-01T16:25:00Z",
+                "stopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                }
+            }
+        },
+        "plannedPassenger": {
+            "planned-1": {
+                "routeId": "$route-am",
+                "planVersionId": "$plan-am",
+                "studentId": "$student-1",
+                "plannedStopId": "$route-am-0",
+                "estimatedRideSeconds": 1500
+            },
+            "planned-2": {
+                "routeId": "$route-am",
+                "planVersionId": "$plan-am",
+                "studentId": "$student-2",
+                "plannedStopId": "$route-am-0",
+                "estimatedRideSeconds": 1500
+            },
+            "planned-3": {
+                "routeId": "$route-am",
+                "planVersionId": "$plan-am",
+                "studentId": "$student-3",
+                "plannedStopId": "$route-am-0",
+                "estimatedRideSeconds": 1500
+            },
+            "planned-4": {
+                "routeId": "$route-am",
+                "planVersionId": "$plan-am",
+                "studentId": "$student-4",
+                "plannedStopId": "$route-am-0",
+                "estimatedRideSeconds": 1500
+            }
+        },
+        "recurringSchedule": {
+            "schedule-am": {
+                "scheduleKey": "$schedule-am",
+                "versionNo": 1,
+                "routeId": "$route-am",
+                "effectiveFrom": "2026-11-16T00:00:00Z",
+                "direction": "PICKUP",
+                "plannedStartTime": "1970-01-01T07:00:00Z",
+                "status": "ACTIVE",
+                "createdById": "$admin",
+                "defaultVehicleId": "$bus-1",
+                "defaultDriverId": "$driver-1"
+            },
+            "schedule-pm": {
+                "scheduleKey": "$schedule-pm",
+                "versionNo": 1,
+                "routeId": "$route-pm",
+                "effectiveFrom": "2026-11-16T00:00:00Z",
+                "direction": "DROPOFF",
+                "plannedStartTime": "1970-01-01T16:00:00Z",
+                "status": "ACTIVE",
+                "createdById": "$admin",
+                "defaultVehicleId": "$bus-2",
+                "defaultDriverId": "$driver-2"
+            }
+        },
+        "scheduleWeekday": {
+            "monday-am": {
+                "scheduleId": "$schedule-am",
+                "isoWeekday": 1
+            },
+            "monday-pm": {
+                "scheduleId": "$schedule-pm",
+                "isoWeekday": 1
+            }
+        },
+        "trip": {
+            "trip-am-16": {
+                "createdAt": "2026-11-12T02:00:00Z",
+                "scheduleId": "$schedule-am",
+                "scheduleKey": "$schedule-am",
+                "serviceDate": "2026-11-16T00:00:00Z",
+                "direction": "PICKUP",
+                "plannedStartAt": "2026-11-16T00:00:00Z",
+                "status": "COMPLETED",
+                "dataVersion": 2,
+                "initialDriverId": "$driver-1",
+                "initialVehicleId": "$bus-1",
+                "operatingPolicyId": "$policy",
+                "startedAt": "2026-11-16T00:00:00Z",
+                "startedById": "$driver-account-1",
+                "completedAt": "2026-11-16T00:30:00Z"
+            },
+            "trip-am-23": {
+                "createdAt": "2026-11-12T02:00:00Z",
+                "scheduleId": "$schedule-am",
+                "scheduleKey": "$schedule-am",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "PICKUP",
+                "plannedStartAt": "2026-11-23T00:00:00Z",
+                "status": "PLANNED",
+                "dataVersion": 1,
+                "initialDriverId": "$driver-1",
+                "initialVehicleId": "$bus-1",
+                "operatingPolicyId": "$policy"
+            },
+            "trip-pm-16": {
+                "createdAt": "2026-11-12T02:00:00Z",
+                "scheduleId": "$schedule-pm",
+                "scheduleKey": "$schedule-pm",
+                "serviceDate": "2026-11-16T00:00:00Z",
+                "direction": "DROPOFF",
+                "plannedStartAt": "2026-11-16T09:00:00Z",
+                "status": "CANCELLED",
+                "dataVersion": 2,
+                "initialDriverId": "$driver-2",
+                "initialVehicleId": "$bus-2",
+                "operatingPolicyId": "$policy",
+                "cancelledAt": "2026-11-12T02:00:00Z",
+                "cancelledById": "$admin",
+                "cancellationReason": "Trường nghỉ buổi chiều."
+            },
+            "trip-pm-23": {
+                "createdAt": "2026-11-12T02:00:00Z",
+                "scheduleId": "$schedule-pm",
+                "scheduleKey": "$schedule-pm",
+                "serviceDate": "2026-11-23T00:00:00Z",
+                "direction": "DROPOFF",
+                "plannedStartAt": "2026-11-23T09:00:00Z",
+                "status": "PLANNED",
+                "dataVersion": 1,
+                "initialDriverId": "$driver-2",
+                "initialVehicleId": "$bus-2",
+                "operatingPolicyId": "$policy"
+            }
+        },
+        "tripStop": {
+            "trip-am-16-stop-0": {
+                "tripId": "$trip-am-16",
+                "logicalStopKey": "$trip-am-16-stop-0",
+                "versionNo": 1,
+                "plannedStopId": "$route-am-0",
+                "stopId": "$stop-0",
+                "sequenceNo": 1,
+                "plannedAt": "2026-11-16T00:00:00Z",
+                "stopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            },
+            "trip-am-16-stop-1": {
+                "tripId": "$trip-am-16",
+                "logicalStopKey": "$trip-am-16-stop-1",
+                "versionNo": 1,
+                "plannedStopId": "$route-am-1",
+                "stopId": "$stop-1",
+                "sequenceNo": 2,
+                "plannedAt": "2026-11-16T00:25:00Z",
+                "stopSnapshot": {
+                    "code": "TRUONG",
+                    "name": "Cổng trường demo",
+                    "address": "Fictional school address",
+                    "latitude": 10.79,
+                    "longitude": 106.7,
+                    "kind": "SCHOOL"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            },
+            "trip-am-23-stop-0": {
+                "tripId": "$trip-am-23",
+                "logicalStopKey": "$trip-am-23-stop-0",
+                "versionNo": 1,
+                "plannedStopId": "$route-am-0",
+                "stopId": "$stop-0",
+                "sequenceNo": 1,
+                "plannedAt": "2026-11-23T00:00:00Z",
+                "stopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            },
+            "trip-am-23-stop-1": {
+                "tripId": "$trip-am-23",
+                "logicalStopKey": "$trip-am-23-stop-1",
+                "versionNo": 1,
+                "plannedStopId": "$route-am-1",
+                "stopId": "$stop-1",
+                "sequenceNo": 2,
+                "plannedAt": "2026-11-23T00:25:00Z",
+                "stopSnapshot": {
+                    "code": "TRUONG",
+                    "name": "Cổng trường demo",
+                    "address": "Fictional school address",
+                    "latitude": 10.79,
+                    "longitude": 106.7,
+                    "kind": "SCHOOL"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            },
+            "trip-pm-16-stop-1": {
+                "tripId": "$trip-pm-16",
+                "logicalStopKey": "$trip-pm-16-stop-1",
+                "versionNo": 1,
+                "plannedStopId": "$route-pm-1",
+                "stopId": "$stop-1",
+                "sequenceNo": 1,
+                "plannedAt": "2026-11-16T09:00:00Z",
+                "stopSnapshot": {
+                    "code": "TRUONG",
+                    "name": "Cổng trường demo",
+                    "address": "Fictional school address",
+                    "latitude": 10.79,
+                    "longitude": 106.7,
+                    "kind": "SCHOOL"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            },
+            "trip-pm-16-stop-0": {
+                "tripId": "$trip-pm-16",
+                "logicalStopKey": "$trip-pm-16-stop-0",
+                "versionNo": 1,
+                "plannedStopId": "$route-pm-0",
+                "stopId": "$stop-0",
+                "sequenceNo": 2,
+                "plannedAt": "2026-11-16T09:25:00Z",
+                "stopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            },
+            "trip-pm-23-stop-1": {
+                "tripId": "$trip-pm-23",
+                "logicalStopKey": "$trip-pm-23-stop-1",
+                "versionNo": 1,
+                "plannedStopId": "$route-pm-1",
+                "stopId": "$stop-1",
+                "sequenceNo": 1,
+                "plannedAt": "2026-11-23T09:00:00Z",
+                "stopSnapshot": {
+                    "code": "TRUONG",
+                    "name": "Cổng trường demo",
+                    "address": "Fictional school address",
+                    "latitude": 10.79,
+                    "longitude": 106.7,
+                    "kind": "SCHOOL"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            },
+            "trip-pm-23-stop-0": {
+                "tripId": "$trip-pm-23",
+                "logicalStopKey": "$trip-pm-23-stop-0",
+                "versionNo": 1,
+                "plannedStopId": "$route-pm-0",
+                "stopId": "$stop-0",
+                "sequenceNo": 2,
+                "plannedAt": "2026-11-23T09:25:00Z",
+                "stopSnapshot": {
+                    "code": "BEN",
+                    "name": "Điểm đón Bến An",
+                    "address": "12 đường Bến An (demo)",
+                    "latitude": 10.78,
+                    "longitude": 106.69,
+                    "kind": "SERVICE_POINT"
+                },
+                "effectiveFrom": "2026-11-12T02:00:00Z",
+                "changedById": "$admin"
+            }
+        },
+        "tripAssignment": {
+            "assignment": {
+                "tripId": "$trip-am-16",
+                "vehicleId": "$bus-1",
+                "driverId": "$driver-1",
+                "effectiveFrom": "2026-11-16T00:00:00Z",
+                "effectiveTo": "2026-11-16T00:30:00Z",
+                "assignedById": "$admin"
+            }
+        },
+        "tripPassenger": {
+            "trip-am-16-passenger-1": {
+                "tripId": "$trip-am-16",
+                "studentId": "$student-1",
+                "versionNo": 1,
+                "registrationDayId": "$day-1-16-PICKUP",
+                "plannedPassengerId": "$planned-1",
+                "tripStopId": "$trip-am-16-stop-0",
+                "disposition": "EXPECTED",
+                "effectiveFrom": "2026-11-12T02:00:00Z"
+            },
+            "trip-am-16-passenger-2": {
+                "tripId": "$trip-am-16",
+                "studentId": "$student-2",
+                "versionNo": 1,
+                "registrationDayId": "$day-2-16-PICKUP",
+                "plannedPassengerId": "$planned-2",
+                "tripStopId": "$trip-am-16-stop-0",
+                "disposition": "EXPECTED",
+                "effectiveFrom": "2026-11-12T02:00:00Z"
+            },
+            "trip-am-23-passenger-1": {
+                "tripId": "$trip-am-23",
+                "studentId": "$student-1",
+                "versionNo": 1,
+                "registrationDayId": "$day-1-23-PICKUP",
+                "plannedPassengerId": "$planned-1",
+                "tripStopId": "$trip-am-23-stop-0",
+                "disposition": "EXPECTED",
+                "effectiveFrom": "2026-11-12T02:00:00Z"
+            },
+            "trip-am-23-passenger-2": {
+                "tripId": "$trip-am-23",
+                "studentId": "$student-2",
+                "versionNo": 1,
+                "registrationDayId": "$day-2-23-PICKUP",
+                "plannedPassengerId": "$planned-2",
+                "tripStopId": "$trip-am-23-stop-0",
+                "disposition": "EXPECTED",
+                "effectiveFrom": "2026-11-12T02:00:00Z"
+            },
+            "trip-am-23-passenger-3": {
+                "tripId": "$trip-am-23",
+                "studentId": "$student-3",
+                "versionNo": 1,
+                "registrationDayId": "$day-3-23-PICKUP",
+                "plannedPassengerId": "$planned-3",
+                "tripStopId": "$trip-am-23-stop-0",
+                "disposition": "EXPECTED",
+                "effectiveFrom": "2026-11-12T02:00:00Z"
+            },
+            "trip-am-23-passenger-4": {
+                "tripId": "$trip-am-23",
+                "studentId": "$student-4",
+                "versionNo": 1,
+                "registrationDayId": "$day-4-23-PICKUP",
+                "plannedPassengerId": "$planned-4",
+                "tripStopId": "$trip-am-23-stop-0",
+                "disposition": "EXPECTED",
+                "effectiveFrom": "2026-11-12T02:00:00Z"
+            }
+        },
+        "attendanceEvent": {
+            "board-1": {
+                "tripId": "$trip-am-16",
+                "studentId": "$student-1",
+                "assignmentId": "$assignment",
+                "eventKind": "BOARD",
+                "method": "MANUAL_ONLINE",
+                "occurredAt": "2026-11-16T00:00:00Z",
+                "recordedById": "$driver-account-1",
+                "outsideManifest": false,
+                "operationKey": "demo-board-1",
+                "reason": "Điểm danh thủ công trong chuyến demo.",
+                "tripPassengerId": "$trip-am-16-passenger-1",
+                "tripStopId": "$trip-am-16-stop-0"
+            },
+            "alight-1": {
+                "tripId": "$trip-am-16",
+                "studentId": "$student-1",
+                "assignmentId": "$assignment",
+                "eventKind": "ALIGHT",
+                "method": "MANUAL_ONLINE",
+                "occurredAt": "2026-11-16T00:25:00Z",
+                "recordedById": "$driver-account-1",
+                "outsideManifest": false,
+                "operationKey": "demo-alight-1",
+                "reason": "Điểm danh thủ công trong chuyến demo.",
+                "tripPassengerId": "$trip-am-16-passenger-1",
+                "tripStopId": "$trip-am-16-stop-1"
+            },
+            "board-2": {
+                "tripId": "$trip-am-16",
+                "studentId": "$student-2",
+                "assignmentId": "$assignment",
+                "eventKind": "BOARD",
+                "method": "MANUAL_ONLINE",
+                "occurredAt": "2026-11-16T00:00:00Z",
+                "recordedById": "$driver-account-1",
+                "outsideManifest": false,
+                "operationKey": "demo-board-2",
+                "reason": "Điểm danh thủ công trong chuyến demo.",
+                "tripPassengerId": "$trip-am-16-passenger-2",
+                "tripStopId": "$trip-am-16-stop-0"
+            },
+            "alight-2": {
+                "tripId": "$trip-am-16",
+                "studentId": "$student-2",
+                "assignmentId": "$assignment",
+                "eventKind": "ALIGHT",
+                "method": "MANUAL_ONLINE",
+                "occurredAt": "2026-11-16T00:25:00Z",
+                "recordedById": "$driver-account-1",
+                "outsideManifest": false,
+                "operationKey": "demo-alight-2",
+                "reason": "Điểm danh thủ công trong chuyến demo.",
+                "tripPassengerId": "$trip-am-16-passenger-2",
+                "tripStopId": "$trip-am-16-stop-1"
+            }
+        },
+        "tripReconciliation": {
+            "close-check": {
+                "tripId": "$trip-am-16",
+                "purpose": "CLOSE_CHECK",
+                "evaluatedDataVersion": 2,
+                "evaluatedAt": "2026-11-16T00:30:00Z",
+                "performedById": "$driver-account-1",
+                "vehicleCheckById": "$driver-account-1",
+                "vehicleCheckConfirmedAt": "2026-11-16T00:30:00Z",
+                "vehicleCheckScope": {
+                    "aggregate_confirmation": true,
+                    "vehicle_ids": ["$bus-1"]
+                },
+                "result": "ELIGIBLE"
+            }
+        },
+        "reconciliationItem": {
+            "result-1": {
+                "reconciliationId": "$close-check",
+                "studentId": "$student-1",
+                "tripPassengerId": "$trip-am-16-passenger-1",
+                "result": "RECONCILED"
+            },
+            "result-2": {
+                "reconciliationId": "$close-check",
+                "studentId": "$student-2",
+                "tripPassengerId": "$trip-am-16-passenger-2",
+                "result": "RECONCILED"
+            }
+        },
+        "reconciliationEvidence": {
+            "evidence-board-1": {
+                "itemId": "$result-1",
+                "attendanceEventId": "$board-1"
+            },
+            "evidence-alight-1": {
+                "itemId": "$result-1",
+                "attendanceEventId": "$alight-1"
+            },
+            "evidence-board-2": {
+                "itemId": "$result-2",
+                "attendanceEventId": "$board-2"
+            },
+            "evidence-alight-2": {
+                "itemId": "$result-2",
+                "attendanceEventId": "$alight-2"
+            }
+        }
+    }
+}
