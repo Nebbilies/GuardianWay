@@ -5,6 +5,7 @@ import { Stack } from '@/components/stack';
 import { Alert, Button, Card, EmptyState } from '@/components/ui';
 
 import type { Registration } from '../../../../fixtures/transport/contract';
+import { groupRegistrationStops } from './detail-days';
 import { directionLabels, formatCivilDate, serviceDirections } from './draft';
 import { useRegistrationSession } from './registration-provider';
 import {
@@ -80,41 +81,23 @@ function Detail({ registration }: { registration: Registration }) {
         </Card>
       ) : null}
       {serviceDirections.map((side) => {
-        const groups = new Map<
-          string,
-          {
-            requested: string | undefined;
-            approved: string | undefined;
-            dates: string[];
-          }
-        >();
-        for (const day of registration.days) {
-          if (day.direction !== side) continue;
-          const key = JSON.stringify([
-            day.requestedStop?.id,
-            day.approvedStop?.id,
-          ]);
-          const existing = groups.get(key);
-          if (existing) existing.dates.push(day.serviceDate);
-          else
-            groups.set(key, {
-              requested: day.requestedStop?.name,
-              approved: day.approvedStop?.name,
-              dates: [day.serviceDate],
-            });
-        }
-        if (!groups.size) return null;
+        const groups = groupRegistrationStops(
+          registration.days,
+          side,
+          dates.length,
+        );
+        if (groups.length === 0) return null;
         return (
           <Card key={side}>
             <Stack gap="md">
               <AppText variant="compact" accessibilityRole="header">
                 {directionLabels[side]}
               </AppText>
-              {[...groups].map(([key, group]) => (
-                <Stack key={key} gap="xs">
-                  {groups.size > 1 ? (
+              {groups.map((group) => (
+                <Stack key={group.key} gap="xs">
+                  {group.displayDates.length > 0 ? (
                     <AppText variant="label" tone="muted">
-                      {group.dates.sort().map(formatCivilDate).join(', ')}
+                      {group.displayDates.map(formatCivilDate).join(', ')}
                     </AppText>
                   ) : null}
                   <AppText variant="label" tone="muted">

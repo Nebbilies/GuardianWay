@@ -7,6 +7,9 @@ export const directionLabels: Record<Direction, string> = {
 };
 export const serviceDirections = ['PICKUP', 'DROPOFF'] as const;
 
+const millisecondsPerDay = 86_400_000;
+const maxDemoDayDirectionRows = 1000;
+
 type RequestedPoint = { stopId: string; address: string };
 
 export type RegistrationDraft = {
@@ -63,6 +66,16 @@ export function isoWeekday(date: Date) {
   return date.getUTCDay() || 7;
 }
 
+function countServiceDates(start: Date, end: Date, weekdays: Set<number>) {
+  const span = (end.getTime() - start.getTime()) / millisecondsPerDay + 1;
+  const firstWeekday = isoWeekday(start) - 1;
+  let count = Math.floor(span / 7) * weekdays.size;
+  for (let offset = 0; offset < span % 7; offset += 1) {
+    if (weekdays.has(((firstWeekday + offset) % 7) + 1)) count += 1;
+  }
+  return count;
+}
+
 export function prepareDraft(
   draft: RegistrationDraft,
 ): { ok: true; days: RequestedDay[] } | { ok: false; errors: DraftErrors } {
@@ -72,14 +85,17 @@ export function prepareDraft(
   const directions = serviceDirections.filter((direction) =>
     draft.directions.includes(direction),
   );
+  const selectedWeekdays = new Set(
+    draft.weekdays.filter(
+      (day) => Number.isInteger(day) && day >= 1 && day <= 7,
+    ),
+  );
 
   if (!draft.studentId) errors.studentId = 'Chọn học sinh.';
   if (!start || !end) errors.period = 'Chọn ngày bắt đầu và ngày kết thúc.';
   else if (start > end)
     errors.period = 'Ngày kết thúc phải từ ngày bắt đầu trở đi.';
-  if (
-    !draft.weekdays.some((day) => Number.isInteger(day) && day >= 1 && day <= 7)
-  ) {
+  if (selectedWeekdays.size === 0) {
     errors.weekdays = 'Chọn ít nhất một ngày trong tuần.';
   }
   if (!directions.length) errors.directions = 'Chọn ít nhất một chiều.';
@@ -92,13 +108,31 @@ export function prepareDraft(
   if (!start || !end || Object.keys(errors).length)
     return { ok: false, errors };
 
+  const rowCount =
+    countServiceDates(start, end, selectedWeekdays) * directions.length;
+  if (rowCount === 0) {
+    return {
+      ok: false,
+      errors: { period: 'Khoảng ngày không có ngày đi xe đã chọn.' },
+    };
+  }
+  if (rowCount > maxDemoDayDirectionRows) {
+    return {
+      ok: false,
+      errors: {
+        period:
+          'Mỗi đơn hỗ trợ tối đa 1.000 lượt theo ngày và chiều. Hãy rút ngắn kỳ hoặc giảm số ngày đã chọn.',
+      },
+    };
+  }
+
   const days: RequestedDay[] = [];
   for (
     const date = start;
     date <= end;
     date.setUTCDate(date.getUTCDate() + 1)
   ) {
-    if (!draft.weekdays.includes(isoWeekday(date))) continue;
+    if (!selectedWeekdays.has(isoWeekday(date))) continue;
     for (const direction of directions) {
       const { stopId, address } = draft.points[direction];
       days.push({
@@ -109,10 +143,5 @@ export function prepareDraft(
       });
     }
   }
-  return days.length
-    ? { ok: true, days }
-    : {
-        ok: false,
-        errors: { period: 'Khoảng ngày không có ngày đi xe đã chọn.' },
-      };
+  return { ok: true, days };
 }

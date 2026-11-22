@@ -23,6 +23,8 @@ Nạp dữ liệu bằng `npm run database:seed:demo --workspace backend` từ g
 
 Đặt `EXPO_PUBLIC_REGISTRATION_FIXTURE_FAIL_ONCE=1` trước khi chạy Expo để lần gửi hợp lệ đầu tiên trong mỗi phiên báo lỗi. Bấm **Thử gửi lại** để tiếp tục. Đơn mô phỏng được lưu đến khi đăng xuất hoặc khởi động lại app.
 
+Mỗi đơn mô phỏng hỗ trợ tối đa 1.000 lượt theo ngày và chiều. Một ngày đi cả hai chiều tính hai lượt.
+
 ## Quy tắc UI
 
 - Nguồn thiết kế: [`../DESIGN.md`](../DESIGN.md).
