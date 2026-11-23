@@ -126,6 +126,11 @@ Noto Sans is the default because it supports Vietnamese well, remains readable a
 - Keep prose between 45 and 75 characters per line.
 - Do not use font weight alone to indicate interactive or status meaning.
 
+### UI copy
+
+- Keep labels and guidance that help the user understand the data or take the next action. Omit secondary text that repeats nearby information.
+- Use labeled fields, separate lines, or table columns for distinct values. Use natural punctuation within a phrase. Do not use the middle dot (`·`) as a separator in UI copy.
+
 ## Spacing and sizing
 
 Use a 4 px base unit.
@@ -187,6 +192,7 @@ Use a 4 px base unit.
 - Keep labels visible; placeholders are examples, not labels.
 - Place validation next to the affected field and explain how to recover.
 - Mark optional fields rather than marking every required field.
+- When a required-field asterisk is present, use the semantic danger color for the asterisk.
 - Group fields by operational task, not by database schema.
 - Preserve entered data after recoverable errors.
 
@@ -207,6 +213,8 @@ Use a 4 px base unit.
 ### Dialogs
 
 Use dialogs for short, focused decisions and confirmations. Use full pages, drawers, or inline editing for complex forms and multi-step tasks.
+
+- Use the standard accent header with a short action title. Put essential context in the relevant field or summary and omit generic subtitles under the title.
 
 ### Loading and failure
 

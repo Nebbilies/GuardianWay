@@ -1,0 +1,27 @@
+[
+    {
+        "key": "registration-5",
+        "source": "registration-5",
+        "submittedAt": "2026-11-18T01:00:00Z",
+        "startDate": "2026-11-23",
+        "dayCount": 6,
+        "points": { "PICKUP": "$stop-0", "DROPOFF": "$stop-2" }
+    },
+    {
+        "key": "review-conflict",
+        "source": "registration-1",
+        "submittedAt": "2026-11-19T01:40:00Z",
+        "startDate": "2026-11-23",
+        "dayCount": 2,
+        "points": { "PICKUP": "$stop-0" }
+    },
+    {
+        "key": "review-inactive-point",
+        "source": "registration-4",
+        "submittedAt": "2026-11-20T09:15:00Z",
+        "startDate": "2026-11-28",
+        "dayCount": 1,
+        "points": { "DROPOFF": "$stop-review-inactive" },
+        "requestedAddress": "18 đường Bờ Kè"
+    }
+]

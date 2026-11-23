@@ -6,7 +6,7 @@ import { DataTable } from "@/components/custom/data-table";
 import { ChoiceField, Choice } from "@/components/custom/choice-field";
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
-import { Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,10 @@ import { getErrorMessage } from "@/lib/i18n";
 import { FormDialog } from "@/components/custom/form-dialog";
 import { stopApi, type Stop } from "./contracts";
 import { StopForm } from "./form";
-export function StopPage() {
+import Link from "next/link";
+import { registrationDetailPath } from "@/modules/transport/registration-review/paths";
+
+export function StopPage({ reviewId }: { reviewId?: string }) {
     const { mutate: mutateCache } = useSWRConfig();
     const { confirm, dialog } = useConfirmAction();
     const [search, setSearch] = useState(""),
@@ -81,6 +84,14 @@ export function StopPage() {
                 </Button>
             }
         >
+            {reviewId && (
+                <Button variant="ghost" size="sm" asChild>
+                    <Link href={registrationDetailPath(reviewId)}>
+                        <ArrowLeft className="size-4" />
+                        Quay lại đơn đăng ký
+                    </Link>
+                </Button>
+            )}
             <div className="gw-filters">
                 <Input
                     aria-label="Tìm điểm"

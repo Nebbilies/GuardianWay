@@ -16,3 +16,5 @@ Use `fixtureClient(actor).registrations()` or `.passengers(tripId)` during devel
 [demo.json](demo.json) projects the database seed into a fixed fictional school UUID. The two apps use identical IDs. A separately seeded database has its own school UUID. From the repo root, run `node scripts/generate-transport-fixtures.cjs` after editing seed data and `node scripts/generate-transport-fixtures.cjs --check` to check for drift.
 
 The mobile registration form also uses the generated student request permissions and active service points for each direction. Read access and permission to submit are checked separately.
+
+For web review, seed the local demo database, start the backend and web development servers, and sign in as the demo school administrator. Open **Đăng ký xe** under **Kế hoạch và chuyến**. The review queue includes a two-direction request, an overlap, and an inactive stop. The stop catalogue is live. Draft assignments and review outcomes are scoped to the current tab, account and school.

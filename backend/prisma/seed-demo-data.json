@@ -208,6 +208,17 @@
                 "allowsPickup": false,
                 "allowsDropoff": true,
                 "status": "ACTIVE"
+            },
+            "stop-review-inactive": {
+                "code": "BK-DEMO",
+                "name": "Điểm Bờ Kè",
+                "address": "18 đường Bờ Kè (demo)",
+                "latitude": 10.786,
+                "longitude": 106.697,
+                "kind": "SERVICE_POINT",
+                "allowsPickup": false,
+                "allowsDropoff": true,
+                "status": "INACTIVE"
             }
         },
         "schoolPolicyVersion": {
