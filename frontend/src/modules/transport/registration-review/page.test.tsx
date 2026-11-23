@@ -10,6 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SWRConfig } from "swr";
 import { ReviewPage } from "./page";
 import { demoRegistrations, demoSchool } from "./demo";
+import { PointLookup } from "./point-lookup";
+import type { Stop } from "@/modules/planning/stops/contracts";
 
 const school = {
     ...demoSchool,
@@ -106,6 +108,53 @@ afterEach(() => {
 });
 
 describe("dispatch review workspace", () => {
+    it("refreshes an open lookup when eligible points change", async () => {
+        vi.stubGlobal(
+            "ResizeObserver",
+            class {
+                observe() {}
+                unobserve() {}
+                disconnect() {}
+            },
+        );
+        const point: Stop = { ...ben, kind: "SERVICE_POINT", status: "ACTIVE" };
+        const renderLookup = (catalogue: Stop[]) => (
+            <SWRConfig
+                value={{ provider: () => new Map(), shouldRetryOnError: false }}
+            >
+                <PointLookup
+                    label="Điểm gán"
+                    stop={null}
+                    direction="DROPOFF"
+                    catalogue={catalogue}
+                    schoolId={school.id}
+                    onChange={() => {}}
+                />
+            </SWRConfig>
+        );
+        const { rerender } = render(renderLookup([point]));
+        fireEvent.click(screen.getByRole("button", { name: "Điểm gán" }));
+        expect(
+            await screen.findByRole("option", { name: /Điểm Bến An/ }),
+        ).toBeInTheDocument();
+
+        rerender(
+            renderLookup([
+                { ...point, name: "Bến An mới" },
+                { ...point, id: park.id, code: park.code, name: park.name },
+            ]),
+        );
+        expect(
+            await screen.findByRole("option", { name: /Bến An mới/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("option", { name: /Điểm Công viên/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.queryByRole("option", { name: /Điểm Bến An/ }),
+        ).not.toBeInTheDocument();
+    });
+
     it("approves all dates and shows the decision in the approved list after reopening", async () => {
         mockApi();
         show({ id: happy.id });

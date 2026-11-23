@@ -19,7 +19,7 @@ export function PointLookup({
 }) {
     return (
         <PagedLookup<Stop>
-            cacheKey={`review-points:${schoolId}:${direction}`}
+            cacheKey={["review-points", schoolId, direction, catalogue]}
             label={label}
             value={stop?.id ?? ""}
             selectedLabel={stop?.name}

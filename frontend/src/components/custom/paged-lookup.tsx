@@ -10,7 +10,7 @@ import { ErrorNotice } from "@/components/error-notice";
 import type { ListParams, PaginatedResponse } from "@/lib/http/contracts";
 
 interface Props<Row> {
-    cacheKey: string;
+    cacheKey: string | readonly unknown[];
     label: string;
     value: string;
     onChange: (id: string) => void;
