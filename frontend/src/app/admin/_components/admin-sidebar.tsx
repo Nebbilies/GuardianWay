@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
     Bus,
+    ClipboardList,
     GraduationCap,
     MapPin,
     Navigation,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import LogoutButton from "./logout-button";
+import { registrationListPath } from "@/modules/transport/registration-review/paths";
 
 const sections = [
     {
@@ -33,6 +35,15 @@ const sections = [
     {
         name: "Kế hoạch và chuyến",
         items: [
+            ...(process.env.NODE_ENV === "development"
+                ? [
+                      {
+                          href: registrationListPath,
+                          label: "Đăng ký xe",
+                          icon: ClipboardList,
+                      },
+                  ]
+                : []),
             { href: "/admin/stops", label: "Điểm dừng", icon: MapPin },
             { href: "/admin/routes", label: "Phương án tuyến", icon: Route },
             {

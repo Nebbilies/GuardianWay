@@ -1,5 +1,5 @@
 "use client";
-import { useState, useId } from "react";
+import { useState, useId, type ReactNode } from "react";
 import useSWR from "swr";
 import { Command } from "cmdk";
 import { Popover } from "radix-ui";
@@ -16,6 +16,7 @@ interface Props<Row> {
     onChange: (id: string) => void;
     load: (query: ListParams) => Promise<PaginatedResponse<Row>>;
     describe: (row: Row) => string;
+    renderOption?: (row: Row) => ReactNode;
     required?: boolean;
     selectedLabel?: string;
     disabled?: boolean;
@@ -28,6 +29,7 @@ export function PagedLookup<Row extends { id: string }>({
     onChange,
     load,
     describe,
+    renderOption,
     required,
     selectedLabel,
     disabled,
@@ -136,7 +138,9 @@ export function PagedLookup<Row extends { id: string }>({
                                             choose(item.id, describe(item))
                                         }
                                     >
-                                        {describe(item)}
+                                        {renderOption
+                                            ? renderOption(item)
+                                            : describe(item)}
                                         {value === item.id && (
                                             <Check size={16} />
                                         )}
